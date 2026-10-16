@@ -425,7 +425,11 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
     <>
       <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
         <div className="flex items-center gap-2">
-          <Store className="size-5 text-wa-green" />
+          {isPoliceShop(shop) ? (
+            <img src={policeCrest.url} alt="Ghana Police crest" className="size-10 object-contain" />
+          ) : (
+            <Store className="size-5 text-wa-green" />
+          )}
           <p className="font-display font-bold">{shop.name}</p>
           <span className="ml-auto rounded-full bg-wa-green/15 px-2 py-0.5 text-xs font-medium text-wa-green">
             Active · {left} days left
