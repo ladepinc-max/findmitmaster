@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useAppPrice } from "@/lib/pricing";
 import { captureAccurateLocation } from "@/lib/community-map";
+import { CommunityMapView } from "@/components/chat/CommunityMapView";
 import { startShopCheckout } from "@/lib/shop.functions";
 import {
   CUSTOM_CATEGORY,
@@ -288,7 +289,21 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
         {locating ? <Loader2 className="size-4 animate-spin" /> : <MapPin className="size-4" />}
         {gps ? "Location captured — tap to retry" : "Capture shop location (stand at the door)"}
       </Button>
-      {gps ? <p className="text-xs text-muted-foreground">{gps.msg}</p> : null}
+      {gps ? (
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">{gps.msg}</p>
+          <div className="overflow-hidden rounded-xl">
+            <CommunityMapView
+              center={{ lat: gps.lat, lng: gps.lng }}
+              pin={{ lat: gps.lat, lng: gps.lng }}
+              onPinMove={(lat, lng) => setGps((g) => (g ? { ...g, lat, lng, msg: "Pin moved — customers will be directed here" } : g))}
+              onMapTap={(lat, lng) => setGps((g) => (g ? { ...g, lat, lng, msg: "Pin moved — customers will be directed here" } : g))}
+              height={260}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Drag the pin or tap the satellite picture to place it exactly on your shop entrance.</p>
+        </div>
+      ) : null}
       <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border p-3 text-sm">
         <Camera className="size-4" /> {photo ? photo.name : "Add a shop front photo"}
         <input type="file" accept="image/*" className="hidden" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />

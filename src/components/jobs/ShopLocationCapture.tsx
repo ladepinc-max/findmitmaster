@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Camera, Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { InAppCamera } from "@/components/chat/InAppCamera";
+import { CommunityMapView } from "@/components/chat/CommunityMapView";
 import { Button } from "@/components/ui/button";
 import { captureAccurateLocation } from "@/lib/community-map";
 
@@ -58,13 +59,15 @@ export function ShopLocationCapture({
       </Button>
       {coords ? (
         <div className="overflow-hidden rounded-xl">
-          <iframe
-            title="Shop location"
-            className="h-32 w-full border-0"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.003},${coords.lat - 0.002},${coords.lng + 0.003},${coords.lat + 0.002}&layer=mapnik&marker=${coords.lat},${coords.lng}`}
+          <CommunityMapView
+            center={{ lat: coords.lat, lng: coords.lng }}
+            pin={{ lat: coords.lat, lng: coords.lng }}
+            onPinMove={(lat, lng) => onCoords({ ...coords, lat, lng })}
+            onMapTap={(lat, lng) => onCoords({ ...coords, lat, lng })}
+            height={240}
           />
           <p className="pt-1 text-xs text-muted-foreground">
-            Pin: {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+            Drag the pin or tap the satellite picture to mark the exact entrance. Pin: {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
           </p>
         </div>
       ) : null}
