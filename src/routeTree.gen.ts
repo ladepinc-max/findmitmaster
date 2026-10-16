@@ -10,33 +10,521 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HandleRouteImport } from './routes/$handle'
+import { Route as ApplyCompanyVerificationRouteImport } from './routes/apply-company-verification'
+import { Route as ApplyFindmitVerificationRouteImport } from './routes/apply-findmit-verification'
+import { Route as ApplyTeacherRouteImport } from './routes/apply-teacher'
+import { Route as AssignSoundsRouteImport } from './routes/assign-sounds'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CreateRouteImport } from './routes/create'
+import { Route as EmployerRouteImport } from './routes/employer'
+import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as LRouteImport } from './routes/l'
+import { Route as MyShopRouteImport } from './routes/my-shop'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PaymentVerifyRouteImport } from './routes/payment-verify'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StationsRouteImport } from './routes/stations'
+import { Route as TutorRouteImport } from './routes/tutor'
+import { Route as AdminClassControlRouteImport } from './routes/admin.class-control'
+import { Route as AdminPartnerTvsRouteImport } from './routes/admin.partner-tvs'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
+import { Route as AdminRoadsRouteImport } from './routes/admin.roads'
+import { Route as AdminTeacherApplicationsRouteImport } from './routes/admin.teacher-applications'
+import { Route as AdminVaultRouteImport } from './routes/admin.vault'
+import { Route as AdminVerificationsRouteImport } from './routes/admin.verifications'
+import { Route as ApiCfLiveInputRouteImport } from './routes/api/cf-live-input'
+import { Route as ApiCfStreamUploadRouteImport } from './routes/api/cf-stream-upload'
+import { Route as ApiCfTokenRouteImport } from './routes/api/cf-token'
+import { Route as CamIndexRouteImport } from './routes/cam.index'
+import { Route as CamCamRouteImport } from './routes/cam.$cam'
+import { Route as LiveChannelRouteImport } from './routes/live.$channel'
+import { Route as ProfileIndexRouteImport } from './routes/profile.index'
+import { Route as ProfileEditRouteImport } from './routes/profile.edit'
+import { Route as TvCategoryRouteImport } from './routes/tv.$category'
+import { Route as WatchIdRouteImport } from './routes/watch.$id'
+import { Route as EducationSlugReplaysRouteImport } from './routes/education.$slug.replays'
+import { Route as EducationLiveClassIdRouteImport } from './routes/education.live.$classId'
+import { Route as AdminApplicationKindIdRouteImport } from './routes/admin.application.$kind.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HandleRoute = HandleRouteImport.update({
+  id: '/$handle',
+  path: '/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyCompanyVerificationRoute =
+  ApplyCompanyVerificationRouteImport.update({
+    id: '/apply-company-verification',
+    path: '/apply-company-verification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApplyFindmitVerificationRoute =
+  ApplyFindmitVerificationRouteImport.update({
+    id: '/apply-findmit-verification',
+    path: '/apply-findmit-verification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApplyTeacherRoute = ApplyTeacherRouteImport.update({
+  id: '/apply-teacher',
+  path: '/apply-teacher',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssignSoundsRoute = AssignSoundsRouteImport.update({
+  id: '/assign-sounds',
+  path: '/assign-sounds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerRoute = EmployerRouteImport.update({
+  id: '/employer',
+  path: '/employer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LRoute = LRouteImport.update({
+  id: '/l',
+  path: '/l',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyShopRoute = MyShopRouteImport.update({
+  id: '/my-shop',
+  path: '/my-shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentVerifyRoute = PaymentVerifyRouteImport.update({
+  id: '/payment-verify',
+  path: '/payment-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StationsRoute = StationsRouteImport.update({
+  id: '/stations',
+  path: '/stations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TutorRoute = TutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminClassControlRoute = AdminClassControlRouteImport.update({
+  id: '/admin/class-control',
+  path: '/admin/class-control',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPartnerTvsRoute = AdminPartnerTvsRouteImport.update({
+  id: '/admin/partner-tvs',
+  path: '/admin/partner-tvs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/admin/posts',
+  path: '/admin/posts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoadsRoute = AdminRoadsRouteImport.update({
+  id: '/admin/roads',
+  path: '/admin/roads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTeacherApplicationsRoute =
+  AdminTeacherApplicationsRouteImport.update({
+    id: '/admin/teacher-applications',
+    path: '/admin/teacher-applications',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminVaultRoute = AdminVaultRouteImport.update({
+  id: '/admin/vault',
+  path: '/admin/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminVerificationsRoute = AdminVerificationsRouteImport.update({
+  id: '/admin/verifications',
+  path: '/admin/verifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCfLiveInputRoute = ApiCfLiveInputRouteImport.update({
+  id: '/api/cf-live-input',
+  path: '/api/cf-live-input',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCfStreamUploadRoute = ApiCfStreamUploadRouteImport.update({
+  id: '/api/cf-stream-upload',
+  path: '/api/cf-stream-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCfTokenRoute = ApiCfTokenRouteImport.update({
+  id: '/api/cf-token',
+  path: '/api/cf-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CamIndexRoute = CamIndexRouteImport.update({
+  id: '/cam/',
+  path: '/cam/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CamCamRoute = CamCamRouteImport.update({
+  id: '/cam/$cam',
+  path: '/cam/$cam',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveChannelRoute = LiveChannelRouteImport.update({
+  id: '/live/$channel',
+  path: '/live/$channel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileEditRoute = ProfileEditRouteImport.update({
+  id: '/profile/edit',
+  path: '/profile/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TvCategoryRoute = TvCategoryRouteImport.update({
+  id: '/tv/$category',
+  path: '/tv/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchIdRoute = WatchIdRouteImport.update({
+  id: '/watch/$id',
+  path: '/watch/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EducationSlugReplaysRoute = EducationSlugReplaysRouteImport.update({
+  id: '/education/$slug/replays',
+  path: '/education/$slug/replays',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EducationLiveClassIdRoute = EducationLiveClassIdRouteImport.update({
+  id: '/education/live/$classId',
+  path: '/education/live/$classId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminApplicationKindIdRoute = AdminApplicationKindIdRouteImport.update({
+  id: '/admin/application/$kind/$id',
+  path: '/admin/application/$kind/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$handle': typeof HandleRoute
+  '/apply-company-verification': typeof ApplyCompanyVerificationRoute
+  '/apply-findmit-verification': typeof ApplyFindmitVerificationRoute
+  '/apply-teacher': typeof ApplyTeacherRoute
+  '/assign-sounds': typeof AssignSoundsRoute
+  '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
+  '/create': typeof CreateRoute
+  '/employer': typeof EmployerRoute
+  '/jobs': typeof JobsRoute
+  '/l': typeof LRoute
+  '/my-shop': typeof MyShopRoute
+  '/onboarding': typeof OnboardingRoute
+  '/payment-verify': typeof PaymentVerifyRoute
+  '/settings': typeof SettingsRoute
+  '/stations': typeof StationsRoute
+  '/tutor': typeof TutorRoute
+  '/admin/class-control': typeof AdminClassControlRoute
+  '/admin/partner-tvs': typeof AdminPartnerTvsRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/roads': typeof AdminRoadsRoute
+  '/admin/teacher-applications': typeof AdminTeacherApplicationsRoute
+  '/admin/vault': typeof AdminVaultRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
+  '/api/cf-live-input': typeof ApiCfLiveInputRoute
+  '/api/cf-stream-upload': typeof ApiCfStreamUploadRoute
+  '/api/cf-token': typeof ApiCfTokenRoute
+  '/cam/$cam': typeof CamCamRoute
+  '/live/$channel': typeof LiveChannelRoute
+  '/profile/edit': typeof ProfileEditRoute
+  '/tv/$category': typeof TvCategoryRoute
+  '/watch/$id': typeof WatchIdRoute
+  '/cam/': typeof CamIndexRoute
+  '/profile/': typeof ProfileIndexRoute
+  '/education/$slug/replays': typeof EducationSlugReplaysRoute
+  '/education/live/$classId': typeof EducationLiveClassIdRoute
+  '/admin/application/$kind/$id': typeof AdminApplicationKindIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$handle': typeof HandleRoute
+  '/apply-company-verification': typeof ApplyCompanyVerificationRoute
+  '/apply-findmit-verification': typeof ApplyFindmitVerificationRoute
+  '/apply-teacher': typeof ApplyTeacherRoute
+  '/assign-sounds': typeof AssignSoundsRoute
+  '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
+  '/create': typeof CreateRoute
+  '/employer': typeof EmployerRoute
+  '/jobs': typeof JobsRoute
+  '/l': typeof LRoute
+  '/my-shop': typeof MyShopRoute
+  '/onboarding': typeof OnboardingRoute
+  '/payment-verify': typeof PaymentVerifyRoute
+  '/settings': typeof SettingsRoute
+  '/stations': typeof StationsRoute
+  '/tutor': typeof TutorRoute
+  '/admin/class-control': typeof AdminClassControlRoute
+  '/admin/partner-tvs': typeof AdminPartnerTvsRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/roads': typeof AdminRoadsRoute
+  '/admin/teacher-applications': typeof AdminTeacherApplicationsRoute
+  '/admin/vault': typeof AdminVaultRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
+  '/api/cf-live-input': typeof ApiCfLiveInputRoute
+  '/api/cf-stream-upload': typeof ApiCfStreamUploadRoute
+  '/api/cf-token': typeof ApiCfTokenRoute
+  '/cam/$cam': typeof CamCamRoute
+  '/live/$channel': typeof LiveChannelRoute
+  '/profile/edit': typeof ProfileEditRoute
+  '/tv/$category': typeof TvCategoryRoute
+  '/watch/$id': typeof WatchIdRoute
+  '/cam': typeof CamIndexRoute
+  '/profile': typeof ProfileIndexRoute
+  '/education/$slug/replays': typeof EducationSlugReplaysRoute
+  '/education/live/$classId': typeof EducationLiveClassIdRoute
+  '/admin/application/$kind/$id': typeof AdminApplicationKindIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$handle': typeof HandleRoute
+  '/apply-company-verification': typeof ApplyCompanyVerificationRoute
+  '/apply-findmit-verification': typeof ApplyFindmitVerificationRoute
+  '/apply-teacher': typeof ApplyTeacherRoute
+  '/assign-sounds': typeof AssignSoundsRoute
+  '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
+  '/create': typeof CreateRoute
+  '/employer': typeof EmployerRoute
+  '/jobs': typeof JobsRoute
+  '/l': typeof LRoute
+  '/my-shop': typeof MyShopRoute
+  '/onboarding': typeof OnboardingRoute
+  '/payment-verify': typeof PaymentVerifyRoute
+  '/settings': typeof SettingsRoute
+  '/stations': typeof StationsRoute
+  '/tutor': typeof TutorRoute
+  '/admin/class-control': typeof AdminClassControlRoute
+  '/admin/partner-tvs': typeof AdminPartnerTvsRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/roads': typeof AdminRoadsRoute
+  '/admin/teacher-applications': typeof AdminTeacherApplicationsRoute
+  '/admin/vault': typeof AdminVaultRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
+  '/api/cf-live-input': typeof ApiCfLiveInputRoute
+  '/api/cf-stream-upload': typeof ApiCfStreamUploadRoute
+  '/api/cf-token': typeof ApiCfTokenRoute
+  '/cam/$cam': typeof CamCamRoute
+  '/live/$channel': typeof LiveChannelRoute
+  '/profile/edit': typeof ProfileEditRoute
+  '/tv/$category': typeof TvCategoryRoute
+  '/watch/$id': typeof WatchIdRoute
+  '/cam/': typeof CamIndexRoute
+  '/profile/': typeof ProfileIndexRoute
+  '/education/$slug/replays': typeof EducationSlugReplaysRoute
+  '/education/live/$classId': typeof EducationLiveClassIdRoute
+  '/admin/application/$kind/$id': typeof AdminApplicationKindIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$handle'
+    | '/apply-company-verification'
+    | '/apply-findmit-verification'
+    | '/apply-teacher'
+    | '/assign-sounds'
+    | '/auth'
+    | '/chat'
+    | '/create'
+    | '/employer'
+    | '/jobs'
+    | '/l'
+    | '/my-shop'
+    | '/onboarding'
+    | '/payment-verify'
+    | '/settings'
+    | '/stations'
+    | '/tutor'
+    | '/admin/class-control'
+    | '/admin/partner-tvs'
+    | '/admin/posts'
+    | '/admin/roads'
+    | '/admin/teacher-applications'
+    | '/admin/vault'
+    | '/admin/verifications'
+    | '/api/cf-live-input'
+    | '/api/cf-stream-upload'
+    | '/api/cf-token'
+    | '/cam/$cam'
+    | '/live/$channel'
+    | '/profile/edit'
+    | '/tv/$category'
+    | '/watch/$id'
+    | '/cam/'
+    | '/profile/'
+    | '/education/$slug/replays'
+    | '/education/live/$classId'
+    | '/admin/application/$kind/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$handle'
+    | '/apply-company-verification'
+    | '/apply-findmit-verification'
+    | '/apply-teacher'
+    | '/assign-sounds'
+    | '/auth'
+    | '/chat'
+    | '/create'
+    | '/employer'
+    | '/jobs'
+    | '/l'
+    | '/my-shop'
+    | '/onboarding'
+    | '/payment-verify'
+    | '/settings'
+    | '/stations'
+    | '/tutor'
+    | '/admin/class-control'
+    | '/admin/partner-tvs'
+    | '/admin/posts'
+    | '/admin/roads'
+    | '/admin/teacher-applications'
+    | '/admin/vault'
+    | '/admin/verifications'
+    | '/api/cf-live-input'
+    | '/api/cf-stream-upload'
+    | '/api/cf-token'
+    | '/cam/$cam'
+    | '/live/$channel'
+    | '/profile/edit'
+    | '/tv/$category'
+    | '/watch/$id'
+    | '/cam'
+    | '/profile'
+    | '/education/$slug/replays'
+    | '/education/live/$classId'
+    | '/admin/application/$kind/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/$handle'
+    | '/apply-company-verification'
+    | '/apply-findmit-verification'
+    | '/apply-teacher'
+    | '/assign-sounds'
+    | '/auth'
+    | '/chat'
+    | '/create'
+    | '/employer'
+    | '/jobs'
+    | '/l'
+    | '/my-shop'
+    | '/onboarding'
+    | '/payment-verify'
+    | '/settings'
+    | '/stations'
+    | '/tutor'
+    | '/admin/class-control'
+    | '/admin/partner-tvs'
+    | '/admin/posts'
+    | '/admin/roads'
+    | '/admin/teacher-applications'
+    | '/admin/vault'
+    | '/admin/verifications'
+    | '/api/cf-live-input'
+    | '/api/cf-stream-upload'
+    | '/api/cf-token'
+    | '/cam/$cam'
+    | '/live/$channel'
+    | '/profile/edit'
+    | '/tv/$category'
+    | '/watch/$id'
+    | '/cam/'
+    | '/profile/'
+    | '/education/$slug/replays'
+    | '/education/live/$classId'
+    | '/admin/application/$kind/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HandleRoute: typeof HandleRoute
+  ApplyCompanyVerificationRoute: typeof ApplyCompanyVerificationRoute
+  ApplyFindmitVerificationRoute: typeof ApplyFindmitVerificationRoute
+  ApplyTeacherRoute: typeof ApplyTeacherRoute
+  AssignSoundsRoute: typeof AssignSoundsRoute
+  AuthRoute: typeof AuthRoute
+  ChatRoute: typeof ChatRoute
+  CreateRoute: typeof CreateRoute
+  EmployerRoute: typeof EmployerRoute
+  JobsRoute: typeof JobsRoute
+  LRoute: typeof LRoute
+  MyShopRoute: typeof MyShopRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PaymentVerifyRoute: typeof PaymentVerifyRoute
+  SettingsRoute: typeof SettingsRoute
+  StationsRoute: typeof StationsRoute
+  TutorRoute: typeof TutorRoute
+  AdminClassControlRoute: typeof AdminClassControlRoute
+  AdminPartnerTvsRoute: typeof AdminPartnerTvsRoute
+  AdminPostsRoute: typeof AdminPostsRoute
+  AdminRoadsRoute: typeof AdminRoadsRoute
+  AdminTeacherApplicationsRoute: typeof AdminTeacherApplicationsRoute
+  AdminVaultRoute: typeof AdminVaultRoute
+  AdminVerificationsRoute: typeof AdminVerificationsRoute
+  ApiCfLiveInputRoute: typeof ApiCfLiveInputRoute
+  ApiCfStreamUploadRoute: typeof ApiCfStreamUploadRoute
+  ApiCfTokenRoute: typeof ApiCfTokenRoute
+  CamCamRoute: typeof CamCamRoute
+  LiveChannelRoute: typeof LiveChannelRoute
+  ProfileEditRoute: typeof ProfileEditRoute
+  TvCategoryRoute: typeof TvCategoryRoute
+  WatchIdRoute: typeof WatchIdRoute
+  CamIndexRoute: typeof CamIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
+  EducationSlugReplaysRoute: typeof EducationSlugReplaysRoute
+  EducationLiveClassIdRoute: typeof EducationLiveClassIdRoute
+  AdminApplicationKindIdRoute: typeof AdminApplicationKindIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +536,307 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$handle': {
+      id: '/$handle'
+      path: '/$handle'
+      fullPath: '/$handle'
+      preLoaderRoute: typeof HandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply-company-verification': {
+      id: '/apply-company-verification'
+      path: '/apply-company-verification'
+      fullPath: '/apply-company-verification'
+      preLoaderRoute: typeof ApplyCompanyVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply-findmit-verification': {
+      id: '/apply-findmit-verification'
+      path: '/apply-findmit-verification'
+      fullPath: '/apply-findmit-verification'
+      preLoaderRoute: typeof ApplyFindmitVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply-teacher': {
+      id: '/apply-teacher'
+      path: '/apply-teacher'
+      fullPath: '/apply-teacher'
+      preLoaderRoute: typeof ApplyTeacherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assign-sounds': {
+      id: '/assign-sounds'
+      path: '/assign-sounds'
+      fullPath: '/assign-sounds'
+      preLoaderRoute: typeof AssignSoundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer': {
+      id: '/employer'
+      path: '/employer'
+      fullPath: '/employer'
+      preLoaderRoute: typeof EmployerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l': {
+      id: '/l'
+      path: '/l'
+      fullPath: '/l'
+      preLoaderRoute: typeof LRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-shop': {
+      id: '/my-shop'
+      path: '/my-shop'
+      fullPath: '/my-shop'
+      preLoaderRoute: typeof MyShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-verify': {
+      id: '/payment-verify'
+      path: '/payment-verify'
+      fullPath: '/payment-verify'
+      preLoaderRoute: typeof PaymentVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stations': {
+      id: '/stations'
+      path: '/stations'
+      fullPath: '/stations'
+      preLoaderRoute: typeof StationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tutor': {
+      id: '/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof TutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/class-control': {
+      id: '/admin/class-control'
+      path: '/admin/class-control'
+      fullPath: '/admin/class-control'
+      preLoaderRoute: typeof AdminClassControlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/partner-tvs': {
+      id: '/admin/partner-tvs'
+      path: '/admin/partner-tvs'
+      fullPath: '/admin/partner-tvs'
+      preLoaderRoute: typeof AdminPartnerTvsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/admin/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/roads': {
+      id: '/admin/roads'
+      path: '/admin/roads'
+      fullPath: '/admin/roads'
+      preLoaderRoute: typeof AdminRoadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/teacher-applications': {
+      id: '/admin/teacher-applications'
+      path: '/admin/teacher-applications'
+      fullPath: '/admin/teacher-applications'
+      preLoaderRoute: typeof AdminTeacherApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/vault': {
+      id: '/admin/vault'
+      path: '/admin/vault'
+      fullPath: '/admin/vault'
+      preLoaderRoute: typeof AdminVaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/verifications': {
+      id: '/admin/verifications'
+      path: '/admin/verifications'
+      fullPath: '/admin/verifications'
+      preLoaderRoute: typeof AdminVerificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cf-live-input': {
+      id: '/api/cf-live-input'
+      path: '/api/cf-live-input'
+      fullPath: '/api/cf-live-input'
+      preLoaderRoute: typeof ApiCfLiveInputRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cf-stream-upload': {
+      id: '/api/cf-stream-upload'
+      path: '/api/cf-stream-upload'
+      fullPath: '/api/cf-stream-upload'
+      preLoaderRoute: typeof ApiCfStreamUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cf-token': {
+      id: '/api/cf-token'
+      path: '/api/cf-token'
+      fullPath: '/api/cf-token'
+      preLoaderRoute: typeof ApiCfTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cam/': {
+      id: '/cam/'
+      path: '/cam'
+      fullPath: '/cam/'
+      preLoaderRoute: typeof CamIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cam/$cam': {
+      id: '/cam/$cam'
+      path: '/cam/$cam'
+      fullPath: '/cam/$cam'
+      preLoaderRoute: typeof CamCamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live/$channel': {
+      id: '/live/$channel'
+      path: '/live/$channel'
+      fullPath: '/live/$channel'
+      preLoaderRoute: typeof LiveChannelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/edit': {
+      id: '/profile/edit'
+      path: '/profile/edit'
+      fullPath: '/profile/edit'
+      preLoaderRoute: typeof ProfileEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tv/$category': {
+      id: '/tv/$category'
+      path: '/tv/$category'
+      fullPath: '/tv/$category'
+      preLoaderRoute: typeof TvCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watch/$id': {
+      id: '/watch/$id'
+      path: '/watch/$id'
+      fullPath: '/watch/$id'
+      preLoaderRoute: typeof WatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/education/$slug/replays': {
+      id: '/education/$slug/replays'
+      path: '/education/$slug/replays'
+      fullPath: '/education/$slug/replays'
+      preLoaderRoute: typeof EducationSlugReplaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/education/live/$classId': {
+      id: '/education/live/$classId'
+      path: '/education/live/$classId'
+      fullPath: '/education/live/$classId'
+      preLoaderRoute: typeof EducationLiveClassIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/application/$kind/$id': {
+      id: '/admin/application/$kind/$id'
+      path: '/admin/application/$kind/$id'
+      fullPath: '/admin/application/$kind/$id'
+      preLoaderRoute: typeof AdminApplicationKindIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HandleRoute: HandleRoute,
+  ApplyCompanyVerificationRoute: ApplyCompanyVerificationRoute,
+  ApplyFindmitVerificationRoute: ApplyFindmitVerificationRoute,
+  ApplyTeacherRoute: ApplyTeacherRoute,
+  AssignSoundsRoute: AssignSoundsRoute,
+  AuthRoute: AuthRoute,
+  ChatRoute: ChatRoute,
+  CreateRoute: CreateRoute,
+  EmployerRoute: EmployerRoute,
+  JobsRoute: JobsRoute,
+  LRoute: LRoute,
+  MyShopRoute: MyShopRoute,
+  OnboardingRoute: OnboardingRoute,
+  PaymentVerifyRoute: PaymentVerifyRoute,
+  SettingsRoute: SettingsRoute,
+  StationsRoute: StationsRoute,
+  TutorRoute: TutorRoute,
+  AdminClassControlRoute: AdminClassControlRoute,
+  AdminPartnerTvsRoute: AdminPartnerTvsRoute,
+  AdminPostsRoute: AdminPostsRoute,
+  AdminRoadsRoute: AdminRoadsRoute,
+  AdminTeacherApplicationsRoute: AdminTeacherApplicationsRoute,
+  AdminVaultRoute: AdminVaultRoute,
+  AdminVerificationsRoute: AdminVerificationsRoute,
+  ApiCfLiveInputRoute: ApiCfLiveInputRoute,
+  ApiCfStreamUploadRoute: ApiCfStreamUploadRoute,
+  ApiCfTokenRoute: ApiCfTokenRoute,
+  CamCamRoute: CamCamRoute,
+  LiveChannelRoute: LiveChannelRoute,
+  ProfileEditRoute: ProfileEditRoute,
+  TvCategoryRoute: TvCategoryRoute,
+  WatchIdRoute: WatchIdRoute,
+  CamIndexRoute: CamIndexRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
+  EducationSlugReplaysRoute: EducationSlugReplaysRoute,
+  EducationLiveClassIdRoute: EducationLiveClassIdRoute,
+  AdminApplicationKindIdRoute: AdminApplicationKindIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

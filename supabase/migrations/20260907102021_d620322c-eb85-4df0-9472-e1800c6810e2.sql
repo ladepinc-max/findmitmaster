@@ -1,0 +1,16 @@
+ALTER TABLE public.talent_verification_applications
+  ADD COLUMN IF NOT EXISTS full_name text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS location_name text,
+  ADD COLUMN IF NOT EXISTS ghana_card text,
+  ADD COLUMN IF NOT EXISTS skill_trade text,
+  ADD COLUMN IF NOT EXISTS learning_pathway text,
+  ADD COLUMN IF NOT EXISTS master_trainer text,
+  ADD COLUMN IF NOT EXISTS years_experience text,
+  ADD COLUMN IF NOT EXISTS evidence_option text DEFAULT 'video',
+  ADD COLUMN IF NOT EXISTS video1_path text,
+  ADD COLUMN IF NOT EXISTS video2_path text,
+  ADD COLUMN IF NOT EXISTS certificate_path text,
+  ADD COLUMN IF NOT EXISTS photo_paths text[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS short_bio text,
+  ADD COLUMN IF NOT EXISTS findmit_user_id text;

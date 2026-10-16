@@ -1,0 +1,16 @@
+ALTER TABLE public.company_verification_applications
+  ADD COLUMN IF NOT EXISTS industry text,
+  ADD COLUMN IF NOT EXISTS region_city text,
+  ADD COLUMN IF NOT EXISTS company_size text,
+  ADD COLUMN IF NOT EXISTS website text,
+  ADD COLUMN IF NOT EXISTS official_email text,
+  ADD COLUMN IF NOT EXISTS ghana_card_number text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS hr_contact_name text,
+  ADD COLUMN IF NOT EXISTS hr_contact_position text,
+  ADD COLUMN IF NOT EXISTS staff_count integer,
+  ADD COLUMN IF NOT EXISTS workers_compensation_path text,
+  ADD COLUMN IF NOT EXISTS registration_ghana_card_path text,
+  ADD COLUMN IF NOT EXISTS information_confirmed boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS verification_fee numeric NOT NULL DEFAULT 3000,
+  ADD COLUMN IF NOT EXISTS fee_currency text NOT NULL DEFAULT 'GHS';

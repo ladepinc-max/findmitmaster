@@ -1,0 +1,1 @@
+ALTER TABLE public.app_pricing ADD COLUMN IF NOT EXISTS is_waived boolean NOT NULL DEFAULT false;

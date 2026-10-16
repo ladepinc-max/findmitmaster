@@ -1,0 +1,1 @@
+ALTER TABLE public.tutor_settings ADD COLUMN IF NOT EXISTS free_trial_days integer NOT NULL DEFAULT 60;

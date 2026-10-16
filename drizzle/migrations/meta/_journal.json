@@ -1,0 +1,174 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791976585637,
+      "tag": "0000_import_part1",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791976585638,
+      "tag": "0001_import_part2",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791976585639,
+      "tag": "0002_import_part3",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791976585640,
+      "tag": "0003_import_part4",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791976585641,
+      "tag": "0004_import_part5",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791976679717,
+      "tag": "0005_import_stage_a",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791976679718,
+      "tag": "0006_import_part5b",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791976679719,
+      "tag": "0007_import_part6",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791976679720,
+      "tag": "0008_import_part7",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791976679721,
+      "tag": "0009_tutor_voice_tuning",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791976679722,
+      "tag": "0010_tutor_settings_super_admin",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791976679723,
+      "tag": "0011_tutor_free_trial_days",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791976679724,
+      "tag": "0012_create_community_map_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791976679725,
+      "tag": "0013_community_map_storage_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791976679726,
+      "tag": "0014_community_map_confirmations",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791976679727,
+      "tag": "0015_road_tracing_and_feedback",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791976679728,
+      "tag": "0016_findmit_ghana_job_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791976679729,
+      "tag": "0017_jobs_shop_photo",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791976679730,
+      "tag": "0018_vault_all_levels",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791976724537,
+      "tag": "0019_import_finish",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791982662502,
+      "tag": "0020_shops_storefronts",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791982900010,
+      "tag": "0021_fix_shop_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792000278431,
+      "tag": "0022_shop_name_available",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792057987029,
+      "tag": "0023_retry_after_enum_fix",
+      "breakpoints": true
+    }
+  ]
+}
