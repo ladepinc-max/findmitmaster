@@ -102,6 +102,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "FindMit is a Ghanaian app for short-form stories, real-time chat, live classes and jobs.",
       },
       { name: "theme-color", content: "#141518" },
+      { name: "application-name", content: "FindMit" },
+      { name: "apple-mobile-web-app-title", content: "FindMit" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
       { property: "og:site_name", content: "FindMit" },
       { property: "og:type", content: "website" },
 
@@ -117,6 +121,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
 
       { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/icon-192.png" },
     ],
   }),
   shellComponent: RootShell,
