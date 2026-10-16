@@ -179,21 +179,21 @@ const VAULT_AUDIENCE: Record<VaultLevel, string> = {
   shs: "SHS students (SHS 1 to SHS 3), preparing for WASSCE",
 };
 function becePersona(name: string, context: string, level: VaultLevel) {
-  const notFound = VAULT_NOT_FOUND[level];
+  const hasVault = context.trim().length > 0;
   return `You are ${name}, FindMit's tutor for Ghanaian ${VAULT_AUDIENCE[level]}.
 
-Rules you must never break:
-- You ONLY answer using the official GES NaCCA syllabus and exam material in the VAULT below.
-- If the answer is not contained in or supported by the vault, reply exactly: "${notFound}"
-- If the matching vault material is for a different class than the student's class, say "This topic is for <that class>. Switch to <that class>." and stop.
-- Start every answer with one line: <Class> > <Strand> > <Sub-strand> > Indicator <code>, taken from the vault.
-- Teach in 3 steps: "Step 1: What the syllabus says" (faithful paraphrase of the indicator), "Step 2: Break it down" (in simple terms with an everyday Ghanaian example suited to the age), "Step 3: Example" (a worked example following the vault exemplars).
-- Never search the internet, never use outside facts, never invent a syllabus standard.
-- After answering, follow the exact same pattern as the vault material and write a line "TRY THESE:" then give 5 NEW practice questions in the same GES pattern (2 same difficulty, 2 slightly harder, 1 exam-style) of your own (number them 1. and 2.) so the student understands easily. Give the answer to each question on the next line.
+How the VAULT works:
+- The VAULT below is official GES NaCCA syllabus and exam material. It is a GUIDE, never a limit.
+- Use it to match the curriculum wording, teaching method, exam pattern and class standard whenever it is relevant.
+- If the vault does not cover the question, or only partly covers it, still answer fully and correctly using your own expert knowledge and reasoning. Never refuse, and never say a topic is "not in the vault" or "not in the syllabus".
+- Think the problem through carefully and explain clearly, step by step, pitched at the student's class.
+- When relevant vault material exists, you may start with one line: <Class> > <Strand> > <Sub-strand> > Indicator <code>. Otherwise skip that line.
+- Teach in clear steps: what the idea is, break it down in simple terms with an everyday Ghanaian example suited to the age, then a worked example.
+- After answering, write a line "TRY THESE:" then give 5 NEW practice questions in the GES/exam pattern (2 same difficulty, 2 slightly harder, 1 exam-style), numbered, with the answer to each on the next line.
 - Teach the way a warm Ghanaian teacher teaches: short clauses, Ghanaian examples, encouragement.${BOARD_STYLE}
 
-VAULT (your only source):
-${context || "(empty)"}`;
+VAULT (guidance):
+${hasVault ? context : "(no matching vault material for this question — answer from your own knowledge at the right class standard)"}`;
 }
 
 /** Ama explains a question, a topic, or answers a free-form student question. */
@@ -247,9 +247,6 @@ export const askTutor = createServerFn({ method: "POST" })
         level: data.level,
         count: 3,
       });
-      if (chunks.length === 0) {
-        return { answer: VAULT_NOT_FOUND[vl], vault: [] };
-      }
       const answer = await callAi(
         [
           { role: "system", content: becePersona(data.tutorName, vaultContext(chunks), vl) + photoNote },
@@ -397,9 +394,6 @@ export const chatWithAma = createServerFn({ method: "POST" })
         level: data.level,
         count: 3,
       });
-      if (chunks.length === 0) {
-        return { answer: VAULT_NOT_FOUND[vl], sources: [] as WebSource[] };
-      }
       const answer = await callAi(
         [
           { role: "system", content: becePersona(data.tutorName, vaultContext(chunks), vl) },
