@@ -257,7 +257,7 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
           {name.trim().length < 2
             ? "Type your business name above — your link is made automatically"
             : available === true
-              ? `Available: findmit.world/@${h}`
+              ? `Available: findmitmaster.lovable.app/@${h}`
               : available === false
                 ? "Could not find a free link — change the business name slightly"
                 : "Checking…"}
@@ -352,7 +352,7 @@ function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void })
         </p>
       </div>
       <ul className="space-y-1 text-left text-sm">
-        <li>✓ Your shop link findmit.world/@{shop.handle}</li>
+        <li>✓ Your shop link findmitmaster.lovable.app/@{shop.handle}</li>
         <li>✓ Pin on the map with an "Enter Shop" button</li>
         <li>✓ Shop page with products and a Call button</li>
         <li>✓ Found when customers search @{shop.handle}</li>
