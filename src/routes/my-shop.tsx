@@ -1,4 +1,5 @@
 import { openCheckout, checkoutCallbackUrl } from "@/lib/open-checkout";
+import policeCrest from "@/assets/ghana-police-crest.png.asset.json";
 import { useCachedState } from "@/lib/page-cache";
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
