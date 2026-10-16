@@ -1,0 +1,2 @@
+CREATE POLICY "Admins can delete any job" ON public.jobs FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins can delete any expertise" ON public.talent_profiles FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));

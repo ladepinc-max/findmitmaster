@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Admins can view all CVs and verification docs" ON storage.objects;
+CREATE POLICY "Admins can view all CVs and verification docs" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'cvs' AND (public.has_role(auth.uid(), 'admin') OR public.is_super_admin()));

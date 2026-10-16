@@ -1,0 +1,3 @@
+CREATE POLICY "Anyone can read tv ads files" ON storage.objects FOR SELECT USING (bucket_id = 'tv-ads');
+CREATE POLICY "Admins upload tv ads files" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'tv-ads' AND (public.is_super_admin() OR public.has_role(auth.uid(),'admin')));
+CREATE POLICY "Admins delete tv ads files" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'tv-ads' AND (public.is_super_admin() OR public.has_role(auth.uid(),'admin')));

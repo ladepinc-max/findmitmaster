@@ -1,0 +1,2 @@
+ALTER TABLE public.class_stage_requests DROP CONSTRAINT IF EXISTS class_stage_requests_status_check;
+ALTER TABLE public.class_stage_requests ADD CONSTRAINT class_stage_requests_status_check CHECK (status = ANY (ARRAY['pending'::text,'waiting'::text,'approved'::text,'rejected'::text,'ended'::text]));

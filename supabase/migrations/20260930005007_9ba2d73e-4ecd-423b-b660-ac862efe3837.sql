@@ -1,0 +1,1 @@
+ALTER TABLE public.live_classes ADD COLUMN IF NOT EXISTS stream_input_uid text;
