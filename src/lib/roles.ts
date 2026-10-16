@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { SUPER_ADMIN_EMAIL } from "@/lib/app-sections";
+import { isSuperAdminEmail } from "@/lib/app-sections";
 
 export type AppRole = "public" | "teacher" | "admin";
 
 /** Highest role wins: admin > teacher > public. */
 export async function fetchRole(userId: string, email?: string | null): Promise<AppRole> {
-  if ((email ?? "").toLowerCase() === SUPER_ADMIN_EMAIL) return "admin";
+  if (isSuperAdminEmail(email)) return "admin";
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   if (error) return "public";
   const roles = ((data ?? []) as { role: string }[]).map((row) => row.role);

@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const SUPER_ADMIN_EMAIL = "findmitedutech@gmail.com";
+export const SUPER_ADMIN_EMAILS = ["findmitedutech@gmail.com", "ladepinc@gmail.com"];
+export const isSuperAdminEmail = (email?: string | null) => SUPER_ADMIN_EMAILS.includes((email ?? "").toLowerCase());
 
 export type SectionId =
   | "shs_tv_upload"
@@ -24,7 +26,7 @@ export interface AppSection {
 /** Role rule: the owner email is super_admin, everyone else is a normal user. */
 export function useIsSuperAdmin() {
   const { user } = useAuth();
-  return (user?.email ?? "").toLowerCase() === SUPER_ADMIN_EMAIL;
+  return isSuperAdminEmail(user?.email);
 }
 
 /** Live map of section visibility/lock flags, shared by every screen. */

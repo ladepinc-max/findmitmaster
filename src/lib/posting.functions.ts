@@ -14,7 +14,7 @@ async function jobPostFee(): Promise<number> {
 
 export const EXPERTISE_POST_FEE = 30;
 
-const SUPER_ADMIN_EMAIL = "findmitedutech@gmail.com";
+const SUPER_ADMIN_EMAILS = ["findmitedutech@gmail.com", "ladepinc@gmail.com"];
 
 /** Admins (and the owner account) publish for free. */
 type FreeFeature = "jobs_post" | "talent_post" | "jobs_contact";
@@ -45,7 +45,7 @@ async function hasFreeAccess(userId: string, feature: FreeFeature) {
 }
 
 async function isFreePoster(userId: string, email: string | null | undefined, feature?: FreeFeature) {
-  if ((email ?? "").toLowerCase() === SUPER_ADMIN_EMAIL) return true;
+  if (SUPER_ADMIN_EMAILS.includes((email ?? "").toLowerCase())) return true;
   if (feature && (await hasFreeAccess(userId, feature))) return true;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // Approved FindMit Ghana members post free in the area they were approved for.
