@@ -19,7 +19,9 @@ import {
   daysLeft,
   isShopActive,
   isValidHandle,
-  normaliseHandle,
+  SHOP_EXTENSIONS,
+  buildShopHandle,
+  type ShopExtension,
   shopLink,
   shopPhotoUrl,
   uploadShopPhoto,
@@ -101,7 +103,8 @@ function MyShopPage() {
 }
 
 function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => void }) {
-  const [handle, setHandle] = useState("");
+  const [ext, setExt] = useState<ShopExtension>("shop");
+  const [h, setH] = useState("");
   const [available, setAvailable] = useState<boolean | null>(null);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("food");
@@ -114,21 +117,42 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
   const [locating, setLocating] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
-  const h = normaliseHandle(handle);
   const valid = isValidHandle(h);
 
+  // Auto-generate the link from the business name; add a number if it is taken.
   useEffect(() => {
     setAvailable(null);
-    if (!valid) return undefined;
+    setH("");
+    if (name.trim().length < 2) return undefined;
+    let cancelled = false;
     const t = window.setTimeout(async () => {
-      const { data } = await (supabase as unknown as { rpc: (f: string, a: unknown) => Promise<{ data: boolean }> }).rpc(
-        "is_shop_handle_available",
-        { _handle: h },
-      );
-      setAvailable(Boolean(data));
-    }, 350);
-    return () => window.clearTimeout(t);
-  }, [h, valid]);
+      for (let n = 1; n <= 20 && !cancelled; n++) {
+        const cand = buildShopHandle(name, ext, n);
+        if (!cand || !isValidHandle(cand)) break;
+        const { data } = await (supabase as unknown as { rpc: (f: string, a: unknown) => Promise<{ data: boolean }> }).rpc(
+          "is_shop_handle_available",
+          { _handle: cand },
+        );
+        if (cancelled) return;
+        if (data) {
+          setH(cand);
+          setAvailable(true);
+          return;
+        }
+      }
+      if (!cancelled) setAvailable(false);
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [name, ext]);
+
+  const pickExt = (v: ShopExtension) => {
+    setExt(v);
+    const cat = SHOP_EXTENSIONS.find((x) => x.value === v)?.category;
+    if (cat) setCategory(cat);
+  };
 
   useEffect(() => {
     setNameFree(null);
@@ -153,7 +177,7 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
   };
 
   const save = async () => {
-    if (!valid || !available) return void toast.error("Choose an available shop name");
+    if (!valid || !available) return void toast.error("Type a business name to get your shop link");
     if (!name.trim() || !phone.trim()) return void toast.error("Add your shop name and phone number");
     if (nameFree === false) return void toast.error("That business name is unavailable — please change it");
     const finalCategory = category === CUSTOM_CATEGORY ? customCategory.trim() : category;
@@ -191,32 +215,6 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
         <p className="font-display text-base font-bold">Register your shop</p>
         <p className="text-xs text-muted-foreground">Customers will find you on the map by typing your @name.</p>
       </div>
-      <label className="block text-sm font-medium">
-        Shop name (your link)
-        <div className="mt-1 flex items-center rounded-md border border-input bg-background px-3">
-          <span className="text-muted-foreground">@</span>
-          <input
-            className="h-10 flex-1 bg-transparent px-1 text-sm outline-none"
-            value={handle}
-            onChange={(e) => setHandle(e.target.value)}
-            placeholder="ama.food.shop"
-            autoCapitalize="none"
-          />
-          {valid && available === true ? <Check className="size-4 text-wa-green" /> : null}
-          {valid && available === false ? <X className="size-4 text-destructive" /> : null}
-        </div>
-        <span className="mt-1 block text-xs text-muted-foreground">
-          {!h
-            ? "3–30 letters, numbers or dots"
-            : !valid
-              ? "Use 3–30 letters, numbers, dots or _"
-              : available === false
-                ? "Already taken — try another"
-                : available
-                  ? `Available: findmit.world/@${h}`
-                  : "Checking…"}
-        </span>
-      </label>
       <div>
         <div className="relative">
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Business name (e.g. Ama's Kitchen)" />
@@ -228,6 +226,40 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
         ) : nameFree === true ? (
           <p className="mt-1 text-xs text-wa-green">Available</p>
         ) : null}
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-medium">Choose your link type</p>
+        <div className="flex flex-wrap gap-2">
+          {SHOP_EXTENSIONS.map((x) => (
+            <button
+              key={x.value}
+              type="button"
+              onClick={() => pickExt(x.value)}
+              title={x.hint}
+              className={`rounded-full border px-3 py-1.5 text-sm ${ext === x.value ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"}`}
+            >
+              {x.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{SHOP_EXTENSIONS.find((x) => x.value === ext)?.hint}</p>
+      </div>
+      <div className="rounded-xl border border-border bg-muted/40 p-3">
+        <p className="text-xs text-muted-foreground">Your shop link</p>
+        <p className="flex items-center gap-2 font-display font-bold">
+          {h ? `@${h}` : `@yourname.${ext}`}
+          {available === true ? <Check className="size-4 text-wa-green" /> : null}
+          {available === false ? <X className="size-4 text-destructive" /> : null}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {name.trim().length < 2
+            ? "Type your business name above — your link is made automatically"
+            : available === true
+              ? `Available: findmit.world/@${h}`
+              : available === false
+                ? "Could not find a free link — change the business name slightly"
+                : "Checking…"}
+        </p>
       </div>
       <select
         className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"

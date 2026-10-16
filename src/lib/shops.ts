@@ -15,6 +15,8 @@ export const SHOP_CATEGORIES = [
   { value: "mechanic", label: "Mechanic", emoji: "🔧" },
   { value: "services", label: "Services", emoji: "🛠️" },
   { value: "police", label: "Police Station", emoji: "🛡️" },
+  { value: "fireservice", label: "Fire Service", emoji: "🚒" },
+  { value: "hotel", label: "Hotel / Guest House", emoji: "🏨" },
   { value: "shop", label: "Other shop", emoji: "🏪" },
 ] as const;
 
@@ -104,4 +106,28 @@ export async function uploadShopPhoto(userId: string, file: Blob) {
   const { error } = await supabase.storage.from(SHOP_BUCKET).upload(path, file, { contentType: file.type || "image/jpeg" });
   if (error) throw error;
   return path;
+}
+
+/** Shop link endings the owner picks from; the name part is generated from the business name. */
+export const SHOP_EXTENSIONS = [
+  { value: "shop", label: ".shop", hint: "Shops, food, fashion, phones", category: "shop" },
+  { value: "hotel", label: ".hotel", hint: "Hotels, guest houses, lodges", category: "hotel" },
+  { value: "police", label: ".police", hint: "Police stations", category: "police" },
+  { value: "fireservice", label: ".fireservice", hint: "Fire service stations", category: "fireservice" },
+  { value: "school", label: ".school", hint: "Schools and academies", category: "school" },
+  { value: "hospital", label: ".hospital", hint: "Hospitals, clinics, pharmacies", category: "clinic" },
+  { value: "services", label: ".services", hint: "Mechanics, salons, plumbers…", category: "services" },
+] as const;
+export type ShopExtension = (typeof SHOP_EXTENSIONS)[number]["value"];
+
+/** "Ama's Kitchen" -> "amaskitchen", trimmed so "<slug>.<ext>" fits the 30-char handle limit. */
+export function slugifyShopName(name: string, ext: string, suffix = "") {
+  const base = name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const max = 30 - ext.length - 1 - suffix.length;
+  return base.slice(0, Math.max(0, max)) + suffix;
+}
+
+export function buildShopHandle(name: string, ext: string, n = 1) {
+  const slug = slugifyShopName(name, ext, n > 1 ? String(n) : "");
+  return slug.length >= 2 ? `${slug}.${ext}` : "";
 }
