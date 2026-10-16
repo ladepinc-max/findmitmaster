@@ -1,4 +1,4 @@
-import { openCheckout } from "@/lib/open-checkout";
+import { openCheckout, checkoutCallbackUrl } from "@/lib/open-checkout";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, Copy, Loader2, Save, Search, Sparkles, Upload, X } from "lucide-react";
@@ -254,7 +254,7 @@ export function PostTalentDialog({
             kind: "expertise",
             targetId: talentProfileId,
             momoNumber: momo.number,
-            callbackUrl: `${window.location.origin}/payment-verify`,
+            callbackUrl: checkoutCallbackUrl(),
           },
         });
         toast.info(`Opening secure payment of GHS ${TALENT_POST_FEE}…`);

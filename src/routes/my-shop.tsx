@@ -1,4 +1,4 @@
-import { openCheckout } from "@/lib/open-checkout";
+import { openCheckout, checkoutCallbackUrl } from "@/lib/open-checkout";
 import { useCachedState } from "@/lib/page-cache";
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -326,7 +326,7 @@ function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void })
     setBusy(true);
     try {
       const r = await start({
-        data: { shopId: shop.id, momoNumber: momo, callbackUrl: `${window.location.origin}/payment-verify` },
+        data: { shopId: shop.id, momoNumber: momo, callbackUrl: checkoutCallbackUrl() },
       });
       if (r.activated) {
         toast.success("Your shop is live!");
@@ -519,7 +519,7 @@ function RenewButton({ shop }: { shop: Shop }) {
       className="flex-1"
       onClick={async () => {
         try {
-          const r = await start({ data: { shopId: shop.id, callbackUrl: `${window.location.origin}/payment-verify` } });
+          const r = await start({ data: { shopId: shop.id, callbackUrl: checkoutCallbackUrl() } });
           if (r.authorizationUrl) openCheckout(r.authorizationUrl);
           else {
             toast.success("Renewed for another year");
