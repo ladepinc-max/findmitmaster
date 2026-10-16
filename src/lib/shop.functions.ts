@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const SUPER_ADMIN_EMAIL = "findmitedutech@gmail.com";
+const SUPER_ADMIN_EMAILS = ["findmitedutech@gmail.com", "ladepinc@gmail.com"];
 const DEFAULT_FEE = 200;
 
 type Admin = { from: (t: string) => any };
@@ -46,7 +46,7 @@ export const startShopCheckout = createServerFn({ method: "POST" })
 
     const email = ((context.claims as { email?: string } | null)?.email ?? "").toLowerCase();
     const fee = await shopFee(db);
-    if (fee.free || email === SUPER_ADMIN_EMAIL) {
+    if (fee.free || SUPER_ADMIN_EMAILS.includes(email)) {
       const expiresAt = await activate(db, data.shopId);
       return { activated: true as const, expiresAt, authorizationUrl: null };
     }

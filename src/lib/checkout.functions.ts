@@ -13,11 +13,11 @@ async function appFee(key: "job_post" | "talent_post", fallback: number): Promis
   return Number((data as { amount?: number } | null)?.amount ?? fallback);
 }
 
-const SUPER_ADMIN_EMAIL = "findmitedutech@gmail.com";
+const SUPER_ADMIN_EMAILS = ["findmitedutech@gmail.com", "ladepinc@gmail.com"];
 
 /** Admins (and the owner account) publish for free. */
 async function isFreePoster(userId: string, email: string | null | undefined) {
-  if ((email ?? "").toLowerCase() === SUPER_ADMIN_EMAIL) return true;
+  if (SUPER_ADMIN_EMAILS.includes((email ?? "").toLowerCase())) return true;
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("user_roles")
