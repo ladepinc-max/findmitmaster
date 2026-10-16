@@ -43,7 +43,7 @@ function OnboardingPage() {
   useEffect(() => {
     if (loading) return;
     if (!session) void navigate({ to: "/auth", replace: true });
-    else if (profile) void navigate({ to: "/", replace: true });
+    else if (profile) void navigate({ to: "/jobs", replace: true });
   }, [loading, session, profile, navigate]);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ function OnboardingPage() {
       if (error) throw error;
       await refreshProfile();
       toast.success("Welcome to FindMit");
-      void navigate({ to: "/", replace: true });
+      void navigate({ to: "/jobs", replace: true });
     } catch (error) {
       console.error(error);
       toast.error("Could not create your profile. Please try again.");
