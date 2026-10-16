@@ -133,7 +133,7 @@ function StorefrontPage() {
     try {
       const id = await findOrCreateConversation(user.id, shop.owner_id);
       if (product) {
-        const link = `https://findmit.world/@${shop.handle}`;
+        const link = `${window.location.origin}/@${shop.handle}`;
         const lines = [
           `🛍️ ${product.name}`,
           `${priceLabel(product.price_ghc)} · ${product.is_available ? "Available" : "Sold out"}`,

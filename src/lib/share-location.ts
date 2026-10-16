@@ -6,7 +6,7 @@ export interface SharedPlace {
 }
 
 const KEY = "findmit:pendingNav";
-const SITE = "https://findmit.world";
+const SITE = typeof window !== "undefined" ? window.location.origin : "https://findmitmaster.lovable.app";
 
 /** Public link that opens FindMit's live navigation for this place. */
 export function placeLink(p: SharedPlace) {
