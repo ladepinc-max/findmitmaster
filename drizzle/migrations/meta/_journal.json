@@ -169,6 +169,13 @@
       "when": 1792057987029,
       "tag": "0023_retry_after_enum_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792147395167,
+      "tag": "0024_noop_sync",
+      "breakpoints": true
     }
   ]
 }
