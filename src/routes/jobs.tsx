@@ -771,7 +771,7 @@ function PostJobDialog({
             kind: "job",
             targetId: jobId,
             momoNumber: momo.number,
-            callbackUrl: `${window.location.origin}/payment-verify`,
+            callbackUrl: checkoutCallbackUrl(),
           },
         });
         toast.info(`Opening secure payment of GHS ${JOB_POST_FEE}…`);

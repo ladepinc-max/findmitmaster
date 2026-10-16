@@ -254,7 +254,7 @@ export function PostTalentDialog({
             kind: "expertise",
             targetId: talentProfileId,
             momoNumber: momo.number,
-            callbackUrl: `${window.location.origin}/payment-verify`,
+            callbackUrl: checkoutCallbackUrl(),
           },
         });
         toast.info(`Opening secure payment of GHS ${TALENT_POST_FEE}…`);
