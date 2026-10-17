@@ -347,17 +347,20 @@ async function searchWeb(query: string): Promise<WebSource[]> {
 /** Decides whether a student question needs fresh information from the web. */
 function needsWeb(question: string) {
   const q = question.toLowerCase();
-  return /\b(latest|today|current|recent|news|update|updates|2025|2026|timetable|registration|result|results|release|price|who is|when is|deadline|happening|score|election|president)\b/.test(
+  return /\b(latest|today|news|this week|happening now|breaking|election results?|exchange rate|fuel price)\b/.test(
     q,
   );
 }
 
 /** Shared General AI context; classroom prompts and vault behavior stay separate. */
 export async function prepareGeneralChat(data: GeneralChatInput) {
-  const lastUser = [...data.history].reverse().find((message) => message.role === "user");
-  const lookup = data.question.length < 80 && lastUser
-    ? `${lastUser.content}\n${data.question}` : data.question;
-  const sources = needsWeb(lookup) ? await searchWeb(lookup) : [];
+  // Only look things up for clearly time-sensitive questions, and never wait more than 2s.
+  const sources = needsWeb(data.question)
+    ? await Promise.race([
+        searchWeb(data.question).catch(() => [] as WebSource[]),
+        new Promise<WebSource[]>((resolve) => setTimeout(() => resolve([]), 2000)),
+      ])
+    : [];
   const web = sources.length
     ? `\nFresh web excerpts (${new Date().toISOString().slice(0, 10)}):\n${sources.map((s) => `${s.title}: ${s.snippet} (${s.url})`).join("\n")}`
     : "\nNo fresh web excerpts are available for this turn. Do not claim you searched or verified current facts.";
