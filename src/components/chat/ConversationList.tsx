@@ -1,5 +1,4 @@
 import { FindMitLogo } from "@/components/FindMitLogo";
-import { AmaLauncher } from "@/components/tutor/AmaLauncher";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BadgeCheck,
@@ -165,8 +164,6 @@ export function ConversationList({
               <DropdownMenuItem onSelect={onNewCommunity}>New community</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <AmaLauncher className="ml-1" />
-
 
         </div>
       </header>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Clock, Loader2, Mic, RotateCw, Send, Square, Trash2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,7 @@ function RichText({ text }: { text: string }) {
 type AnyRec = any;
 
 export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () => void }) {
+  const navigate = useNavigate();
   const { settings } = useTutorSettings();
   const runChat = useServerFn(chatWithAma);
   const [messages, setMessages] = useState<TutorChatMessage[]>([]);
@@ -342,7 +344,7 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{settings.tutor_name}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {listening ? "Listening…" : "Always active · AI tutor"}
+            {listening ? "Listening…" : "General AI · ask anything"}
           </p>
         </div>
         <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -355,6 +357,9 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
           />
         </label>
         <AmaVoicePicker />
+        <Button size="sm" className="h-8 px-2.5 text-xs font-bold" onClick={() => void navigate({ to: "/tutor" })}>
+          CLASSROOM
+        </Button>
 
         <Button variant="ghost" size="sm" onClick={() => void clearAll()}>
           Clear
