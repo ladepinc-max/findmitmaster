@@ -77,6 +77,8 @@ export const Route = createFileRoute("/")({
         name: "description",
         content: "Watch recorded stories and join ongoing live classes on FindMit.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Stories — FindMit" },
       {
         property: "og:description",

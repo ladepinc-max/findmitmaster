@@ -37,6 +37,7 @@ import { Route as AdminVerificationsRouteImport } from './routes/admin.verificat
 import { Route as ApiCfLiveInputRouteImport } from './routes/api/cf-live-input'
 import { Route as ApiCfStreamUploadRouteImport } from './routes/api/cf-stream-upload'
 import { Route as ApiCfTokenRouteImport } from './routes/api/cf-token'
+import { Route as ApiGeneralAiRouteImport } from './routes/api/general-ai'
 import { Route as CamIndexRouteImport } from './routes/cam.index'
 import { Route as CamCamRouteImport } from './routes/cam.$cam'
 import { Route as LiveChannelRouteImport } from './routes/live.$channel'
@@ -191,6 +192,11 @@ const ApiCfTokenRoute = ApiCfTokenRouteImport.update({
   path: '/api/cf-token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGeneralAiRoute = ApiGeneralAiRouteImport.update({
+  id: '/api/general-ai',
+  path: '/api/general-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CamIndexRoute = CamIndexRouteImport.update({
   id: '/cam/',
   path: '/cam/',
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/api/cf-live-input': typeof ApiCfLiveInputRoute
   '/api/cf-stream-upload': typeof ApiCfStreamUploadRoute
   '/api/cf-token': typeof ApiCfTokenRoute
+  '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByTo {
   '/api/cf-live-input': typeof ApiCfLiveInputRoute
   '/api/cf-stream-upload': typeof ApiCfStreamUploadRoute
   '/api/cf-token': typeof ApiCfTokenRoute
+  '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -352,6 +360,7 @@ export interface FileRoutesById {
   '/api/cf-live-input': typeof ApiCfLiveInputRoute
   '/api/cf-stream-upload': typeof ApiCfStreamUploadRoute
   '/api/cf-token': typeof ApiCfTokenRoute
+  '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -394,6 +403,7 @@ export interface FileRouteTypes {
     | '/api/cf-live-input'
     | '/api/cf-stream-upload'
     | '/api/cf-token'
+    | '/api/general-ai'
     | '/cam/$cam'
     | '/live/$channel'
     | '/profile/edit'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/api/cf-live-input'
     | '/api/cf-stream-upload'
     | '/api/cf-token'
+    | '/api/general-ai'
     | '/cam/$cam'
     | '/live/$channel'
     | '/profile/edit'
@@ -474,6 +485,7 @@ export interface FileRouteTypes {
     | '/api/cf-live-input'
     | '/api/cf-stream-upload'
     | '/api/cf-token'
+    | '/api/general-ai'
     | '/cam/$cam'
     | '/live/$channel'
     | '/profile/edit'
@@ -515,6 +527,7 @@ export interface RootRouteChildren {
   ApiCfLiveInputRoute: typeof ApiCfLiveInputRoute
   ApiCfStreamUploadRoute: typeof ApiCfStreamUploadRoute
   ApiCfTokenRoute: typeof ApiCfTokenRoute
+  ApiGeneralAiRoute: typeof ApiGeneralAiRoute
   CamCamRoute: typeof CamCamRoute
   LiveChannelRoute: typeof LiveChannelRoute
   ProfileEditRoute: typeof ProfileEditRoute
@@ -725,6 +738,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCfTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/general-ai': {
+      id: '/api/general-ai'
+      path: '/api/general-ai'
+      fullPath: '/api/general-ai'
+      preLoaderRoute: typeof ApiGeneralAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cam/': {
       id: '/cam/'
       path: '/cam'
@@ -827,6 +847,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCfLiveInputRoute: ApiCfLiveInputRoute,
   ApiCfStreamUploadRoute: ApiCfStreamUploadRoute,
   ApiCfTokenRoute: ApiCfTokenRoute,
+  ApiGeneralAiRoute: ApiGeneralAiRoute,
   CamCamRoute: CamCamRoute,
   LiveChannelRoute: LiveChannelRoute,
   ProfileEditRoute: ProfileEditRoute,

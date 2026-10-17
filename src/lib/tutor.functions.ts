@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { generalPersona, type GeneralChatInput } from "@/lib/general-ai";
 
 // Google retired 1.5 and 2.5 Flash-Lite for new keys; 3.5 Flash-Lite is the current successor.
 const GEMINI_MODEL = "gemini-3.5-flash-lite";
@@ -349,6 +350,25 @@ function needsWeb(question: string) {
   return /\b(latest|today|current|recent|news|update|updates|2025|2026|timetable|registration|result|results|release|price|who is|when is|deadline|happening|score|election|president)\b/.test(
     q,
   );
+}
+
+/** Shared General AI context; classroom prompts and vault behavior stay separate. */
+export async function prepareGeneralChat(data: GeneralChatInput) {
+  const lastUser = [...data.history].reverse().find((message) => message.role === "user");
+  const lookup = data.question.length < 80 && lastUser
+    ? `${lastUser.content}\n${data.question}` : data.question;
+  const sources = needsWeb(lookup) ? await searchWeb(lookup) : [];
+  const web = sources.length
+    ? `\nFresh web excerpts (${new Date().toISOString().slice(0, 10)}):\n${sources.map((s) => `${s.title}: ${s.snippet} (${s.url})`).join("\n")}`
+    : "\nNo fresh web excerpts are available for this turn. Do not claim you searched or verified current facts.";
+  return {
+    sources,
+    messages: [
+      { role: "system", content: generalPersona(data.tutorName, data.language) + web },
+      ...data.history,
+      { role: "user", content: data.question },
+    ],
+  };
 }
 
 /**
