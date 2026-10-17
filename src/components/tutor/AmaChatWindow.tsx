@@ -173,6 +173,11 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
           if (!answer) setText(trimmed);
         } else setStatus("ready");
       } finally {
+        cancelAnimationFrame(frame);
+        if (shown < answer.length) {
+          shown = answer.length;
+          update();
+        }
         busyRef.current = false;
         abortRef.current = null;
         textareaRef.current?.focus();
