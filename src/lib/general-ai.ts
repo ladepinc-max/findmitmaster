@@ -24,10 +24,12 @@ export function conversationHistory(messages: UIMessage[]) {
     return [
       {
         role: message.role,
-      content: stripDiagrams(message.parts
-          .filter((part) => part.type === "text")
-          .map((part) => part.text)
-        .join("\n")),
+        content: stripDiagrams(
+          message.parts
+            .filter((part) => part.type === "text")
+            .map((part) => part.text)
+            .join("\n"),
+        ),
       },
     ];
   });
