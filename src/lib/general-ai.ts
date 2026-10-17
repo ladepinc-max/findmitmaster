@@ -3,7 +3,9 @@ import type { UIMessage } from "ai";
 
 export const generalChatSchema = z.object({
   question: z.string().min(1).max(2000),
-  history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string() })).default([]),
+  history: z
+    .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string() }))
+    .default([]),
   tutorName: z.string().min(1).max(40).default("Ama"),
   language: z.string().default("english"),
 });
@@ -18,17 +20,25 @@ export type GeneralChatEvent =
 export function conversationHistory(messages: UIMessage[]) {
   return messages.flatMap((message) => {
     if (message.role !== "user" && message.role !== "assistant") return [];
-    return [{
-      role: message.role,
-      content: message.parts.filter((part) => part.type === "text").map((part) => part.text).join("\n"),
-    }];
+    return [
+      {
+        role: message.role,
+        content: message.parts
+          .filter((part) => part.type === "text")
+          .map((part) => part.text)
+          .join("\n"),
+      },
+    ];
   });
 }
 
 export function generalPersona(name: string, language: string) {
-  const tongue = language === "pidgin" ? "Use natural Ghanaian Pidgin English."
-    : language === "twi" ? "Use simple Twi, with English for technical terms."
-    : "Use clear, natural English.";
+  const tongue =
+    language === "pidgin"
+      ? "Use natural Ghanaian Pidgin English."
+      : language === "twi"
+        ? "Use simple Twi, with English for technical terms."
+        : "Use clear, natural English.";
   return `You are ${name}, FindMit's friendly General AI, a thoughtful conversational companion and patient teacher for people of all ages around the world. ${tongue}
 - Treat everyone as a capable learner, never patronise them or assume their age, school level or location.
 - Read the ENTIRE conversation. Keep the ongoing topic, details, preferences and previous explanations in mind. Resolve short replies such as 'why?', 'yes', 'continue' and 'another example' using the conversation, especially your last question. Do not reset the conversation or repeat introductions.
