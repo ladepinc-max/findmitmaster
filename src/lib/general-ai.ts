@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { UIMessage } from "ai";
+import { stripDiagrams } from "@/lib/diagrams";
 
 export const generalChatSchema = z.object({
   question: z.string().min(1).max(2000),
@@ -23,10 +24,10 @@ export function conversationHistory(messages: UIMessage[]) {
     return [
       {
         role: message.role,
-        content: message.parts
+      content: stripDiagrams(message.parts
           .filter((part) => part.type === "text")
           .map((part) => part.text)
-          .join("\n"),
+        .join("\n")),
       },
     ];
   });

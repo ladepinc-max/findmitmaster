@@ -20,6 +20,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { supabase } from "@/integrations/supabase/client";
+import { amaSpeech } from "@/lib/ama-voice";
 import { conversationHistory, readSseData, type GeneralChatEvent } from "@/lib/general-ai";
 import {
   clearTutorChat,
@@ -50,6 +51,7 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
 
   useEffect(() => {
     let active = true;
+    amaSpeech.stop();
     setLoaded(false);
     void fetchTutorChat(userId)
       .then((rows) => {
