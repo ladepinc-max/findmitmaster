@@ -40,7 +40,7 @@ import {
 
 
 export const Route = createFileRoute("/chat")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { c?: string; ama?: "1" } => ({
     c: typeof search['c'] === "string" ? (search['c'] as string) : undefined,
     ama: search["ama"] === "1" || search["ama"] === 1 ? ("1" as const) : undefined,
   }),
