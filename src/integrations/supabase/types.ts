@@ -2727,16 +2727,19 @@ export type Database = {
           description: string | null
           handle: string
           id: string
+          is_open: boolean
           landmark: string | null
           lat: number | null
           lng: number | null
           name: string
+          opening_hours: string | null
           owner_id: string
           phone: string
           photo_url: string | null
           subscription_expires_at: string | null
           subscription_status: string
           updated_at: string
+          views_count: number
         }
         Insert: {
           category?: string
@@ -2744,16 +2747,19 @@ export type Database = {
           description?: string | null
           handle: string
           id?: string
+          is_open?: boolean
           landmark?: string | null
           lat?: number | null
           lng?: number | null
           name: string
+          opening_hours?: string | null
           owner_id: string
           phone?: string
           photo_url?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
           updated_at?: string
+          views_count?: number
         }
         Update: {
           category?: string
@@ -2761,16 +2767,19 @@ export type Database = {
           description?: string | null
           handle?: string
           id?: string
+          is_open?: boolean
           landmark?: string | null
           lat?: number | null
           lng?: number | null
           name?: string
+          opening_hours?: string | null
           owner_id?: string
           phone?: string
           photo_url?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
           updated_at?: string
+          views_count?: number
         }
         Relationships: []
       }
@@ -3789,6 +3798,7 @@ export type Database = {
         Returns: undefined
       }
       increment_post_view: { Args: { _post_id: string }; Returns: undefined }
+      increment_shop_view: { Args: { _shop_id: string }; Returns: undefined }
       increment_talent_view: {
         Args: { _talent_profile_id: string }
         Returns: undefined
