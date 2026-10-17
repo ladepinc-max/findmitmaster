@@ -15,3 +15,4 @@
 - Shops (`shops`, `shop_products`) are public only while `subscription_status='active'` and unexpired; a trigger blocks owners from changing subscription fields, which only server functions in src/lib/shop.functions.ts (after Paystack verification or admin waiver of `app_pricing.shop_registration`) may set — keeps the paywall unbypassable from the browser.
 - Public storefronts live at `/@handle` via src/routes/$handle.tsx (non-@ paths 404) — matches the shareable shop-link format.
 - Police stations (category "police" or handle ending ".police") use a separate storefront layout with no product catalog — isPoliceShop() in src/lib/shops.ts is the single switch.
+- General AI uses an authenticated raw streaming route with the existing Gemini model, full UIMessage text-part history, and AI Elements; only completed answers are saved to the existing user-scoped tutor history so classroom logic remains independent.

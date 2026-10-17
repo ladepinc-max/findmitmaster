@@ -647,11 +647,11 @@ export interface TutorChatMessage {
 
 /** The student's saved conversation with the tutor. */
 export async function fetchTutorChat(userId: string): Promise<TutorChatMessage[]> {
-  const { data } = await db("tutor_chat_messages")
+  const { data, error } = await db("tutor_chat_messages")
     .select("id, role, content, web_sources, created_at")
     .eq("user_id", userId)
-    .order("created_at", { ascending: true })
-    .limit(200);
+    .order("created_at", { ascending: true });
+  if (error) throw error;
   return ((data ?? []) as TutorChatMessage[]).map((row) => ({
     ...row,
     web_sources: Array.isArray(row.web_sources) ? row.web_sources : [],
@@ -664,14 +664,16 @@ export async function saveTutorMessage(
   content: string,
   webSources: TutorWebSource[] = [],
 ) {
-  await db("tutor_chat_messages").insert({
+  const { error } = await db("tutor_chat_messages").insert({
     user_id: userId,
     role,
     content,
     web_sources: webSources,
   });
+  if (error) throw error;
 }
 
 export async function clearTutorChat(userId: string) {
-  await db("tutor_chat_messages").delete().eq("user_id", userId);
+  const { error } = await db("tutor_chat_messages").delete().eq("user_id", userId);
+  if (error) throw error;
 }
