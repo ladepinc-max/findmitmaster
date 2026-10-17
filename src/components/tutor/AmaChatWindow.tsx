@@ -145,7 +145,7 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
               </MessageContent>
             </Message>
           ))}
-          {status === "submitted" ? <Shimmer>{settings.tutor_name} is thinking…</Shimmer> : null}
+          {status === "submitted" ? <Shimmer>{`${settings.tutor_name} is thinking…`}</Shimmer> : null}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>

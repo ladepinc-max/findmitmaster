@@ -24,12 +24,19 @@ export const Route = createFileRoute("/api/general-ai")({
           const { prepareGeneralChat } = await import("@/lib/tutor.functions");
           const { messages, sources } = await prepareGeneralChat(parsed.data);
           // Preserve the school's existing Gemini model and key; stream instead of buffering the answer.
-          const upstream = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+          const send = () => fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${gemini}`, "Content-Type": "application/json" },
             body: JSON.stringify({ model: "gemini-3.5-flash-lite", messages, stream: true }),
             signal: request.signal,
           });
+          let upstream = await send();
+          for (let i = 0; i < 2 && (upstream.status === 503 || upstream.status === 429); i++) {
+            await upstream.body?.cancel();
+            await new Promise((resolve) => setTimeout(resolve, 1200 * (i + 1) + Math.random() * 500));
+            if (request.signal.aborted) throw new Error("Cancelled");
+            upstream = await send();
+          }
           if (!upstream.ok || !upstream.body) {
             console.warn("General AI request failed", upstream.status);
             return Response.json({ error: upstream.status === 429 || upstream.status === 503
