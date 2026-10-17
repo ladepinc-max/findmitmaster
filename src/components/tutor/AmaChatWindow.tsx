@@ -11,7 +11,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputTextarea,
@@ -101,8 +101,30 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
       let answer = "";
       let sources: TutorWebSource[] = [];
       let completed = false;
+      // Reveal the reply gradually, a few characters per frame, so it writes line by line.
+      let shown = 0;
+      let frame = 0;
+      const update = () =>
+        setMessages((previous) => {
+          const reply: GeneralMessage = {
+            id: replyId,
+            role: "assistant",
+            parts: [{ type: "text", text: answer.slice(0, shown) }],
+            sources,
+          };
+          return previous.some((message) => message.id === replyId)
+            ? previous.map((message) => (message.id === replyId ? reply : message))
+            : [...previous, reply];
+        });
+      const tick = () => {
+        if (shown < answer.length) {
+          shown = Math.min(answer.length, shown + Math.max(2, Math.ceil((answer.length - shown) / 40)));
+          update();
+        }
+        frame = requestAnimationFrame(tick);
+      };
       try {
-        await saveTutorMessage(userId, "user", trimmed);
+        const savedUser = saveTutorMessage(userId, "user", trimmed);
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData.session?.access_token;
         if (!token) throw new Error("Please sign in again to continue.");
@@ -123,31 +145,25 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
             .catch(() => ({ error: "Could not reach General AI." }));
           throw new Error(failure.error ?? "Could not reach General AI.");
         }
-        const update = () =>
-          setMessages((previous) => {
-            const reply: GeneralMessage = {
-              id: replyId,
-              role: "assistant",
-              parts: [{ type: "text", text: answer }],
-              sources,
-            };
-            return previous.some((message) => message.id === replyId)
-              ? previous.map((message) => (message.id === replyId ? reply : message))
-              : [...previous, reply];
-          });
-        for await (const frame of readSseData(response.body)) {
-          const event = JSON.parse(frame) as GeneralChatEvent;
+        frame = requestAnimationFrame(tick);
+        for await (const chunk of readSseData(response.body)) {
+          const event = JSON.parse(chunk) as GeneralChatEvent;
           if (event.type === "sources") sources = event.sources;
           if (event.type === "text") {
             answer += event.text;
             setStatus("streaming");
-            update();
           }
           if (event.type === "error") throw new Error(event.message);
           if (event.type === "done") completed = true;
         }
         if (!completed || !answer.trim())
           throw new Error("The reply was interrupted. Please try again.");
+        while (shown < answer.length && !controller.signal.aborted)
+          await new Promise((resolve) => setTimeout(resolve, 30));
+        cancelAnimationFrame(frame);
+        shown = answer.length;
+        update();
+        await savedUser;
         await saveTutorMessage(userId, "assistant", answer, sources);
         setStatus("ready");
       } catch (error) {
@@ -157,6 +173,11 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
           if (!answer) setText(trimmed);
         } else setStatus("ready");
       } finally {
+        cancelAnimationFrame(frame);
+        if (shown < answer.length) {
+          shown = answer.length;
+          update();
+        }
         busyRef.current = false;
         abortRef.current = null;
         textareaRef.current?.focus();
@@ -230,9 +251,9 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
               </div>
             </div>
           ) : null}
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <Message key={message.id} from={message.role} data-message-role={message.role}>
-              <MessageContent className="group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
+              <MessageContent className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed shadow-sm group-[.is-assistant]:bg-card group-[.is-assistant]:text-card-foreground group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
                 {message.parts.map((part, partIndex) =>
                   part.type === "text" ? (
                     message.role === "assistant" ? (
@@ -240,11 +261,9 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
                         key={partIndex}
                         text={part.text}
                         renderText={(value) => (
-                          <MessageResponse
-                            isAnimating={status === "streaming" && index === messages.length - 1}
-                          >
-                            {value}
-                          </MessageResponse>
+                          <span className="block whitespace-pre-wrap break-words">
+                            {value.replace(/\*\*|__|^#{1,6}\s*/gm, "")}
+                          </span>
                         )}
                       />
                     ) : (

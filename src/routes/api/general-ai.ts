@@ -98,7 +98,9 @@ export const Route = createFileRoute("/api/general-ai")({
           return new Response(stream, {
             headers: {
               "Content-Type": "text/event-stream; charset=utf-8",
-              "Cache-Control": "no-store",
+              "Cache-Control": "no-store, no-transform",
+              "X-Accel-Buffering": "no",
+              Connection: "keep-alive",
             },
           });
         } catch {
