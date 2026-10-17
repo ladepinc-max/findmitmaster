@@ -865,6 +865,9 @@ function TutorPage() {
             {level ? level.blurb : "Always active · voice or text"}
           </p>
         </div>
+        <Link to="/chat" search={{ ama: "1" }} className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-bold text-primary-foreground">
+          GENERAL
+        </Link>
       </header>
 
       {level?.id === "kids" ? (

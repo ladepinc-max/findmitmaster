@@ -40,8 +40,9 @@ import {
 
 
 export const Route = createFileRoute("/chat")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { c?: string | undefined; ama?: "1" | undefined } => ({
     c: typeof search['c'] === "string" ? (search['c'] as string) : undefined,
+    ama: search["ama"] === "1" || search["ama"] === 1 ? ("1" as const) : undefined,
   }),
   head: () => ({
     meta: [
@@ -65,7 +66,7 @@ function ChatPage() {
 
 function ChatSurface() {
   const { profile } = useAuth();
-  const { c: initialConversationId } = Route.useSearch();
+  const { c: initialConversationId, ama: openAma } = Route.useSearch();
   const [conversations, setConversations] = useCachedState<ConversationSummary[]>("chat:conversations", []);
   const [groups, setGroups] = useCachedState<GroupSummary[]>("chat:groups", []);
   const [communities, setCommunities] = useCachedState<CommunitySummary[]>("chat:communities", []);
@@ -76,7 +77,7 @@ function ChatSurface() {
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [mutedIds, setMutedIds] = useState<string[]>([]);
   const [dialogKind, setDialogKind] = useState<"group" | "community" | null>(null);
-  const [amaOpen, setAmaOpen] = useState(false);
+  const [amaOpen, setAmaOpen] = useState(openAma === "1");
   const [mapOpen, setMapOpen] = useState(false);
   const [navTarget, setNavTarget] = useState<NavTarget | null>(null);
   const { settings: tutor } = useTutorSettings();
@@ -308,7 +309,7 @@ function ChatSurface() {
               <ShieldCheck className="size-3.5 text-wa-green" />
             </span>
             <span className="block truncate text-xs text-muted-foreground">
-              Always active · AI tutor. Ask by voice or text.
+              Ask anything · tap CLASSROOM for lessons
             </span>
           </span>
         </button>
