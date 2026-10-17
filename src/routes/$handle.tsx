@@ -272,17 +272,22 @@ function StorefrontPage() {
                 onDoubleClick={() => setZoom(p)}
                 className={`select-none rounded-2xl border border-border bg-card p-2.5 shadow-sm [-webkit-touch-callout:none] ${p.is_available ? "" : "opacity-60"}`}
               >
-                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-muted">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
                   {thumbs[p.id] ? (
                     <img src={thumbs[p.id] ?? ""} alt={p.name} className="pointer-events-none size-full object-cover" loading="lazy" draggable={false} />
                   ) : (
                     <div className="flex size-full items-center justify-center text-3xl">{categoryEmoji(shop.category)}</div>
                   )}
+                  {!p.is_available ? (
+                    <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 bg-destructive py-1 text-center text-xs font-bold uppercase tracking-wide text-destructive-foreground">
+                      Out of stock
+                    </span>
+                  ) : null}
                 </div>
                 <p className="mt-2 line-clamp-2 font-display text-sm font-bold">{p.name}</p>
                 <span className="mt-1 inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 text-[11px]">
-                  <span className={`size-2 rounded-full ${p.is_available ? "bg-wa-green" : "bg-muted-foreground"}`} />
-                  {p.is_available ? "Available" : "Sold out"}
+                  <span className={`size-2 rounded-full ${p.is_available ? "bg-wa-green" : "bg-destructive"}`} />
+                  {p.is_available ? "In stock" : "Out of stock"}
                 </span>
                 <p className="mt-1 font-display text-base font-bold text-wa-green">{priceLabel(p.price_ghc)}</p>
               </div>
@@ -316,7 +321,7 @@ function StorefrontPage() {
             <p className="font-display text-xl font-bold">{zoom.name}</p>
             <div className="flex items-center gap-3">
               <span className="font-display text-lg font-bold text-wa-green">{priceLabel(zoom.price_ghc)}</span>
-              <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{zoom.is_available ? "Available" : "Sold out"}</span>
+              <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${zoom.is_available ? "bg-muted" : "bg-destructive text-destructive-foreground"}`}>{zoom.is_available ? "In stock" : "Out of stock"}</span>
             </div>
             {zoom.description ? <p className="whitespace-pre-wrap text-sm text-muted-foreground">{zoom.description}</p> : null}
             <Button className="w-full" onClick={() => { const p = zoom; setZoom(null); void openChat(p); }}>
