@@ -11,7 +11,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
   PromptInput,
   PromptInputTextarea,
@@ -251,7 +251,7 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
               </div>
             </div>
           ) : null}
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <Message key={message.id} from={message.role} data-message-role={message.role}>
               <MessageContent className="group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
                 {message.parts.map((part, partIndex) =>
