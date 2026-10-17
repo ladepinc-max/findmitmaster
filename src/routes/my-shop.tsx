@@ -8,6 +8,7 @@ import { ArrowLeft, Camera, Check, Copy, Loader2, Lock, MapPin, Plus, Store, Tra
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useAppPrice } from "@/lib/pricing";
@@ -486,16 +487,23 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
               <p className="truncate text-sm font-medium">{p.name}</p>
               <p className="text-xs text-muted-foreground">{priceLabel(p.price_ghc)}</p>
             </div>
-            <Button
-              size="sm"
-              variant={p.is_available ? "outline" : "secondary"}
-              onClick={async () => {
-                await db.from("shop_products").update({ is_available: !p.is_available }).eq("id", p.id);
-                void load();
-              }}
-            >
-              {p.is_available ? "In stock" : "Sold out"}
-            </Button>
+            <label className="flex shrink-0 flex-col items-center gap-1">
+              <Switch
+                checked={p.is_available}
+                aria-label={`${p.name} in stock`}
+                onCheckedChange={async (on) => {
+                  setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, is_available: on } : x)));
+                  const { error } = await db.from("shop_products").update({ is_available: on }).eq("id", p.id);
+                  if (error) {
+                    toast.error("Could not update stock");
+                    void load();
+                  } else toast.success(on ? `${p.name} is in stock` : `${p.name} marked out of stock`);
+                }}
+              />
+              <span className={`text-[11px] font-medium ${p.is_available ? "text-wa-green" : "text-destructive"}`}>
+                {p.is_available ? "In stock" : "Out of stock"}
+              </span>
+            </label>
             <Button
               size="icon"
               variant="ghost"
