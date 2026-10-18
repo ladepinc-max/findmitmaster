@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { findOrCreateConversation } from "@/lib/chat";
+import { openShopConversation, useShopInbox } from "@/lib/shop-chat";
+import { ShopChatSheet } from "@/components/shop/ShopChatSheet";
+import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
 import { useCachedState } from "@/lib/page-cache";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { BadgeCheck, ChevronLeft, MessageCircle, Send, X, Home as HomeIcon, IdCard, Loader2, MapPin, Navigation, Phone, ShieldAlert, Store, Users } from "lucide-react";
@@ -43,6 +45,8 @@ type Shop = {
   lng: number | null;
   photo_url: string | null;
   owner_id: string;
+  is_open: boolean;
+  opening_hours: string | null;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 const db = supabase as unknown as { from: (t: string) => any };
@@ -55,6 +59,9 @@ function StorefrontPage() {
   const [zoom, setZoom] = useState<Product | null>(null);
   const [menu, setMenu] = useState<Product | null>(null);
   const [chatBusy, setChatBusy] = useState(false);
+  const [chat, setChat] = useState<{ id: string; draft?: string } | null>(null);
+  const [ownerInboxOpen, setOwnerInboxOpen] = useState(false);
+  const countedView = useRef<string | null>(null);
   const pressTimer = useRef<number | null>(null);
   const lastTap = useRef<{ id: string; t: number } | null>(null);
   const longFired = useRef(false);
@@ -66,6 +73,12 @@ function StorefrontPage() {
   const [cover, setCover] = useCachedState<string | null>(`shop:${h}:cover`, null);
   const [products, setProducts] = useCachedState<Product[]>(`shop:${h}:products`, []);
   const [thumbs, setThumbs] = useCachedState<Record<string, string | null>>(`shop:${h}:thumbs`, {});
+  const inbox = useShopInbox(shop?.id ?? "", user?.id);
+  useEffect(() => {
+    if (!shop || countedView.current === shop.id || user?.id === shop.owner_id) return;
+    countedView.current = shop.id;
+    void supabase.rpc("increment_shop_view", { _shop_id: shop.id });
+  }, [shop, user?.id]);
 
   useEffect(() => {
     let alive = true;
@@ -73,7 +86,7 @@ function StorefrontPage() {
       // Only paid, unexpired shops are visible to customers.
       const { data, error } = await db
         .from("shops")
-        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at")
+        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours")
         .eq("handle", h)
         .eq("subscription_status", "active")
         .gt("subscription_expires_at", new Date().toISOString())
@@ -128,10 +141,11 @@ function StorefrontPage() {
       toast("Sign in to chat with this shop");
       return void navigate({ to: "/auth" });
     }
-    if (user.id === shop.owner_id) return void toast("This is your own shop");
+    if (user.id === shop.owner_id) { setOwnerInboxOpen(true); return; }
     setChatBusy(true);
     try {
-      const id = await findOrCreateConversation(user.id, shop.owner_id);
+      const id = await openShopConversation(shop.id, user.id, shop.owner_id);
+      let draft: string | undefined;
       if (product) {
         const link = `${window.location.origin}/@${shop.handle}`;
         const lines = [
@@ -140,9 +154,9 @@ function StorefrontPage() {
           product.description ? product.description : null,
           `From @${shop.handle}: ${link}`,
         ].filter(Boolean);
-        sessionStorage.setItem(`fm-chat-draft:${id}`, lines.join("\n"));
+        draft = lines.join("\n");
       }
-      void navigate({ to: "/chat", search: { c: id } });
+      setChat({ id, draft });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not open chat");
     } finally {
@@ -179,11 +193,12 @@ function StorefrontPage() {
         <Button asChild size="icon" className={`${size} rounded-full`} aria-label="Call">
           <a href={tel}><Phone className={icon} /></a>
         </Button>
-        {!police ? (
-          <Button size="icon" variant="secondary" className={`${size} rounded-full`} aria-label="Chat with shop" disabled={chatBusy} onClick={() => void openChat()}>
+        {(
+          <Button size="icon" variant="secondary" className={`${size} relative rounded-full`} aria-label={user?.id === shop.owner_id ? "Shop messages" : "Chat with shop"} disabled={chatBusy} onClick={() => void openChat()}>
             {chatBusy ? <Loader2 className={`${icon} animate-spin`} /> : <MessageCircle className={icon} />}
+            {inbox.unread > 0 ? <span className="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">{inbox.unread}</span> : null}
           </Button>
-        ) : null}
+        )}
         {shop.lat != null ? (
           <Button size="icon" variant="outline" className={`${size} rounded-full`} aria-label="Directions to shop" onClick={directions}>
             <Navigation className={icon} />
@@ -235,6 +250,7 @@ function StorefrontPage() {
           </div>
         </div>
 
+        <div className="mt-3 space-y-1 border-y border-border py-3"><p className={`text-sm font-semibold ${shop.is_open === false ? "text-destructive" : "text-wa-green"}`}>{shop.is_open === false ? "Currently Closed" : "Open"}</p><p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">Opening hours: {shop.opening_hours || "Not provided yet"}</p></div>
         {shop.description && !police ? <p className="mt-3 text-sm text-muted-foreground">{shop.description}</p> : null}
 
         <div className="mt-6 flex items-center justify-between">
@@ -252,7 +268,7 @@ function StorefrontPage() {
                 </a>
               ))}
             </div>
-            <p className="mt-4 text-center text-sm text-muted-foreground">Average response time: ~5 min • Open 24/7</p>
+            <p className="mt-4 text-center text-sm text-muted-foreground">Call your station for assistance</p>
           </>
         ) : products.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No services listed yet — call to ask.</p>
@@ -305,6 +321,8 @@ function StorefrontPage() {
         </div>
       </div>
 
+      {chat && user ? <ShopChatSheet key={chat.id} conversationId={chat.id} meId={user.id} otherId={shop.owner_id} title={shop.name} subtitle={`@${shop.handle} · ${shop.is_open === false ? "Closed" : "Open"}`} draft={chat.draft} onClose={() => { setChat(null); void inbox.refresh(); }} /> : null}
+      {ownerInboxOpen && user ? <ShopInboxSheet shopId={shop.id} meId={user.id} onClose={() => { setOwnerInboxOpen(false); void inbox.refresh(); }} /> : null}
       {zoom ? (
         <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur" onClick={() => setZoom(null)}>
           <div className="flex justify-end p-3">
