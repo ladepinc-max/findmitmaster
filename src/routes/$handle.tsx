@@ -59,7 +59,7 @@ function StorefrontPage() {
   const [zoom, setZoom] = useState<Product | null>(null);
   const [menu, setMenu] = useState<Product | null>(null);
   const [chatBusy, setChatBusy] = useState(false);
-  const [chat, setChat] = useState<{ id: string; draft?: string } | null>(null);
+  const [chat, setChat] = useState<{ id: string; draft: string | undefined } | null>(null);
   const [ownerInboxOpen, setOwnerInboxOpen] = useState(false);
   const countedView = useRef<string | null>(null);
   const pressTimer = useRef<number | null>(null);
