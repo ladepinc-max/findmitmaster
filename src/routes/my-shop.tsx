@@ -4,7 +4,9 @@ import { useCachedState } from "@/lib/page-cache";
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Camera, Check, Copy, Loader2, Lock, MapPin, Plus, Store, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, Check, Copy, Eye, Package, MessageCircle, Loader2, Lock, MapPin, Plus, Store, Trash2, X } from "lucide-react";
+import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
+import { activeProductCount, useShopInbox } from "@/lib/shop-chat";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +61,9 @@ type Shop = {
   photo_url: string | null;
   subscription_status: string;
   subscription_expires_at: string | null;
+  is_open: boolean;
+  opening_hours: string | null;
+  views_count: number;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 
@@ -373,6 +378,32 @@ function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void })
 }
 
 function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
+  const inbox = useShopInbox(shop.id, userId);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(shop.is_open);
+  const [hours, setHours] = useState(shop.opening_hours ?? "");
+  const [views, setViews] = useState(shop.views_count ?? 0);
+  const [updating, setUpdating] = useState(false);
+  useEffect(() => {
+    const refresh = async () => {
+      const { data } = await supabase.from("shops").select("views_count").eq("id", shop.id).maybeSingle();
+      if (data) setViews(data.views_count);
+    };
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 10000);
+    return () => window.clearInterval(timer);
+  }, [shop.id]);
+  const updateDetails = async (nextOpen: boolean) => {
+    if (!hours.trim()) { toast.error("Add your opening hours first"); return; }
+    setUpdating(true);
+    try {
+      const { error } = await supabase.from("shops").update({ is_open: nextOpen, opening_hours: hours.trim() }).eq("id", shop.id);
+      if (error) throw error;
+      setIsOpen(nextOpen);
+      toast.success("Shop details saved");
+    } catch { toast.error("Could not save shop details"); }
+    finally { setUpdating(false); }
+  };
   const [products, setProducts] = useCachedState<Product[]>(`myshop:${shop.id}:products`, []);
   const [thumbs, setThumbs] = useCachedState<Record<string, string | null>>(`myshop:${shop.id}:thumbs`, {});
   const [name, setName] = useState("");
@@ -425,6 +456,11 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
 
   return (
     <>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-lg border border-border bg-card p-3"><Eye className="mb-2 size-5 text-primary" /><p className="text-xl font-bold">{views}</p><p className="text-xs text-muted-foreground">Total Views</p></div>
+        <div className="rounded-lg border border-border bg-card p-3"><Package className="mb-2 size-5 text-wa-green" /><p className="text-xl font-bold">{activeProductCount(products)}</p><p className="text-xs text-muted-foreground">Active Products</p></div>
+        <Button variant="outline" className="h-auto min-w-0 flex-col items-start gap-0 rounded-lg bg-card p-3 text-left" onClick={() => setInboxOpen(true)}><MessageCircle className="mb-2 size-5 text-primary" /><span className="text-xl font-bold">{inbox.unread}</span><span className="whitespace-normal text-xs font-normal text-muted-foreground">New Messages</span></Button>
+      </div>
       <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
         <div className="flex items-center gap-2">
           {isPoliceShop(shop) ? (
@@ -433,28 +469,24 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
             <Store className="size-5 text-wa-green" />
           )}
           <p className="font-display font-bold">{shop.name}</p>
+          <Button size="icon" variant="ghost" aria-label="Shop messages" className="relative shrink-0" onClick={() => setInboxOpen(true)}><MessageCircle className="size-5" />{inbox.unread > 0 ? <span className="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">{inbox.unread}</span> : null}</Button>
           <span className="ml-auto rounded-full bg-wa-green/15 px-2 py-0.5 text-xs font-medium text-wa-green">
             Active · {left} days left
           </span>
         </div>
-        <div className="flex items-center gap-2 rounded-xl bg-muted p-2 text-xs">
-          <span className="min-w-0 flex-1 truncate">{link}</span>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => void navigator.clipboard.writeText(link).then(() => toast.success("Link copied"))}
-          >
-            <Copy className="size-4" />
-          </Button>
-        </div>
+        <Button className="w-full" onClick={() => void navigator.clipboard.writeText(link).then(() => toast.success("Link copied")).catch(() => toast.error("Could not copy link"))}><Copy className="size-4" />Copy Shop Link</Button>
+        <div className="flex items-center justify-between gap-3"><label htmlFor="shop-open" className={`text-sm font-semibold ${isOpen ? "text-wa-green" : "text-destructive"}`}>{isOpen ? "Open" : "Closed"}</label><Switch id="shop-open" checked={isOpen} disabled={updating} onCheckedChange={(next) => void updateDetails(next)} /></div>
+        <label className="block space-y-1 text-sm"><span>Opening hours</span><Input value={hours} onChange={(e) => setHours(e.target.value)} placeholder="e.g. Mon–Sat, 8 am–6 pm; Sun closed" maxLength={500} /></label>
+        <Button variant="outline" className="w-full" disabled={updating} onClick={() => void updateDetails(isOpen)}>{updating ? "Saving…" : "Save opening hours"}</Button>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="flex-1">
-            <a href={`/@${shop.handle}`}>View my shop</a>
+            <Link to="/$handle" params={{ handle: `@${shop.handle}` }}>View my shop</Link>
           </Button>
           {left <= 30 ? <RenewButton shop={shop} /> : null}
         </div>
       </section>
 
+      {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}
       {isPoliceShop(shop) ? (
         <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-sm">
           Police stations don't list products. Customers see your station name, location and a Call Police button.

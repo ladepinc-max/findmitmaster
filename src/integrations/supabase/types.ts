@@ -2635,6 +2635,49 @@ export type Database = {
           },
         ]
       }
+      shop_conversations: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          customer_id: string
+          shop_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          customer_id: string
+          shop_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          customer_id?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_conversations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_conversations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_conversations_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_payments: {
         Row: {
           amount: number

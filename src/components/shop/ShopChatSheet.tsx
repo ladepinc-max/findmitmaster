@@ -21,7 +21,7 @@ export function ShopChatSheet({
   otherId: string;
   title: string;
   subtitle?: string | null;
-  draft?: string;
+  draft?: string | undefined;
   onClose: () => void;
 }) {
   const [msgs, setMsgs] = useState<ChatMessage[] | null>(null);
@@ -76,7 +76,8 @@ export function ShopChatSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60" onClick={onClose}>
       <div
-        className="flex h-[78dvh] w-full max-w-lg animate-in slide-in-from-bottom flex-col rounded-t-3xl border-t border-border bg-card shadow-2xl duration-300"
+        role="dialog" aria-modal="true" aria-label={title}
+        className="flex h-[78dvh] w-full max-w-lg animate-in slide-in-from-bottom flex-col rounded-t-3xl border-t border-border bg-card shadow-2xl duration-300 motion-reduce:animate-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-muted" />
