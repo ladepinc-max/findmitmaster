@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AmaAvatar } from "@/components/tutor/AmaAvatar";
 import { TeacherText } from "@/components/tutor/TeacherText";
+import { LongPressActions } from "@/components/tutor/LongPressActions";
 import {
   Conversation,
   ConversationContent,
@@ -253,7 +254,16 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
           ) : null}
           {messages.map((message) => (
             <Message key={message.id} from={message.role} data-message-role={message.role}>
-              <MessageContent className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed shadow-sm group-[.is-assistant]:bg-card group-[.is-assistant]:text-card-foreground group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
+              <LongPressActions
+                className="flex max-w-[88%] group-[.is-user]:ml-auto"
+                text={message.parts
+                  .map((part) => (part.type === "text" ? part.text : ""))
+                  .join("\n")
+                  .replace(/\[DIAGRAM\][\s\S]*?\[\/DIAGRAM\]|\[PICTURE:[^\]]*\]/g, "")
+                  .replace(/\*\*|__|^#{1,6}\s*/gm, "")
+                  .trim()}
+              >
+              <MessageContent className="max-w-full rounded-2xl px-3.5 py-2.5 text-[15px] leading-relaxed shadow-sm group-[.is-assistant]:bg-card group-[.is-assistant]:text-card-foreground group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
                 {message.parts.map((part, partIndex) =>
                   part.type === "text" ? (
                     message.role === "assistant" ? (
@@ -289,6 +299,7 @@ export function AmaChatWindow({ userId, onBack }: { userId: string; onBack: () =
                   </div>
                 ) : null}
               </MessageContent>
+              </LongPressActions>
             </Message>
           ))}
           {status === "submitted" ? (
