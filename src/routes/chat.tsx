@@ -139,12 +139,14 @@ function ChatSurface() {
   const reload = useCallback(async () => {
     if (!profile) return;
     try {
-      const [convos, groupRows, communityRows] = await Promise.all([
+      const [convos, groupRows, communityRows, shopLinks] = await Promise.all([
         fetchConversations(profile.id),
         fetchGroups(profile.id).catch(() => [] as GroupSummary[]),
         fetchCommunities(profile.id).catch(() => [] as CommunitySummary[]),
+        supabase.from("shop_conversations").select("conversation_id").then((r) => r.data ?? []),
       ]);
-      setConversations(convos);
+      const shopIds = new Set(shopLinks.map((row) => row.conversation_id));
+      setConversations(convos.filter((c) => !shopIds.has(c.id)));
       setGroups(groupRows);
       setCommunities(communityRows);
     } catch {
