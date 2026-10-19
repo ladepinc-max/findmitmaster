@@ -42,7 +42,8 @@ export function useShopInbox(shopId: string, meId?: string) {
     setLoading(true);
     void refresh();
     const timer = window.setInterval(() => void refresh(), 5000);
-    const channel = meId ? supabase.channel(`shop-inbox:${shopId}:${meId}`)
+    // Unique name per hook instance: the dashboard and the inbox sheet both listen at once.
+    const channel = meId && shopId ? supabase.channel(`shop-inbox:${shopId}:${meId}:${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "messages", filter: `receiver_id=eq.${meId}` }, () => void refresh()).subscribe() : null;
     return () => { window.clearInterval(timer); if (channel) void supabase.removeChannel(channel); };
   }, [shopId, meId, refresh]);
