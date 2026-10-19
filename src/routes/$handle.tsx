@@ -5,7 +5,7 @@ import { ShopChatSheet } from "@/components/shop/ShopChatSheet";
 import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
 import { useCachedState } from "@/lib/page-cache";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
-import { BadgeCheck, ChevronLeft, MessageCircle, Minus, Plus, Send, ShoppingCart, X, Home as HomeIcon, IdCard, Loader2, MapPin, Navigation, Phone, ShieldAlert, Store, Users } from "lucide-react";
+import { BadgeCheck, ChevronLeft, CreditCard, MessageCircle, Minus, Plus, Send, ShoppingCart, X, Home as HomeIcon, IdCard, Loader2, MapPin, Navigation, Phone, ShieldAlert, Store, Users } from "lucide-react";
 import { addToCart, cartCount, cartOrderText, cartTotal, setCartQty, type CartItem } from "@/lib/cart";
 import policeCrest from "@/assets/ghana-police-crest.png.asset.json";
 import { Button } from "@/components/ui/button";
@@ -321,7 +321,7 @@ function StorefrontPage() {
                   return inCart ? (
                     <div className="mt-2 flex items-center justify-between" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                       <Button size="icon" variant="outline" className="size-8" aria-label={`Less ${p.name}`} onClick={() => setCart((c) => setCartQty(c, p.id, inCart.qty - 1))}><Minus className="size-3" /></Button>
-                      <span className="text-sm font-semibold">{inCart.qty}</span>
+                      <QtyInput qty={inCart.qty} name={p.name} onChange={(q) => setCart((c) => setCartQty(c, p.id, q))} />
                       <Button size="icon" variant="outline" className="size-8" aria-label={`More ${p.name}`} onClick={() => setCart((c) => setCartQty(c, p.id, inCart.qty + 1))}><Plus className="size-3" /></Button>
                     </div>
                   ) : (
@@ -359,14 +359,15 @@ function StorefrontPage() {
                 <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{i.name}</p><p className="text-xs text-muted-foreground">GH₵ {Number(i.price_ghc).toFixed(2)} each</p></div>
                 <div className="flex items-center gap-1">
                   <Button size="icon" variant="outline" className="size-8" aria-label={`Less ${i.name}`} onClick={() => setCart((c) => setCartQty(c, i.id, i.qty - 1))}><Minus className="size-3" /></Button>
-                  <span className="w-6 text-center text-sm font-semibold">{i.qty}</span>
+                  <QtyInput qty={i.qty} name={i.name} onChange={(q) => setCart((c) => setCartQty(c, i.id, q))} />
                   <Button size="icon" variant="outline" className="size-8" aria-label={`More ${i.name}`} onClick={() => setCart((c) => setCartQty(c, i.id, i.qty + 1))}><Plus className="size-3" /></Button>
                 </div>
                 <p className="w-20 text-right text-sm font-bold">GH₵ {(Number(i.price_ghc) * i.qty).toFixed(2)}</p>
               </div>
             ))}
             <div className="flex items-center justify-between border-t border-border pt-3"><span className="font-semibold">Total</span><span className="font-display text-xl font-bold text-wa-green">GH₵ {cartTotal(cart).toFixed(2)}</span></div>
-            <Button className="w-full" disabled={chatBusy} onClick={() => { setCartOpen(false); void openChat(undefined, cartOrderText(cart, shop.handle)); }}><Send className="size-4" /> Send order to shop chat</Button>
+            <Button size="lg" className="w-full bg-wa-green text-primary-foreground hover:bg-wa-green/90" onClick={() => toast.info("Online payment is coming soon. Your cart is saved.")}><CreditCard className="size-4" /> Pay GH₵ {cartTotal(cart).toFixed(2)}</Button>
+            <Button variant="outline" className="w-full" disabled={chatBusy} onClick={() => { setCartOpen(false); void openChat(undefined, cartOrderText(cart, shop.handle)); }}><Send className="size-4" /> Send order to shop chat</Button>
             <Button variant="ghost" className="w-full" onClick={() => { setCart([]); setCartOpen(false); }}>Clear cart</Button>
           </div>
         </div>
@@ -424,5 +425,29 @@ function StorefrontPage() {
         </div>
       ) : null}
     </main>
+  );
+}
+
+function QtyInput({ qty, name, onChange }: { qty: number; name: string; onChange: (q: number) => void }) {
+  const [text, setText] = useState(String(qty));
+  useEffect(() => setText(String(qty)), [qty]);
+  const commit = () => {
+    const n = Math.floor(Number(text));
+    if (Number.isFinite(n) && n > 0) onChange(Math.min(n, 9999));
+    else setText(String(qty));
+  };
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={`Quantity of ${name}`}
+      value={text}
+      onChange={(e) => setText(e.target.value.replace(/\D/g, ""))}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      className="h-8 w-12 rounded-md border border-input bg-background text-center text-sm font-semibold"
+    />
   );
 }
