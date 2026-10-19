@@ -427,3 +427,27 @@ function StorefrontPage() {
     </main>
   );
 }
+
+function QtyInput({ qty, name, onChange }: { qty: number; name: string; onChange: (q: number) => void }) {
+  const [text, setText] = useState(String(qty));
+  useEffect(() => setText(String(qty)), [qty]);
+  const commit = () => {
+    const n = Math.floor(Number(text));
+    if (Number.isFinite(n) && n > 0) onChange(Math.min(n, 9999));
+    else setText(String(qty));
+  };
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={`Quantity of ${name}`}
+      value={text}
+      onChange={(e) => setText(e.target.value.replace(/\D/g, ""))}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      className="h-8 w-12 rounded-md border border-input bg-background text-center text-sm font-semibold"
+    />
+  );
+}
