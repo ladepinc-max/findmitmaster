@@ -5,7 +5,8 @@ import { ShopChatSheet } from "@/components/shop/ShopChatSheet";
 import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
 import { useCachedState } from "@/lib/page-cache";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
-import { BadgeCheck, ChevronLeft, MessageCircle, Send, X, Home as HomeIcon, IdCard, Loader2, MapPin, Navigation, Phone, ShieldAlert, Store, Users } from "lucide-react";
+import { BadgeCheck, ChevronLeft, MessageCircle, Minus, Plus, Send, ShoppingCart, X, Home as HomeIcon, IdCard, Loader2, MapPin, Navigation, Phone, ShieldAlert, Store, Users } from "lucide-react";
+import { addToCart, cartCount, cartOrderText, cartTotal, setCartQty, type CartItem } from "@/lib/cart";
 import policeCrest from "@/assets/ghana-police-crest.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +74,15 @@ function StorefrontPage() {
   const [cover, setCover] = useCachedState<string | null>(`shop:${h}:cover`, null);
   const [products, setProducts] = useCachedState<Product[]>(`shop:${h}:products`, []);
   const [thumbs, setThumbs] = useCachedState<Record<string, string | null>>(`shop:${h}:thumbs`, {});
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const cartKey = `findmit:cart:${h}`;
+  useEffect(() => {
+    try { const raw = localStorage.getItem(cartKey); setCart(raw ? (JSON.parse(raw) as CartItem[]) : []); } catch { /* ignore */ }
+  }, [cartKey]);
+  useEffect(() => {
+    try { if (cart.length) localStorage.setItem(cartKey, JSON.stringify(cart)); else localStorage.removeItem(cartKey); } catch { /* ignore */ }
+  }, [cart, cartKey]);
   const inbox = useShopInbox(shop?.id ?? "", user?.id);
   useEffect(() => {
     if (!shop || countedView.current === shop.id || user?.id === shop.owner_id) return;
@@ -136,7 +146,7 @@ function StorefrontPage() {
     setNavOpen(true);
   };
 
-  const openChat = async (product?: Product) => {
+  const openChat = async (product?: Product, presetDraft?: string) => {
     if (!session || !user) {
       toast("Sign in to chat with this shop");
       return void navigate({ to: "/auth" });
@@ -145,7 +155,7 @@ function StorefrontPage() {
     setChatBusy(true);
     try {
       const id = await openShopConversation(shop.id, user.id, shop.owner_id);
-      let draft: string | undefined;
+      let draft: string | undefined = presetDraft;
       if (product) {
         const link = `${window.location.origin}/@${shop.handle}`;
         const lines = [
@@ -306,6 +316,18 @@ function StorefrontPage() {
                   {p.is_available ? "In stock" : "Out of stock"}
                 </span>
                 <p className="mt-1 font-display text-base font-bold text-wa-green">{priceLabel(p.price_ghc)}</p>
+                {p.is_available && user?.id !== shop.owner_id ? (() => {
+                  const inCart = cart.find((i) => i.id === p.id);
+                  return inCart ? (
+                    <div className="mt-2 flex items-center justify-between" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                      <Button size="icon" variant="outline" className="size-8" aria-label={`Less ${p.name}`} onClick={() => setCart((c) => setCartQty(c, p.id, inCart.qty - 1))}><Minus className="size-3" /></Button>
+                      <span className="text-sm font-semibold">{inCart.qty}</span>
+                      <Button size="icon" variant="outline" className="size-8" aria-label={`More ${p.name}`} onClick={() => setCart((c) => setCartQty(c, p.id, inCart.qty + 1))}><Plus className="size-3" /></Button>
+                    </div>
+                  ) : (
+                    <Button size="sm" className="mt-2 w-full" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setCart((c) => addToCart(c, { id: p.id, name: p.name, price_ghc: Number(p.price_ghc) })); }}><ShoppingCart className="size-3" /> Add to cart</Button>
+                  );
+                })() : null}
               </div>
             ))}
           </div>
@@ -313,6 +335,12 @@ function StorefrontPage() {
       </section>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 p-3 backdrop-blur">
+        {cart.length ? (
+          <button type="button" className="mx-auto mb-2 flex w-full max-w-lg items-center justify-between rounded-xl bg-primary px-4 py-3 text-primary-foreground" onClick={() => setCartOpen(true)}>
+            <span className="flex items-center gap-2 text-sm font-semibold"><ShoppingCart className="size-4" /> {cartCount(cart)} item{cartCount(cart) === 1 ? "" : "s"}</span>
+            <span className="font-display font-bold">GH₵ {cartTotal(cart).toFixed(2)}</span>
+          </button>
+        ) : null}
         <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
           <p className="min-w-0 truncate text-sm font-medium">
             {police ? "Tap to Call Police" : products.length ? "Double-tap to view · hold to send to chat" : shop.name}
@@ -320,6 +348,30 @@ function StorefrontPage() {
           <ActionButtons big />
         </div>
       </div>
+
+      {cartOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60" onClick={() => setCartOpen(false)}>
+          <div className="max-h-[85dvh] w-full max-w-lg space-y-3 overflow-y-auto rounded-t-3xl bg-card p-5 shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between"><p className="font-display text-lg font-bold">Your cart</p><Button size="icon" variant="ghost" aria-label="Close cart" onClick={() => setCartOpen(false)}><X className="size-5" /></Button></div>
+            {cart.map((i) => (
+              <div key={i.id} className="flex items-center gap-3">
+                {thumbs[i.id] ? <img src={thumbs[i.id] ?? ""} alt="" className="size-12 rounded-lg object-cover" /> : <span className="flex size-12 items-center justify-center rounded-lg bg-muted">{categoryEmoji(shop.category)}</span>}
+                <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{i.name}</p><p className="text-xs text-muted-foreground">GH₵ {Number(i.price_ghc).toFixed(2)} each</p></div>
+                <div className="flex items-center gap-1">
+                  <Button size="icon" variant="outline" className="size-8" aria-label={`Less ${i.name}`} onClick={() => setCart((c) => setCartQty(c, i.id, i.qty - 1))}><Minus className="size-3" /></Button>
+                  <span className="w-6 text-center text-sm font-semibold">{i.qty}</span>
+                  <Button size="icon" variant="outline" className="size-8" aria-label={`More ${i.name}`} onClick={() => setCart((c) => setCartQty(c, i.id, i.qty + 1))}><Plus className="size-3" /></Button>
+                </div>
+                <p className="w-20 text-right text-sm font-bold">GH₵ {(Number(i.price_ghc) * i.qty).toFixed(2)}</p>
+              </div>
+            ))}
+            <div className="flex items-center justify-between border-t border-border pt-3"><span className="font-semibold">Total</span><span className="font-display text-xl font-bold text-wa-green">GH₵ {cartTotal(cart).toFixed(2)}</span></div>
+            <Button className="w-full" disabled={chatBusy} onClick={() => { setCartOpen(false); void openChat(undefined, cartOrderText(cart, shop.handle)); }}><Send className="size-4" /> Send order to shop chat</Button>
+            <Button variant="ghost" className="w-full" onClick={() => { setCart([]); setCartOpen(false); }}>Clear cart</Button>
+          </div>
+        </div>
+      ) : null}
+
 
       {chat && user ? <ShopChatSheet key={chat.id} conversationId={chat.id} meId={user.id} otherId={shop.owner_id} title={shop.name} subtitle={`@${shop.handle} · ${shop.is_open === false ? "Closed" : "Open"}`} draft={chat.draft} onClose={() => { setChat(null); void inbox.refresh(); }} /> : null}
       {ownerInboxOpen && user ? <ShopInboxSheet shopId={shop.id} meId={user.id} onClose={() => { setOwnerInboxOpen(false); void inbox.refresh(); }} /> : null}
