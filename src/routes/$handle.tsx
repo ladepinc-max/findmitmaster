@@ -48,6 +48,8 @@ type Shop = {
   owner_id: string;
   is_open: boolean;
   opening_hours: string | null;
+  bg_photo_url?: string | null;
+  bg_opacity?: number | null;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 const db = supabase as unknown as { from: (t: string) => any };
@@ -72,6 +74,7 @@ function StorefrontPage() {
     if (s) setState("ready");
   });
   const [cover, setCover] = useCachedState<string | null>(`shop:${h}:cover`, null);
+  const [bg, setBg] = useCachedState<string | null>(`shop:${h}:bg`, null);
   const [products, setProducts] = useCachedState<Product[]>(`shop:${h}:products`, []);
   const [thumbs, setThumbs] = useCachedState<Record<string, string | null>>(`shop:${h}:thumbs`, {});
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -96,7 +99,7 @@ function StorefrontPage() {
       // Only paid, unexpired shops are visible to customers.
       const { data, error } = await db
         .from("shops")
-        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours")
+        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours, bg_photo_url, bg_opacity")
         .eq("handle", h)
         .eq("subscription_status", "active")
         .gt("subscription_expires_at", new Date().toISOString())
@@ -111,6 +114,8 @@ function StorefrontPage() {
       setState("ready");
       const c = await shopPhotoUrl(s.photo_url);
       if (alive) setCover((prev) => (prev === c ? prev : c));
+      const bgu = await shopPhotoUrl(s.bg_photo_url ?? null);
+      if (alive) setBg(bgu);
       const { data: list } = await db.from("shop_products").select("*").eq("shop_id", s.id).order("sort_order").order("created_at");
       if (!alive || !list) return;
       const ps = list as Product[];
