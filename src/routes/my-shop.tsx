@@ -4,8 +4,9 @@ import { useCachedState } from "@/lib/page-cache";
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Camera, Check, Copy, Eye, Package, MessageCircle, Loader2, Lock, MapPin, Plus, Store, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, Check, Copy, Eye, Package, MessageCircle, Loader2, Lock, MapPin, Plus, Store, Trash2, Wallet, X } from "lucide-react";
 import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
+import { ShopAccountsSheet } from "@/components/shop/ShopAccountsSheet";
 import { activeProductCount, useShopInbox } from "@/lib/shop-chat";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -380,6 +381,7 @@ function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void })
 function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
   const inbox = useShopInbox(shop.id, userId);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const [accountsOpen, setAccountsOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(shop.is_open);
   const [hours, setHours] = useState(shop.opening_hours ?? "");
   const [views, setViews] = useState(shop.views_count ?? 0);
@@ -482,11 +484,13 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
           <Button asChild variant="outline" className="flex-1">
             <Link to="/$handle" params={{ handle: `@${shop.handle}` }}>View my shop</Link>
           </Button>
+          <Button variant="outline" className="flex-1 rounded-full border-wa-green/50" onClick={() => setAccountsOpen(true)}><Wallet className="size-4" />Accounts</Button>
           {left <= 30 ? <RenewButton shop={shop} /> : null}
         </div>
       </section>
 
       {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}
+      {accountsOpen ? <ShopAccountsSheet shopId={shop.id} shopName={shop.name} productCount={products.length} onClose={() => setAccountsOpen(false)} /> : null}
       {isPoliceShop(shop) ? (
         <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-sm">
           Police stations don't list products. Customers see your station name, location and a Call Police button.

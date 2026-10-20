@@ -3,7 +3,7 @@ import { Copy, Forward } from "lucide-react";
 import { toast } from "sonner";
 
 const HOLD_MS = 450;
-const MOVE_TOLERANCE = 10;
+const MOVE_TOLERANCE = 25;
 
 /** Hold a message to pop up Copy and Forward actions. */
 export function LongPressActions({
@@ -65,7 +65,7 @@ export function LongPressActions({
     <div
       ref={boxRef}
       className={`relative select-none ${className ?? ""}`}
-      style={{ WebkitTouchCallout: "none" }}
+      style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none", touchAction: "pan-y" }}
       onContextMenu={(e) => {
         e.preventDefault();
         if (text.trim()) setOpen(true);
@@ -84,7 +84,6 @@ export function LongPressActions({
       }}
       onPointerUp={cancel}
       onPointerCancel={cancel}
-      onPointerLeave={cancel}
     >
       {children}
       {open ? (

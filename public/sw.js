@@ -1,7 +1,7 @@
 /* FindMit service worker: background push + notification handling,
  * plus cache-first storage of immutable hashed build assets (never HTML). */
 
-const ASSET_CACHE = "findmit-assets-v1";
+const ASSET_CACHE = "findmit-assets-v2";
 const isPreviewHost = /^(id-preview--|preview--)/.test(self.location.hostname) ||
   /lovableproject(-dev)?\.com$/.test(self.location.hostname) ||
   self.location.hostname === "localhost";
