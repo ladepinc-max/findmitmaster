@@ -65,6 +65,8 @@ type Shop = {
   is_open: boolean;
   opening_hours: string | null;
   views_count: number;
+  bg_photo_url: string | null;
+  bg_opacity: number | null;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 
@@ -488,6 +490,7 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
           {left <= 30 ? <RenewButton shop={shop} /> : null}
         </div>
       </section>
+      {!isPoliceShop(shop) ? <BackgroundEditor shop={shop} userId={userId} /> : null}
 
       {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}
       {accountsOpen ? <ShopAccountsSheet shopId={shop.id} shopName={shop.name} productCount={products.length} onClose={() => setAccountsOpen(false)} /> : null}
