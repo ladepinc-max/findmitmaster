@@ -288,7 +288,9 @@ function StorefrontPage() {
         ) : products.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No services listed yet — call to ask.</p>
         ) : (
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="relative mt-3 overflow-hidden rounded-2xl">
+          {bg ? <img src={bg} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" style={{ opacity: shop.bg_opacity ?? 0.2 }} /> : null}
+          <div className={`relative grid grid-cols-2 gap-3 ${bg ? "p-2" : ""}`}>
             {products.map((p) => (
               <div
                 key={p.id}
@@ -336,6 +338,7 @@ function StorefrontPage() {
               </div>
             ))}
           </div>
+          </div>
         )}
       </section>
 
@@ -382,7 +385,9 @@ function StorefrontPage() {
       {chat && user ? <ShopChatSheet key={chat.id} conversationId={chat.id} meId={user.id} otherId={shop.owner_id} title={shop.name} subtitle={`@${shop.handle} · ${shop.is_open === false ? "Closed" : "Open"}`} draft={chat.draft} onClose={() => { setChat(null); void inbox.refresh(); }} /> : null}
       {ownerInboxOpen && user ? <ShopInboxSheet shopId={shop.id} meId={user.id} onClose={() => { setOwnerInboxOpen(false); void inbox.refresh(); }} /> : null}
       {zoom ? (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur" onClick={() => setZoom(null)}>
+        <div className="fixed inset-0 z-50 flex flex-col bg-background" onClick={() => setZoom(null)}>
+          {bg ? <img src={bg} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" style={{ opacity: shop.bg_opacity ?? 0.2 }} /> : null}
+          <div className="relative flex min-h-0 flex-1 flex-col">
           <div className="flex justify-end p-3">
             <Button size="icon" variant="ghost" aria-label="Close"><X className="size-6" /></Button>
           </div>
@@ -403,6 +408,7 @@ function StorefrontPage() {
             <Button className="w-full" onClick={() => { const p = zoom; setZoom(null); void openChat(p); }}>
               <Send className="size-4" /> Send to chat
             </Button>
+          </div>
           </div>
         </div>
       ) : null}
