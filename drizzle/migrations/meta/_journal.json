@@ -197,6 +197,13 @@
       "when": 1792281835624,
       "tag": "0027_shop_conversation_links",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792467378434,
+      "tag": "0028_shop_background",
+      "breakpoints": true
     }
   ]
 }

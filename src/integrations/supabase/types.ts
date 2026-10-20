@@ -2765,6 +2765,8 @@ export type Database = {
       }
       shops: {
         Row: {
+          bg_opacity: number
+          bg_photo_url: string | null
           category: string
           created_at: string
           description: string | null
@@ -2785,6 +2787,8 @@ export type Database = {
           views_count: number
         }
         Insert: {
+          bg_opacity?: number
+          bg_photo_url?: string | null
           category?: string
           created_at?: string
           description?: string | null
@@ -2805,6 +2809,8 @@ export type Database = {
           views_count?: number
         }
         Update: {
+          bg_opacity?: number
+          bg_photo_url?: string | null
           category?: string
           created_at?: string
           description?: string | null
