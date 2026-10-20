@@ -65,6 +65,8 @@ type Shop = {
   is_open: boolean;
   opening_hours: string | null;
   views_count: number;
+  bg_photo_url: string | null;
+  bg_opacity: number | null;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 
@@ -488,6 +490,7 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
           {left <= 30 ? <RenewButton shop={shop} /> : null}
         </div>
       </section>
+      {!isPoliceShop(shop) ? <BackgroundEditor shop={shop} userId={userId} /> : null}
 
       {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}
       {accountsOpen ? <ShopAccountsSheet shopId={shop.id} shopName={shop.name} productCount={products.length} onClose={() => setAccountsOpen(false)} /> : null}
@@ -581,5 +584,45 @@ function RenewButton({ shop }: { shop: Shop }) {
     >
       Renew {waived ? "free" : `GH₵ ${amount}`}
     </Button>
+  );
+}
+
+function BackgroundEditor({ shop, userId }: { shop: Shop; userId: string }) {
+  const [path, setPath] = useState<string | null>(shop.bg_photo_url);
+  const [url, setUrl] = useState<string | null>(null);
+  const [opacity, setOpacity] = useState(Math.round((shop.bg_opacity ?? 0.2) * 100));
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { void shopPhotoUrl(path).then(setUrl); }, [path]);
+  const pick = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    try { setPath(await uploadShopPhoto(userId, file)); } catch { toast.error("Could not upload photo"); } finally { setBusy(false); }
+  };
+  const save = async () => {
+    setBusy(true);
+    const { error } = await db.from("shops").update({ bg_photo_url: path, bg_opacity: opacity / 100 }).eq("id", shop.id);
+    setBusy(false);
+    if (error) toast.error("Could not save background"); else toast.success("Background saved");
+  };
+  return (
+    <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
+      <p className="font-display font-bold">Shop background</p>
+      <div className="relative h-32 overflow-hidden rounded-xl border border-border bg-background">
+        {url ? <img src={url} alt="" className="absolute inset-0 size-full object-cover" style={{ opacity: opacity / 100 }} /> : null}
+        <div className="relative flex h-full items-center justify-center text-sm font-semibold">{url ? "Preview" : "No background yet"}</div>
+      </div>
+      <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border p-3 text-sm">
+        <Camera className="size-4" /> {busy ? "Uploading…" : url ? "Change background photo" : "Choose background photo"}
+        <input type="file" accept="image/*" className="hidden" onChange={(e) => void pick(e.target.files?.[0])} />
+      </label>
+      <label className="block space-y-1 text-sm">
+        <span>Opacity: {opacity}%</span>
+        <input type="range" min={5} max={100} value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} className="w-full accent-primary" />
+      </label>
+      <div className="flex gap-2">
+        {path ? <Button variant="outline" className="flex-1" onClick={() => setPath(null)}>Remove</Button> : null}
+        <Button className="flex-1" disabled={busy} onClick={() => void save()}>Save background</Button>
+      </div>
+    </section>
   );
 }

@@ -48,6 +48,8 @@ type Shop = {
   owner_id: string;
   is_open: boolean;
   opening_hours: string | null;
+  bg_photo_url?: string | null;
+  bg_opacity?: number | null;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 const db = supabase as unknown as { from: (t: string) => any };
@@ -72,6 +74,7 @@ function StorefrontPage() {
     if (s) setState("ready");
   });
   const [cover, setCover] = useCachedState<string | null>(`shop:${h}:cover`, null);
+  const [bg, setBg] = useCachedState<string | null>(`shop:${h}:bg`, null);
   const [products, setProducts] = useCachedState<Product[]>(`shop:${h}:products`, []);
   const [thumbs, setThumbs] = useCachedState<Record<string, string | null>>(`shop:${h}:thumbs`, {});
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -96,7 +99,7 @@ function StorefrontPage() {
       // Only paid, unexpired shops are visible to customers.
       const { data, error } = await db
         .from("shops")
-        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours")
+        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours, bg_photo_url, bg_opacity")
         .eq("handle", h)
         .eq("subscription_status", "active")
         .gt("subscription_expires_at", new Date().toISOString())
@@ -111,6 +114,8 @@ function StorefrontPage() {
       setState("ready");
       const c = await shopPhotoUrl(s.photo_url);
       if (alive) setCover((prev) => (prev === c ? prev : c));
+      const bgu = await shopPhotoUrl(s.bg_photo_url ?? null);
+      if (alive) setBg(bgu);
       const { data: list } = await db.from("shop_products").select("*").eq("shop_id", s.id).order("sort_order").order("created_at");
       if (!alive || !list) return;
       const ps = list as Product[];
@@ -283,7 +288,9 @@ function StorefrontPage() {
         ) : products.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No services listed yet — call to ask.</p>
         ) : (
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="relative mt-3 overflow-hidden rounded-2xl">
+          {bg ? <img src={bg} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" style={{ opacity: shop.bg_opacity ?? 0.2 }} /> : null}
+          <div className={`relative grid grid-cols-2 gap-3 ${bg ? "p-2" : ""}`}>
             {products.map((p) => (
               <div
                 key={p.id}
@@ -331,6 +338,7 @@ function StorefrontPage() {
               </div>
             ))}
           </div>
+          </div>
         )}
       </section>
 
@@ -377,7 +385,9 @@ function StorefrontPage() {
       {chat && user ? <ShopChatSheet key={chat.id} conversationId={chat.id} meId={user.id} otherId={shop.owner_id} title={shop.name} subtitle={`@${shop.handle} · ${shop.is_open === false ? "Closed" : "Open"}`} draft={chat.draft} onClose={() => { setChat(null); void inbox.refresh(); }} /> : null}
       {ownerInboxOpen && user ? <ShopInboxSheet shopId={shop.id} meId={user.id} onClose={() => { setOwnerInboxOpen(false); void inbox.refresh(); }} /> : null}
       {zoom ? (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur" onClick={() => setZoom(null)}>
+        <div className="fixed inset-0 z-50 flex flex-col bg-background" onClick={() => setZoom(null)}>
+          {bg ? <img src={bg} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" style={{ opacity: shop.bg_opacity ?? 0.2 }} /> : null}
+          <div className="relative flex min-h-0 flex-1 flex-col">
           <div className="flex justify-end p-3">
             <Button size="icon" variant="ghost" aria-label="Close"><X className="size-6" /></Button>
           </div>
@@ -398,6 +408,7 @@ function StorefrontPage() {
             <Button className="w-full" onClick={() => { const p = zoom; setZoom(null); void openChat(p); }}>
               <Send className="size-4" /> Send to chat
             </Button>
+          </div>
           </div>
         </div>
       ) : null}
