@@ -19,6 +19,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as EmployerRouteImport } from './routes/employer'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as LRouteImport } from './routes/l'
 import { Route as MyShopRouteImport } from './routes/my-shop'
@@ -99,6 +100,11 @@ const CreateRoute = CreateRouteImport.update({
 const EmployerRoute = EmployerRouteImport.update({
   id: '/employer',
   path: '/employer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobsRoute = JobsRouteImport.update({
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/create': typeof CreateRoute
   '/employer': typeof EmployerRoute
+  '/home': typeof HomeRoute
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/create': typeof CreateRoute
   '/employer': typeof EmployerRoute
+  '/home': typeof HomeRoute
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/create': typeof CreateRoute
   '/employer': typeof EmployerRoute
+  '/home': typeof HomeRoute
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
@@ -385,6 +394,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/create'
     | '/employer'
+    | '/home'
     | '/jobs'
     | '/l'
     | '/my-shop'
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/create'
     | '/employer'
+    | '/home'
     | '/jobs'
     | '/l'
     | '/my-shop'
@@ -467,6 +478,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/create'
     | '/employer'
+    | '/home'
     | '/jobs'
     | '/l'
     | '/my-shop'
@@ -509,6 +521,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   CreateRoute: typeof CreateRoute
   EmployerRoute: typeof EmployerRoute
+  HomeRoute: typeof HomeRoute
   JobsRoute: typeof JobsRoute
   LRoute: typeof LRoute
   MyShopRoute: typeof MyShopRoute
@@ -610,6 +623,13 @@ declare module '@tanstack/react-router' {
       path: '/employer'
       fullPath: '/employer'
       preLoaderRoute: typeof EmployerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jobs': {
@@ -829,6 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   CreateRoute: CreateRoute,
   EmployerRoute: EmployerRoute,
+  HomeRoute: HomeRoute,
   JobsRoute: JobsRoute,
   LRoute: LRoute,
   MyShopRoute: MyShopRoute,

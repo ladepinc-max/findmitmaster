@@ -14,12 +14,12 @@ import { useStoriesAccess } from "@/lib/stories-access";
 
 const TABS = [
   { to: "/chat", label: "Chat", icon: MessageCircle },
-  { to: "/", label: "Stories", icon: Play },
   { to: "/jobs", label: "Jobs", icon: Briefcase },
   { to: "/profile", label: "Profile", icon: User },
+  { to: "/home", label: "Home", icon: Home },
 ] as const;
 
-/** Ensures the app opens on Jobs (FindMit Ghana) instead of Stories on first launch. */
+/** Ensures the app opens on the Home browser screen instead of Stories on first launch. */
 let initialRedirectDone = false;
 
 const STORIES_TABS: { id: StoriesInnerTab; label: string; icon: typeof Home }[] = [
@@ -67,14 +67,13 @@ function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useAuth();
   const { count: unreadChats } = useUnreadChatCount(profile?.id);
-  const { allowed: storiesAllowed } = useStoriesAccess();
 
   useNotifications(profile?.id);
 
   return (
     <BottomNavFrame>
       <ul className="flex min-w-0 flex-1 items-stretch">
-        {TABS.filter((t) => t.to !== "/" || storiesAllowed).map(({ to, label, icon: Icon }) => {
+        {TABS.map(({ to, label, icon: Icon }) => {
           const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
           return (
             <li key={to} className="flex-1">
