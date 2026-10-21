@@ -2,7 +2,7 @@
   "name": "FindMit",
   "short_name": "FindMit",
   "id": "/",
-  "start_url": "/jobs",
+  "start_url": "/home",
   "scope": "/",
   "display": "standalone",
   "background_color": "#141518",

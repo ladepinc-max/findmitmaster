@@ -35,9 +35,9 @@ export function FindMitLogo({
 
   if (!linkToHome) return image;
 
-  // The logo is the home button; home is now Jobs (FindMit Ghana).
+  // The logo is the home button; home is now the Home browser screen.
   const handleClick = () => {
-    void navigate({ to: "/jobs", search: { tab: "ghana" } });
+    void navigate({ to: "/home" });
   };
 
   return (
