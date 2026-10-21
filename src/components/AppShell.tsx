@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, MessageCircle, Play, Briefcase, User, Home, Radio, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, MessageCircle, Briefcase, User, Home, Radio, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { useUnreadChatCount } from "@/lib/chat-notifications";
@@ -14,12 +14,12 @@ import { useStoriesAccess } from "@/lib/stories-access";
 
 const TABS = [
   { to: "/chat", label: "Chat", icon: MessageCircle },
-  { to: "/", label: "Stories", icon: Play },
   { to: "/jobs", label: "Jobs", icon: Briefcase },
   { to: "/profile", label: "Profile", icon: User },
+  { to: "/home", label: "Home", icon: Home },
 ] as const;
 
-/** Ensures the app opens on Jobs (FindMit Ghana) instead of Stories on first launch. */
+/** Ensures the app opens on the Home browser screen instead of Stories on first launch. */
 let initialRedirectDone = false;
 
 const STORIES_TABS: { id: StoriesInnerTab; label: string; icon: typeof Home }[] = [
@@ -67,15 +67,14 @@ function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile } = useAuth();
   const { count: unreadChats } = useUnreadChatCount(profile?.id);
-  const { allowed: storiesAllowed } = useStoriesAccess();
 
   useNotifications(profile?.id);
 
   return (
     <BottomNavFrame>
       <ul className="flex min-w-0 flex-1 items-stretch">
-        {TABS.filter((t) => t.to !== "/" || storiesAllowed).map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+        {TABS.map(({ to, label, icon: Icon }) => {
+          const active = pathname.startsWith(to);
           return (
             <li key={to} className="flex-1">
               <Link
@@ -152,20 +151,20 @@ export function AppShell({
     }
   }, [loading, session, profile, navigate, pathname]);
 
-  // First launch lands on Jobs (FindMit Ghana) instead of Stories.
+  // First launch lands on the Home browser screen instead of Stories.
   useEffect(() => {
     if (loading) return;
     if (initialRedirectDone) return;
     initialRedirectDone = true;
     if (pathname === "/") {
-      void navigate({ to: "/jobs", search: { tab: "jobs" }, replace: true });
+      void navigate({ to: "/home", replace: true });
     }
   }, [loading, pathname, navigate]);
 
-  // Stories is private until admin publishes it: unapproved users go to Jobs.
+  // Stories is private until admin publishes it: unapproved users go to Home.
   useEffect(() => {
     if (pathname === "/" && !stories.loading && !stories.allowed) {
-      void navigate({ to: "/jobs", search: { tab: "jobs" }, replace: true });
+      void navigate({ to: "/home", replace: true });
     }
   }, [pathname, stories.loading, stories.allowed, navigate]);
 
