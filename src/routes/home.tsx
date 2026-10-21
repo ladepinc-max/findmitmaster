@@ -105,7 +105,7 @@ function HomeScreen() {
       ]);
 
       const shops = (shopsRes.data ?? []) as ShopHit[];
-      const rawProducts = (productsRes.data ?? []) as { id: string; name: string; price: number | null; shop_id: string }[];
+      const rawProducts = (productsRes.data ?? []) as { id: string; name: string; price_ghc: number | null; shop_id: string }[];
       const jobs = (jobsRes.data ?? []) as JobHit[];
 
       // Products link to their shop's storefront, so resolve each shop handle.
@@ -117,7 +117,7 @@ function HomeScreen() {
       }
       const products: ProductHit[] = rawProducts
         .filter((p) => handleByShop.has(p.shop_id))
-        .map((p) => ({ id: p.id, name: p.name, price: p.price, shopHandle: handleByShop.get(p.shop_id)! }));
+        .map((p) => ({ id: p.id, name: p.name, price: p.price_ghc, shopHandle: handleByShop.get(p.shop_id)! }));
 
       setResults({ shops, products, jobs });
     } finally {
@@ -282,7 +282,7 @@ function HomeScreen() {
                 const cls =
                   "flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center transition-colors hover:bg-secondary";
                 return label === "Ama AI" ? (
-                  <Link key={label} to="/chat" search={{ ama: 1 }} className={cls}>
+                  <Link key={label} to="/chat" search={{ ama: "1" }} className={cls}>
                     {inner}
                   </Link>
                 ) : (
