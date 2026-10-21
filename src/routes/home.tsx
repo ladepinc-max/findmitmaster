@@ -96,7 +96,7 @@ function HomeScreen() {
           .select("id, name, handle, category")
           .or(`name.ilike."${like}",handle.ilike."${like}",category.ilike."${like}"`)
           .limit(6),
-        supabase.from("shop_products").select("id, name, price, shop_id").ilike("name", like).limit(6),
+        supabase.from("shop_products").select("id, name, price_ghc, shop_id").ilike("name", like).limit(6),
         supabase
           .from("jobs")
           .select("id, title, company, location_name")

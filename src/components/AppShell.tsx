@@ -74,7 +74,7 @@ function BottomNav() {
     <BottomNavFrame>
       <ul className="flex min-w-0 flex-1 items-stretch">
         {TABS.map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+          const active = pathname.startsWith(to);
           return (
             <li key={to} className="flex-1">
               <Link
