@@ -171,7 +171,7 @@ function HomeScreen() {
           <section className="mt-6 space-y-5">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-wa-green">
-                <FindMitLogo size="sm" showText={false} linkToHome={false} className="!size-5" />
+                <span className="size-2 rounded-full bg-wa-green" />
                 Found on FindMit
               </h2>
               {hasFindMitHits ? (
@@ -269,20 +269,28 @@ function HomeScreen() {
           <section className="mt-8">
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Quick access</h2>
             <div className="mt-3 grid grid-cols-3 gap-3">
-              {QUICK_TILES.map(({ to, label, icon: Icon, description, ...rest }) => (
-                <Link
-                  key={label}
-                  to={to}
-                  {...("search" in rest ? { search: rest.search } : {})}
-                  className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center transition-colors hover:bg-secondary"
-                >
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                    <Icon className="size-5" />
-                  </span>
-                  <span className="text-xs font-bold">{label}</span>
-                  <span className="text-[0.65rem] leading-tight text-muted-foreground">{description}</span>
-                </Link>
-              ))}
+              {QUICK_TILES.map(({ to, label, icon: Icon, description }) => {
+                const inner = (
+                  <>
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                      <Icon className="size-5" />
+                    </span>
+                    <span className="text-xs font-bold">{label}</span>
+                    <span className="text-[0.65rem] leading-tight text-muted-foreground">{description}</span>
+                  </>
+                );
+                const cls =
+                  "flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center transition-colors hover:bg-secondary";
+                return label === "Ama AI" ? (
+                  <Link key={label} to="/chat" search={{ ama: 1 }} className={cls}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <Link key={label} to={to} className={cls}>
+                    {inner}
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}

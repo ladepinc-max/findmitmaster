@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, MessageCircle, Play, Briefcase, User, Home, Radio, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, MessageCircle, Briefcase, User, Home, Radio, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { useUnreadChatCount } from "@/lib/chat-notifications";
