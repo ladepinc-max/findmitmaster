@@ -102,7 +102,7 @@ function AuthPage() {
 
   useEffect(() => {
     if (loading || !session || needsPhone) return;
-    void navigate({ to: profile ? "/jobs" : "/onboarding", replace: true });
+    void navigate({ to: profile ? "/home" : "/onboarding", replace: true });
   }, [loading, session, profile, needsPhone, navigate]);
 
   useEffect(() => {

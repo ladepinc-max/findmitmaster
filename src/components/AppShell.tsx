@@ -151,20 +151,20 @@ export function AppShell({
     }
   }, [loading, session, profile, navigate, pathname]);
 
-  // First launch lands on Jobs (FindMit Ghana) instead of Stories.
+  // First launch lands on the Home browser screen instead of Stories.
   useEffect(() => {
     if (loading) return;
     if (initialRedirectDone) return;
     initialRedirectDone = true;
     if (pathname === "/") {
-      void navigate({ to: "/jobs", search: { tab: "jobs" }, replace: true });
+      void navigate({ to: "/home", replace: true });
     }
   }, [loading, pathname, navigate]);
 
-  // Stories is private until admin publishes it: unapproved users go to Jobs.
+  // Stories is private until admin publishes it: unapproved users go to Home.
   useEffect(() => {
     if (pathname === "/" && !stories.loading && !stories.allowed) {
-      void navigate({ to: "/jobs", search: { tab: "jobs" }, replace: true });
+      void navigate({ to: "/home", replace: true });
     }
   }, [pathname, stories.loading, stories.allowed, navigate]);
 
