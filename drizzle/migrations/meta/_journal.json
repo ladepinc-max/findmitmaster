@@ -204,6 +204,13 @@
       "when": 1792467378434,
       "tag": "0028_shop_background",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793564558435,
+      "tag": "0029_home_browser",
+      "breakpoints": true
     }
   ]
 }
