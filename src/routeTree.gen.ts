@@ -26,6 +26,7 @@ import { Route as MyShopRouteImport } from './routes/my-shop'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PaymentVerifyRouteImport } from './routes/payment-verify'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ShopsRouteImport } from './routes/shops'
 import { Route as StationsRouteImport } from './routes/stations'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as AdminClassControlRouteImport } from './routes/admin.class-control'
@@ -135,6 +136,11 @@ const PaymentVerifyRoute = PaymentVerifyRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopsRoute = ShopsRouteImport.update({
+  id: '/shops',
+  path: '/shops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StationsRoute = StationsRouteImport.update({
@@ -272,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
+  '/shops': typeof ShopsRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
+  '/shops': typeof ShopsRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
@@ -357,6 +365,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
+  '/shops': typeof ShopsRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
@@ -401,6 +410,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/payment-verify'
     | '/settings'
+    | '/shops'
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
@@ -443,6 +453,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/payment-verify'
     | '/settings'
+    | '/shops'
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
@@ -485,6 +496,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/payment-verify'
     | '/settings'
+    | '/shops'
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
@@ -528,6 +540,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PaymentVerifyRoute: typeof PaymentVerifyRoute
   SettingsRoute: typeof SettingsRoute
+  ShopsRoute: typeof ShopsRoute
   StationsRoute: typeof StationsRoute
   TutorRoute: typeof TutorRoute
   AdminClassControlRoute: typeof AdminClassControlRoute
@@ -672,6 +685,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shops': {
+      id: '/shops'
+      path: '/shops'
+      fullPath: '/shops'
+      preLoaderRoute: typeof ShopsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stations': {
@@ -856,6 +876,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PaymentVerifyRoute: PaymentVerifyRoute,
   SettingsRoute: SettingsRoute,
+  ShopsRoute: ShopsRoute,
   StationsRoute: StationsRoute,
   TutorRoute: TutorRoute,
   AdminClassControlRoute: AdminClassControlRoute,

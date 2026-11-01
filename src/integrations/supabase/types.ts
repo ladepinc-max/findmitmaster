@@ -1249,6 +1249,72 @@ export type Database = {
         }
         Relationships: []
       }
+      home_feed_items: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          kind: string
+          link_url: string | null
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          kind?: string
+          link_url?: string | null
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          kind?: string
+          link_url?: string | null
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      home_quick_apps: {
+        Row: {
+          color: string
+          created_at: string
+          icon_text: string
+          id: string
+          label: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon_text?: string
+          id?: string
+          label: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon_text?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: []
+      }
       job_alerts: {
         Row: {
           category: string | null

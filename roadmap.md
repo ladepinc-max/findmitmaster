@@ -9,3 +9,5 @@
 - [ ] Connect existing customer and owner chat buttons to shop bottom sheets.
 - [ ] Track shop visits and shop-specific unread messages.
 - [ ] Verify stock, closed-shop access, and in-shop conversation.
+# Home browser
+- [x] Phoenix-style Home matching design, in-app browser, admin Quick Access + news/ads feed.
