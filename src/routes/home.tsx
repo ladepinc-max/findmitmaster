@@ -5,14 +5,14 @@ import {
   Briefcase,
   Globe,
   Loader2,
-  MessageCircle,
+  Mic,
   Radio,
   Search,
-  Shield,
-  Sparkles,
   Store,
-  User,
 } from "lucide-react";
+import { toast } from "sonner";
+import { InAppBrowser } from "@/components/home/InAppBrowser";
+import { looksLikeUrl, normalizeUrl, useHomeFeed, useQuickApps, webSearchUrl } from "@/lib/home-browser";
 import { AppShell } from "@/components/AppShell";
 import { FindMitLogo } from "@/components/FindMitLogo";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +49,7 @@ interface FindMitResults {
   jobs: JobHit[];
 }
 
-/** Bold 3D badge flipping on the X-axis; hidden from the public until admin publishes Stories/Live. */
+/** Bold LIVE TV pill flipping on the X-axis; hidden from the public until admin publishes Stories/Live. */
 function LiveTvBadge() {
   const { allowed, loading } = useStoriesAccess();
   if (loading || !allowed) return null;
@@ -57,35 +57,40 @@ function LiveTvBadge() {
     <Link
       to="/"
       aria-label="Live TV and Stories"
-      className="flex items-center gap-2 rounded-full border border-wa-green/40 bg-wa-green/10 px-3 py-1.5"
+      className="animate-flip-x inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-1.5 text-background shadow-lg"
       style={{ perspective: "400px" }}
     >
-      <span className="animate-flip-x inline-flex items-center justify-center rounded-md bg-wa-green p-1 text-white shadow-md">
-        <Radio className="size-4" strokeWidth={2.6} />
-      </span>
-      <span className="text-xs font-extrabold tracking-widest text-wa-green">LIVE TV</span>
+      <span className="size-2.5 rounded-full bg-wa-green" />
+      <Radio className="size-4 text-wa-green" strokeWidth={2.6} />
+      <span className="text-sm font-extrabold tracking-wide">LIVE TV</span>
     </Link>
   );
 }
 
-const QUICK_TILES = [
-  { to: "/jobs", label: "Jobs", icon: Briefcase, description: "Find work & talent" },
-  { to: "/chat", label: "Chat", icon: MessageCircle, description: "Messages & calls" },
-  { to: "/chat", search: { ama: 1 }, label: "Ama AI", icon: Sparkles, description: "Ask anything" },
-  { to: "/my-shop", label: "My Shop", icon: Store, description: "Sell & manage" },
-  { to: "/stations", label: "Stations", icon: Shield, description: "Police & services" },
-  { to: "/profile", label: "Profile", icon: User, description: "Your account" },
-] as const;
+type SpeechCtor = new () => {
+  lang: string;
+  onresult: (e: { results: { 0: { 0: { transcript: string } } } }) => void;
+  onend: () => void;
+  start: () => void;
+};
 
 function HomeScreen() {
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<FindMitResults | null>(null);
+  const [browserUrl, setBrowserUrl] = useState<string | null>(null);
+  const [listening, setListening] = useState(false);
+  const { apps } = useQuickApps();
+  const { items: feed } = useHomeFeed();
 
-  const runSearch = async () => {
-    const q = query.trim();
+  const runSearch = async (raw = query) => {
+    const q = raw.trim();
     if (!q || loading) return;
+    if (looksLikeUrl(q)) {
+      setBrowserUrl(normalizeUrl(q));
+      return;
+    }
     setLoading(true);
     setSearched(q);
     const like = `%${q.replace(/[%_,]/g, " ")}%`;
@@ -103,12 +108,9 @@ function HomeScreen() {
           .or(`title.ilike."${like}",company.ilike."${like}",location_name.ilike."${like}"`)
           .limit(6),
       ]);
-
       const shops = (shopsRes.data ?? []) as ShopHit[];
       const rawProducts = (productsRes.data ?? []) as { id: string; name: string; price_ghc: number | null; shop_id: string }[];
       const jobs = (jobsRes.data ?? []) as JobHit[];
-
-      // Products link to their shop's storefront, so resolve each shop handle.
       const shopIds = [...new Set(rawProducts.map((p) => p.shop_id))];
       const handleByShop = new Map<string, string>();
       if (shopIds.length > 0) {
@@ -118,33 +120,42 @@ function HomeScreen() {
       const products: ProductHit[] = rawProducts
         .filter((p) => handleByShop.has(p.shop_id))
         .map((p) => ({ id: p.id, name: p.name, price: p.price_ghc, shopHandle: handleByShop.get(p.shop_id)! }));
-
       setResults({ shops, products, jobs });
     } finally {
       setLoading(false);
     }
   };
 
+  const startVoice = () => {
+    const w = window as unknown as { SpeechRecognition?: SpeechCtor; webkitSpeechRecognition?: SpeechCtor };
+    const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!Ctor) return void toast.error("Voice search isn't supported on this phone");
+    const rec = new Ctor();
+    rec.lang = "en-GH";
+    rec.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      setQuery(text);
+      void runSearch(text);
+    };
+    rec.onend = () => setListening(false);
+    setListening(true);
+    rec.start();
+  };
+
   const hasFindMitHits = results && (results.shops.length > 0 || results.products.length > 0 || results.jobs.length > 0);
-  const webUrl = `https://www.google.com/search?q=${encodeURIComponent(searched)}`;
+  const rowCls = "flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-secondary";
 
   return (
     <AppShell>
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-        <FindMitLogo size="sm" linkToHome={false} />
-        <LiveTvBadge />
-      </header>
+      {browserUrl ? <InAppBrowser startUrl={browserUrl} onClose={() => setBrowserUrl(null)} /> : null}
 
-      <div className="px-4 pb-10 pt-6">
-        <h1 className="font-display text-2xl font-bold leading-tight">
-          What are you looking for?
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          We check FindMit first, then the whole internet.
-        </p>
+      <div className="mx-auto max-w-xl px-4 pb-28 pt-8">
+        <div className="flex flex-col items-center">
+          <FindMitLogo size="lg" linkToHome={false} />
+        </div>
 
         <form
-          className="mt-4 flex items-center gap-2 rounded-2xl border border-border bg-secondary/60 p-2 pl-4"
+          className="mt-6 flex items-center gap-3 rounded-full bg-secondary px-5 py-3.5"
           onSubmit={(e) => {
             e.preventDefault();
             void runSearch();
@@ -153,42 +164,43 @@ function HomeScreen() {
           <Search className="size-5 shrink-0 text-muted-foreground" />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search shops, products, jobs, anything…"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (!e.target.value) setResults(null);
+            }}
+            placeholder="Search or type website"
+            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
             enterKeyHint="search"
+            aria-label="Search or type website"
           />
-          <button
-            type="submit"
-            disabled={loading || !query.trim()}
-            className="flex h-9 items-center gap-1 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="size-4 animate-spin" /> : "Search"}
-          </button>
+          {loading ? (
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          ) : (
+            <button type="button" aria-label="Voice search" onClick={startVoice} className={listening ? "text-wa-green" : "text-muted-foreground"}>
+              <Mic className="size-5" />
+            </button>
+          )}
         </form>
 
+        <div className="mt-2 flex justify-end">
+          <LiveTvBadge />
+        </div>
+
         {results ? (
-          <section className="mt-6 space-y-5">
+          <section className="mt-4 space-y-5">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-wa-green">
-                <span className="size-2 rounded-full bg-wa-green" />
-                Found on FindMit
+                <span className="size-2 rounded-full bg-wa-green" /> Found on FindMit
               </h2>
               {hasFindMitHits ? (
                 <ul className="mt-3 space-y-2">
                   {results.shops.map((s) => (
                     <li key={`shop-${s.id}`}>
-                      <Link
-                        to="/$handle"
-                        params={{ handle: `@${s.handle}` }}
-                        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-secondary"
-                      >
+                      <Link to="/$handle" params={{ handle: `@${s.handle}` }} className={rowCls}>
                         <Store className="size-5 shrink-0 text-primary" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{s.name}</p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            @{s.handle} · {s.category}
-                          </p>
+                          <p className="truncate text-xs text-muted-foreground">@{s.handle} · {s.category}</p>
                         </div>
                         <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
                       </Link>
@@ -196,11 +208,7 @@ function HomeScreen() {
                   ))}
                   {results.products.map((p) => (
                     <li key={`product-${p.id}`}>
-                      <Link
-                        to="/$handle"
-                        params={{ handle: `@${p.shopHandle}` }}
-                        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-secondary"
-                      >
+                      <Link to="/$handle" params={{ handle: `@${p.shopHandle}` }} className={rowCls}>
                         <Search className="size-5 shrink-0 text-primary" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{p.name}</p>
@@ -214,17 +222,11 @@ function HomeScreen() {
                   ))}
                   {results.jobs.map((j) => (
                     <li key={`job-${j.id}`}>
-                      <Link
-                        to="/jobs"
-                        search={{ tab: "jobs" }}
-                        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-secondary"
-                      >
+                      <Link to="/jobs" search={{ tab: "jobs" }} className={rowCls}>
                         <Briefcase className="size-5 shrink-0 text-primary" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{j.title}</p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {j.company} · {j.location_name}
-                          </p>
+                          <p className="truncate text-xs text-muted-foreground">{j.company} · {j.location_name}</p>
                         </div>
                         <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
                       </Link>
@@ -233,67 +235,67 @@ function HomeScreen() {
                 </ul>
               ) : (
                 <p className="mt-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
-                  Nothing on FindMit matches “{searched}” yet — try the web results below.
+                  Nothing on FindMit matches “{searched}” yet.
                 </p>
               )}
             </div>
+            <button type="button" onClick={() => setBrowserUrl(webSearchUrl(searched))} className={`${rowCls} w-full text-left`}>
+              <Globe className="size-5 shrink-0 text-primary" />
+              <span className="flex-1 text-sm font-semibold">Search the web for “{searched}”</span>
+              <ArrowRight className="size-4 text-muted-foreground" />
+            </button>
+          </section>
+        ) : null}
 
-            <div>
-              <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                <Globe className="size-4" />
-                From the web
-              </h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <a
-                  href={webUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary"
-                >
-                  <Globe className="size-4 text-primary" />
-                  Google results for “{searched}”
-                </a>
-                <a
-                  href={`https://duckduckgo.com/?q=${encodeURIComponent(searched)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-secondary"
-                >
-                  <Search className="size-4 text-primary" />
-                  DuckDuckGo
-                </a>
-              </div>
-            </div>
+        <h2 className="mt-6 font-display text-2xl font-bold">Quick Access</h2>
+        <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2">
+          {apps.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setBrowserUrl(a.url)}
+              className="flex w-[4.6rem] shrink-0 flex-col items-center gap-2 rounded-2xl bg-card p-2.5 shadow-md"
+            >
+              <span
+                className="flex size-12 items-center justify-center rounded-full text-xl font-black text-primary-foreground"
+                style={{ backgroundColor: a.color }}
+              >
+                {a.icon_text || a.label.charAt(0)}
+              </span>
+              <span className="w-full truncate text-xs font-bold">{a.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <Link
+          to="/shops"
+          className="mt-8 flex w-full items-center justify-center rounded-full bg-wa-green py-4 text-lg font-bold text-primary-foreground shadow-md"
+        >
+          Find suppliers on FindMit
+        </Link>
+
+        {feed.length > 0 ? (
+          <section className="mt-8 space-y-4">
+            <h2 className="font-display text-xl font-bold">For you</h2>
+            {feed.map((f) => (
+              <article
+                key={f.id}
+                onClick={() => (f.link_url ? setBrowserUrl(normalizeUrl(f.link_url)) : undefined)}
+                className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+                role={f.link_url ? "link" : undefined}
+              >
+                {f.image_url ? <img src={f.image_url} alt="" className="aspect-video w-full object-cover" loading="lazy" /> : null}
+                <div className="p-4">
+                  <span className="text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground">
+                    {f.kind === "ad" ? "Sponsored" : "News"}
+                  </span>
+                  <h3 className="mt-1 font-bold leading-snug">{f.title}</h3>
+                  {f.body ? <p className="mt-1 text-sm text-muted-foreground">{f.body}</p> : null}
+                </div>
+              </article>
+            ))}
           </section>
-        ) : (
-          <section className="mt-8">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Quick access</h2>
-            <div className="mt-3 grid grid-cols-3 gap-3">
-              {QUICK_TILES.map(({ to, label, icon: Icon, description }) => {
-                const inner = (
-                  <>
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                      <Icon className="size-5" />
-                    </span>
-                    <span className="text-xs font-bold">{label}</span>
-                    <span className="text-[0.65rem] leading-tight text-muted-foreground">{description}</span>
-                  </>
-                );
-                const cls =
-                  "flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center transition-colors hover:bg-secondary";
-                return label === "Ama AI" ? (
-                  <Link key={label} to="/chat" search={{ ama: "1" }} className={cls}>
-                    {inner}
-                  </Link>
-                ) : (
-                  <Link key={label} to={to} className={cls}>
-                    {inner}
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
+        ) : null}
       </div>
     </AppShell>
   );
