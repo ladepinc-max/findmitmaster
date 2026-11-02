@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink, Home, Loader2, RotateCw, Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { looksLikeUrl, normalizeUrl, webSearchUrl } from "@/lib/home-browser";
+import { resolveDestination } from "@/lib/home-browser";
 
 /** Full-screen in-app browser: pages load inside FindMit with Back, Forward, Refresh, Share and Home. */
-export function InAppBrowser({ startUrl, onClose }: { startUrl: string; onClose: () => void }) {
+export function InAppBrowser({ startUrl, onClose, onSearch }: { startUrl: string; onClose: () => void; onSearch: (q: string) => void }) {
   const [history, setHistory] = useState<string[]>([startUrl]);
   const [index, setIndex] = useState(0);
   const [address, setAddress] = useState(startUrl);
@@ -19,7 +19,8 @@ export function InAppBrowser({ startUrl, onClose }: { startUrl: string; onClose:
   }, [url, reloadKey]);
 
   const go = (raw: string) => {
-    const next = looksLikeUrl(raw) ? normalizeUrl(raw) : webSearchUrl(raw);
+    const next = resolveDestination(raw);
+    if (!next) return onSearch(raw.trim());
     setHistory((h) => [...h.slice(0, index + 1), next]);
     setIndex((i) => i + 1);
   };
