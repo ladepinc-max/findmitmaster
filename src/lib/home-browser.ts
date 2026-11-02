@@ -36,9 +36,37 @@ export function normalizeUrl(input: string): string {
   return /^https?:\/\//i.test(s) ? s : `https://${s}`;
 }
 
-/** Google results page that allows being shown inside the in-app browser. */
-export function webSearchUrl(q: string): string {
-  return `https://www.google.com/search?igu=1&q=${encodeURIComponent(q.trim())}`;
+/** Well-known site names users type without a domain. */
+export const SITE_ALIASES: Record<string, string> = {
+  ghanaweb: "https://www.ghanaweb.com",
+  jumia: "https://www.jumia.com.gh",
+  tonaton: "https://tonaton.com",
+  myjoyonline: "https://www.myjoyonline.com",
+  joyonline: "https://www.myjoyonline.com",
+  peacefm: "https://www.peacefmonline.com",
+  peacefmonline: "https://www.peacefmonline.com",
+  citinewsroom: "https://citinewsroom.com",
+  graphic: "https://www.graphic.com.gh",
+  modernghana: "https://www.modernghana.com",
+  pulse: "https://www.pulse.com.gh",
+  adomonline: "https://www.adomonline.com",
+  wikipedia: "https://en.m.wikipedia.org",
+  youtube: "https://m.youtube.com",
+  facebook: "https://m.facebook.com",
+  bbc: "https://www.bbc.com",
+  cnn: "https://edition.cnn.com",
+  waec: "https://www.waecgh.org",
+  ges: "https://ges.gov.gh",
+  ecg: "https://www.ecg.com.gh",
+};
+
+/** Returns a direct website for a typed URL or known site name, else null (→ native search). */
+export function resolveDestination(input: string): string | null {
+  const s = input.trim();
+  if (!s) return null;
+  if (looksLikeUrl(s)) return normalizeUrl(s);
+  const key = s.toLowerCase().replace(/[\s.]+/g, "").replace(/(com|gh|org)$/,"");
+  return SITE_ALIASES[s.toLowerCase().replace(/\s+/g, "")] ?? SITE_ALIASES[key] ?? null;
 }
 
 export function useQuickApps() {
