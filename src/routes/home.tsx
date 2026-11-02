@@ -331,7 +331,7 @@ function HomeScreen() {
             {feed.map((f) => (
               <article
                 key={f.id}
-                onClick={() => (f.link_url ? setBrowserUrl(normalizeUrl(f.link_url)) : undefined)}
+                onClick={() => (f.link_url ? openSite(normalizeUrl(f.link_url)) : undefined)}
                 className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
                 role={f.link_url ? "link" : undefined}
               >
