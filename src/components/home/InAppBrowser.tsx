@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink, Home, Loader2, RotateCw, Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { resolveDestination } from "@/lib/home-browser";
+import { isEmbedBlocked, resolveDestination } from "@/lib/home-browser";
 
 /** Full-screen in-app browser: pages load inside FindMit with Back, Forward, Refresh, Share and Home. */
 export function InAppBrowser({ startUrl, onClose, onSearch }: { startUrl: string; onClose: () => void; onSearch: (q: string) => void }) {
@@ -21,6 +21,7 @@ export function InAppBrowser({ startUrl, onClose, onSearch }: { startUrl: string
   const go = (raw: string) => {
     const next = resolveDestination(raw);
     if (!next) return onSearch(raw.trim());
+    if (isEmbedBlocked(next)) return void window.open(next, "_blank", "noopener,noreferrer");
     setHistory((h) => [...h.slice(0, index + 1), next]);
     setIndex((i) => i + 1);
   };

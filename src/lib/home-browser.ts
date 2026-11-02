@@ -69,6 +69,23 @@ export function resolveDestination(input: string): string | null {
   return SITE_ALIASES[s.toLowerCase().replace(/\s+/g, "")] ?? SITE_ALIASES[key] ?? null;
 }
 
+/** Sites that refuse to load inside other apps — these open directly in the phone's browser/app. */
+const EMBED_BLOCKED = [
+  "youtube.com", "youtu.be", "facebook.com", "fb.com", "instagram.com", "twitter.com", "x.com",
+  "tiktok.com", "whatsapp.com", "google.com", "news.google.com", "linkedin.com", "netflix.com",
+  "bbc.com", "bbc.co.uk", "cnn.com", "jumia.com.gh", "amazon.com", "github.com", "reddit.com",
+  "skysports.com", "espn.com", "telegram.org", "snapchat.com", "pinterest.com",
+];
+
+export function isEmbedBlocked(url: string): boolean {
+  try {
+    const h = new URL(url).hostname.replace(/^(www|m|mobile|edition)\./, "");
+    return EMBED_BLOCKED.some((d) => h === d || h.endsWith(`.${d}`));
+  } catch {
+    return false;
+  }
+}
+
 export function useQuickApps() {
   const [apps, setApps] = useState<QuickApp[]>([]);
   const reload = useCallback(async () => {
