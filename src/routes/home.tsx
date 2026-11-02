@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { InAppBrowser } from "@/components/home/InAppBrowser";
-import { looksLikeUrl, normalizeUrl, useHomeFeed, useQuickApps, webSearchUrl } from "@/lib/home-browser";
+import { normalizeUrl, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
+import { searchWeb, type WebHit } from "@/lib/web-search.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { FindMitLogo } from "@/components/FindMitLogo";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,16 +85,28 @@ function HomeScreen() {
   const [listening, setListening] = useState(false);
   const { apps } = useQuickApps();
   const { items: feed } = useHomeFeed();
+  const searchWebFn = useServerFn(searchWeb);
+  const [webHits, setWebHits] = useState<WebHit[] | null>(null);
+  const [webLoading, setWebLoading] = useState(false);
 
   const runSearch = async (raw = query) => {
     const q = raw.trim();
     if (!q || loading) return;
-    if (looksLikeUrl(q)) {
-      setBrowserUrl(normalizeUrl(q));
+    const direct = resolveDestination(q);
+    if (direct) {
+      setBrowserUrl(direct);
       return;
     }
+    setBrowserUrl(null);
+    setQuery(q);
     setLoading(true);
     setSearched(q);
+    setWebHits(null);
+    setWebLoading(true);
+    void searchWebFn({ data: { q } })
+      .then((r) => setWebHits(r.hits))
+      .catch(() => setWebHits([]))
+      .finally(() => setWebLoading(false));
     const like = `%${q.replace(/[%_,]/g, " ")}%`;
     try {
       const [shopsRes, productsRes, jobsRes] = await Promise.all([
@@ -147,7 +161,7 @@ function HomeScreen() {
 
   return (
     <AppShell>
-      {browserUrl ? <InAppBrowser startUrl={browserUrl} onClose={() => setBrowserUrl(null)} /> : null}
+      {browserUrl ? <InAppBrowser startUrl={browserUrl} onClose={() => setBrowserUrl(null)} onSearch={(q) => void runSearch(q)} /> : null}
 
       <div className="mx-auto max-w-xl px-4 pb-28 pt-8">
         <div className="flex flex-col items-center">
@@ -166,7 +180,10 @@ function HomeScreen() {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              if (!e.target.value) setResults(null);
+              if (!e.target.value) {
+                setResults(null);
+                setWebHits(null);
+              }
             }}
             placeholder="Search or type website"
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
@@ -239,11 +256,40 @@ function HomeScreen() {
                 </p>
               )}
             </div>
-            <button type="button" onClick={() => setBrowserUrl(webSearchUrl(searched))} className={`${rowCls} w-full text-left`}>
-              <Globe className="size-5 shrink-0 text-primary" />
-              <span className="flex-1 text-sm font-semibold">Search the web for “{searched}”</span>
-              <ArrowRight className="size-4 text-muted-foreground" />
-            </button>
+            <div>
+              <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-primary">
+                <Globe className="size-4" /> Found on the web
+              </h2>
+              {webLoading ? (
+                <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" /> Searching the web…
+                </p>
+              ) : webHits && webHits.length > 0 ? (
+                <ul className="mt-3 space-y-2">
+                  {webHits.map((h) => (
+                    <li key={h.url}>
+                      <button type="button" onClick={() => setBrowserUrl(h.url)} className={`${rowCls} w-full items-start text-left`}>
+                        <img
+                          src={`https://icons.duckduckgo.com/ip3/${h.domain}.ico`}
+                          alt=""
+                          className="mt-0.5 size-5 shrink-0 rounded"
+                          loading="lazy"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs text-muted-foreground">{h.domain}</p>
+                          <p className="line-clamp-2 text-sm font-semibold text-primary">{h.title}</p>
+                          {h.snippet ? <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{h.snippet}</p> : null}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+                  No web results for “{searched}”.
+                </p>
+              )}
+            </div>
           </section>
         ) : null}
 
