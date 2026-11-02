@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { InAppBrowser } from "@/components/home/InAppBrowser";
-import { normalizeUrl, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
+import { isEmbedBlocked, normalizeUrl, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
 import { searchWeb, type WebHit } from "@/lib/web-search.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
@@ -89,12 +89,17 @@ function HomeScreen() {
   const [webHits, setWebHits] = useState<WebHit[] | null>(null);
   const [webLoading, setWebLoading] = useState(false);
 
+  const openSite = (url: string) => {
+    if (isEmbedBlocked(url)) window.open(url, "_blank", "noopener,noreferrer");
+    else setBrowserUrl(url);
+  };
+
   const runSearch = async (raw = query) => {
     const q = raw.trim();
     if (!q || loading) return;
     const direct = resolveDestination(q);
     if (direct) {
-      setBrowserUrl(direct);
+      openSite(direct);
       return;
     }
     setBrowserUrl(null);
@@ -268,7 +273,7 @@ function HomeScreen() {
                 <ul className="mt-3 space-y-2">
                   {webHits.map((h) => (
                     <li key={h.url}>
-                      <button type="button" onClick={() => setBrowserUrl(h.url)} className={`${rowCls} w-full items-start text-left`}>
+                      <button type="button" onClick={() => openSite(h.url)} className={`${rowCls} w-full items-start text-left`}>
                         <img
                           src={`https://icons.duckduckgo.com/ip3/${h.domain}.ico`}
                           alt=""
@@ -299,7 +304,7 @@ function HomeScreen() {
             <button
               key={a.id}
               type="button"
-              onClick={() => setBrowserUrl(a.url)}
+              onClick={() => openSite(a.url)}
               className="flex w-[4.6rem] shrink-0 flex-col items-center gap-2 rounded-2xl bg-card p-2.5 shadow-md"
             >
               <span
