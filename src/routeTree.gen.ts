@@ -23,6 +23,7 @@ import { Route as HomeRouteImport } from './routes/home'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as LRouteImport } from './routes/l'
 import { Route as MyShopRouteImport } from './routes/my-shop'
+import { Route as NewsRouteImport } from './routes/news'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PaymentVerifyRouteImport } from './routes/payment-verify'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -121,6 +122,11 @@ const LRoute = LRouteImport.update({
 const MyShopRoute = MyShopRouteImport.update({
   id: '/my-shop',
   path: '/my-shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
+  '/news': typeof NewsRoute
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
+  '/news': typeof NewsRoute
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
@@ -362,6 +370,7 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
+  '/news': typeof NewsRoute
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
@@ -407,6 +416,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/l'
     | '/my-shop'
+    | '/news'
     | '/onboarding'
     | '/payment-verify'
     | '/settings'
@@ -450,6 +460,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/l'
     | '/my-shop'
+    | '/news'
     | '/onboarding'
     | '/payment-verify'
     | '/settings'
@@ -493,6 +504,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/l'
     | '/my-shop'
+    | '/news'
     | '/onboarding'
     | '/payment-verify'
     | '/settings'
@@ -537,6 +549,7 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   LRoute: typeof LRoute
   MyShopRoute: typeof MyShopRoute
+  NewsRoute: typeof NewsRoute
   OnboardingRoute: typeof OnboardingRoute
   PaymentVerifyRoute: typeof PaymentVerifyRoute
   SettingsRoute: typeof SettingsRoute
@@ -664,6 +677,13 @@ declare module '@tanstack/react-router' {
       path: '/my-shop'
       fullPath: '/my-shop'
       preLoaderRoute: typeof MyShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -873,6 +893,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   LRoute: LRoute,
   MyShopRoute: MyShopRoute,
+  NewsRoute: NewsRoute,
   OnboardingRoute: OnboardingRoute,
   PaymentVerifyRoute: PaymentVerifyRoute,
   SettingsRoute: SettingsRoute,
