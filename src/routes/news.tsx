@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { FeedItem } from "@/lib/home-browser";
 
 export const Route = createFileRoute("/news")({
-  validateSearch: (s: Record<string, unknown>) => ({ u: typeof s.u === "string" ? s.u : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({ u: typeof s["u"] === "string" ? (s["u"] as string) : "" }),
   head: () => ({
     meta: [
       { title: "FindMit News — Ghana stories, clean and fast" },
@@ -78,7 +78,7 @@ function NewsReader() {
   const share = async () => {
     const link = `${window.location.origin}/news?u=${encodeURIComponent(u)}`;
     const text = `${article?.title ?? "Read on FindMit"} — ${link}`;
-    if (navigator.share) await navigator.share({ title: article?.title, url: link }).catch(() => {});
+    if (navigator.share) await navigator.share({ title: article?.title ?? "FindMit News", url: link }).catch(() => {});
     else window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 

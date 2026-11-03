@@ -12,7 +12,7 @@ const UA = "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 Chrome/120 Mobile
 
 function tag(block: string, name: string): string {
   const m = block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`, "i"));
-  return m ? decodeEntities(m[1]).trim() : "";
+  return m ? decodeEntities(m[1] ?? "").trim() : "";
 }
 
 function imageFrom(block: string): string | null {
@@ -20,7 +20,7 @@ function imageFrom(block: string): string | null {
     block.match(/<media:(?:content|thumbnail)[^>]+url="([^"]+)"/i) ||
     block.match(/<enclosure[^>]+url="([^"]+)"[^>]*type="image/i) ||
     decodeEntities(block).match(/<img[^>]+src="([^"]+)"/i);
-  return m ? m[1] : null;
+  return m?.[1] ?? null;
 }
 
 async function readFeed(source: string, url: string): Promise<NewsItem[]> {
@@ -36,7 +36,7 @@ async function readFeed(source: string, url: string): Promise<NewsItem[]> {
         source,
         image: imageFrom(b),
         publishedAt: date ? new Date(date).toISOString() : null,
-        categories: [...b.matchAll(/<category[^>]*>([\s\S]*?)<\/category>/gi)].map((m) => stripTags(m[1])),
+        categories: [...b.matchAll(/<category[^>]*>([\s\S]*?)<\/category>/gi)].map((m) => stripTags(m[1] ?? "")),
       };
     }).filter((i) => i.title && /^https?:\/\//.test(i.url));
   } catch {
@@ -57,7 +57,7 @@ function meta(html: string, prop: string): string | null {
   const m =
     html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]+content=["']([^"']+)`, "i")) ||
     html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${prop}["']`, "i"));
-  return m ? decodeEntities(m[1]) : null;
+  return m ? decodeEntities(m[1] ?? "") : null;
 }
 
 /** Fetches a news page and returns a clean, ad-free reader version. */
@@ -78,7 +78,7 @@ export const readArticle = createServerFn({ method: "POST" })
     html = html.replace(/<(script|style|noscript|aside|nav|footer|header|form)[\s\S]*?<\/\1>/gi, "");
     const scope = html.match(/<article[\s\S]*?<\/article>/i)?.[0] ?? html;
     const paragraphs = [...scope.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
-      .map((m) => stripTags(m[1]))
+      .map((m) => stripTags(m[1] ?? ""))
       .filter((p) => p.length > 40 && !/cookie|subscribe to our|all rights reserved|©/i.test(p))
       .slice(0, 60);
     return { title, url: data.url, source, image, publishedAt, paragraphs };
