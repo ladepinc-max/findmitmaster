@@ -1026,6 +1026,51 @@ export type Database = {
           },
         ]
       }
+      crawled_knowledge: {
+        Row: {
+          category: string
+          content: string
+          crawled_at: string
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_evergreen: boolean
+          source_name: string
+          source_url: string
+          summary: string
+          title: string
+          tsv: unknown
+        }
+        Insert: {
+          category?: string
+          content?: string
+          crawled_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_evergreen?: boolean
+          source_name?: string
+          source_url: string
+          summary?: string
+          title: string
+          tsv?: unknown
+        }
+        Update: {
+          category?: string
+          content?: string
+          crawled_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_evergreen?: boolean
+          source_name?: string
+          source_url?: string
+          summary?: string
+          title?: string
+          tsv?: unknown
+        }
+        Relationships: []
+      }
       employer_credits: {
         Row: {
           contacts_remaining: number
@@ -4023,6 +4068,20 @@ export type Database = {
           source: string
           trace: Json
           unhelpful_count: number
+        }[]
+      }
+      search_knowledge: {
+        Args: { _n?: number; _q: string }
+        Returns: {
+          category: string
+          content: string
+          id: string
+          image_url: string
+          rank: number
+          source_name: string
+          source_url: string
+          summary: string
+          title: string
         }[]
       }
       shop_is_active: { Args: { _shop_id: string }; Returns: boolean }

@@ -211,6 +211,13 @@
       "when": 1793564558435,
       "tag": "0029_home_browser",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793751336474,
+      "tag": "0030_crawled_knowledge",
+      "breakpoints": true
     }
   ]
 }
