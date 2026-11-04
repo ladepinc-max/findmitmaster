@@ -70,6 +70,8 @@ export function HomeBrowserAdmin() {
         <Globe className="size-3.5" /> Home browser (admin)
       </h2>
 
+      <KnowledgeCrawlerPanel />
+
       <div className="mt-3 space-y-3 rounded-xl border border-border bg-surface px-4 py-3">
         <p className="text-sm font-semibold">Quick Access apps</p>
         <ul className="space-y-1">

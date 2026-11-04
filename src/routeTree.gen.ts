@@ -51,6 +51,7 @@ import { Route as WatchIdRouteImport } from './routes/watch.$id'
 import { Route as EducationSlugReplaysRouteImport } from './routes/education.$slug.replays'
 import { Route as EducationLiveClassIdRouteImport } from './routes/education.live.$classId'
 import { Route as AdminApplicationKindIdRouteImport } from './routes/admin.application.$kind.$id'
+import { Route as ApiPublicJobsCrawlKnowledgeRouteImport } from './routes/api/public/jobs/crawl-knowledge'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -265,6 +266,12 @@ const AdminApplicationKindIdRoute = AdminApplicationKindIdRouteImport.update({
   path: '/admin/application/$kind/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsCrawlKnowledgeRoute =
+  ApiPublicJobsCrawlKnowledgeRouteImport.update({
+    id: '/api/public/jobs/crawl-knowledge',
+    path: '/api/public/jobs/crawl-knowledge',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -309,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/education/$slug/replays': typeof EducationSlugReplaysRoute
   '/education/live/$classId': typeof EducationLiveClassIdRoute
   '/admin/application/$kind/$id': typeof AdminApplicationKindIdRoute
+  '/api/public/jobs/crawl-knowledge': typeof ApiPublicJobsCrawlKnowledgeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -353,6 +361,7 @@ export interface FileRoutesByTo {
   '/education/$slug/replays': typeof EducationSlugReplaysRoute
   '/education/live/$classId': typeof EducationLiveClassIdRoute
   '/admin/application/$kind/$id': typeof AdminApplicationKindIdRoute
+  '/api/public/jobs/crawl-knowledge': typeof ApiPublicJobsCrawlKnowledgeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -398,6 +407,7 @@ export interface FileRoutesById {
   '/education/$slug/replays': typeof EducationSlugReplaysRoute
   '/education/live/$classId': typeof EducationLiveClassIdRoute
   '/admin/application/$kind/$id': typeof AdminApplicationKindIdRoute
+  '/api/public/jobs/crawl-knowledge': typeof ApiPublicJobsCrawlKnowledgeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -444,6 +454,7 @@ export interface FileRouteTypes {
     | '/education/$slug/replays'
     | '/education/live/$classId'
     | '/admin/application/$kind/$id'
+    | '/api/public/jobs/crawl-knowledge'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/education/$slug/replays'
     | '/education/live/$classId'
     | '/admin/application/$kind/$id'
+    | '/api/public/jobs/crawl-knowledge'
   id:
     | '__root__'
     | '/'
@@ -532,6 +544,7 @@ export interface FileRouteTypes {
     | '/education/$slug/replays'
     | '/education/live/$classId'
     | '/admin/application/$kind/$id'
+    | '/api/public/jobs/crawl-knowledge'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -577,6 +590,7 @@ export interface RootRouteChildren {
   EducationSlugReplaysRoute: typeof EducationSlugReplaysRoute
   EducationLiveClassIdRoute: typeof EducationLiveClassIdRoute
   AdminApplicationKindIdRoute: typeof AdminApplicationKindIdRoute
+  ApiPublicJobsCrawlKnowledgeRoute: typeof ApiPublicJobsCrawlKnowledgeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -875,6 +889,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApplicationKindIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/crawl-knowledge': {
+      id: '/api/public/jobs/crawl-knowledge'
+      path: '/api/public/jobs/crawl-knowledge'
+      fullPath: '/api/public/jobs/crawl-knowledge'
+      preLoaderRoute: typeof ApiPublicJobsCrawlKnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -921,6 +942,7 @@ const rootRouteChildren: RootRouteChildren = {
   EducationSlugReplaysRoute: EducationSlugReplaysRoute,
   EducationLiveClassIdRoute: EducationLiveClassIdRoute,
   AdminApplicationKindIdRoute: AdminApplicationKindIdRoute,
+  ApiPublicJobsCrawlKnowledgeRoute: ApiPublicJobsCrawlKnowledgeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
