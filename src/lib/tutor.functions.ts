@@ -243,14 +243,18 @@ export const askTutor = createServerFn({ method: "POST" })
       }
       // Search on the student's own words; the subject label is only a hint, never a filter,
       // because vault subject names do not always match the class-level labels.
-      const chunks = await searchVault(context.supabase, `${data.subject ?? ""} ${query}`.trim(), {
-        grade: data.grade ?? null,
-        level: data.level,
-        count: 3,
-      });
+      const { searchKnowledgeDb, knowledgeContext } = await import("@/lib/knowledge.server");
+      const [chunks, library] = await Promise.all([
+        searchVault(context.supabase, `${data.subject ?? ""} ${query}`.trim(), {
+          grade: data.grade ?? null,
+          level: data.level,
+          count: 3,
+        }),
+        searchKnowledgeDb(context.supabase, query, 2).catch(() => []),
+      ]);
       const answer = await callAi(
         [
-          { role: "system", content: becePersona(data.tutorName, vaultContext(chunks), vl) + photoNote },
+          { role: "system", content: becePersona(data.tutorName, vaultContext(chunks), vl) + knowledgeContext(library) + photoNote },
           { role: "user", content: userContent(data.prompt) },
         ],
         false,
@@ -258,10 +262,14 @@ export const askTutor = createServerFn({ method: "POST" })
       return { answer, vault: chunks };
     }
     const { vaultGuidance } = await import("@/lib/vault.functions");
-    const guide = await vaultGuidance(context.supabase, data.level, `${data.subject ?? ""} ${data.prompt}`.trim(), data.grade);
+    const { searchKnowledgeDb, knowledgeContext } = await import("@/lib/knowledge.server");
+    const [guide, library] = await Promise.all([
+      vaultGuidance(context.supabase, data.level, `${data.subject ?? ""} ${data.prompt}`.trim(), data.grade),
+      searchKnowledgeDb(context.supabase, data.prompt, 3).catch(() => []),
+    ]);
     const answer = await callAi(
       [
-        { role: "system", content: persona(data.tutorName, data.language) + guide + photoNote },
+        { role: "system", content: persona(data.tutorName, data.language) + guide + knowledgeContext(library) + photoNote },
         { role: "user", content: userContent(data.prompt) },
       ],
       false,
@@ -353,7 +361,18 @@ function needsWeb(question: string) {
 }
 
 /** Shared General AI context; classroom prompts and vault behavior stay separate. */
-export async function prepareGeneralChat(data: GeneralChatInput) {
+export async function prepareGeneralChat(
+  data: GeneralChatInput,
+  client?: import("@supabase/supabase-js").SupabaseClient,
+) {
+  const { searchKnowledgeDb, knowledgeContext } = await import("@/lib/knowledge.server");
+  // FindMit's own library first (fast DB lookup), then the web only for time-sensitive questions.
+  const library = client
+    ? await Promise.race([
+        searchKnowledgeDb(client, data.question, 3).catch(() => []),
+        new Promise<Awaited<ReturnType<typeof searchKnowledgeDb>>>((r) => setTimeout(() => r([]), 1500)),
+      ])
+    : [];
   // Only look things up for clearly time-sensitive questions, and never wait more than 2s.
   const sources = needsWeb(data.question)
     ? await Promise.race([
@@ -367,7 +386,7 @@ export async function prepareGeneralChat(data: GeneralChatInput) {
   return {
     sources,
     messages: [
-      { role: "system", content: generalPersona(data.tutorName, data.language) + web },
+      { role: "system", content: generalPersona(data.tutorName, data.language) + knowledgeContext(library) + web },
       ...data.history,
       { role: "user", content: data.question },
     ],

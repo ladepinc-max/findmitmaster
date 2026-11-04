@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/general-ai")({
           return Response.json({ error: "Please send a valid question." }, { status: 400 });
         try {
           const { prepareGeneralChat } = await import("@/lib/tutor.functions");
-          const { messages, sources } = await prepareGeneralChat(parsed.data);
+          const { messages, sources } = await prepareGeneralChat(parsed.data, client);
           // Preserve the school's existing Gemini model and key; stream instead of buffering the answer.
           const send = () =>
             fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
