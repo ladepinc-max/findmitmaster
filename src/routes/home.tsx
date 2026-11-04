@@ -209,6 +209,7 @@ function HomeScreen() {
           <LiveTvBadge />
         </div>
 
+        {searched ? <LibraryResults q={searched} onOpen={openSite} /> : null}
         {results ? (
           <section className="mt-4 space-y-5">
             <div>
