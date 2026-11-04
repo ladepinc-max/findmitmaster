@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { searchKnowledge } from "@/lib/knowledge.functions";
 import { NewsFeed } from "@/components/home/NewsFeed";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {

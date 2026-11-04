@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { runKnowledgeCrawl } from "@/lib/knowledge.functions";
 import { Globe, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -128,5 +130,32 @@ export function HomeBrowserAdmin() {
         </ul>
       </div>
     </section>
+  );
+}
+
+/** Admin: fill the FindMit library now, optionally with extra topics. */
+function KnowledgeCrawlerPanel() {
+  const run = useServerFn(runKnowledgeCrawl);
+  const [topics, setTopics] = useState("");
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    try {
+      const r = await run({ data: { topics: topics.split(",").map((t) => t.trim()).filter(Boolean) } });
+      toast.success(`Library updated: ${r.topics} topics, ${r.news} news stories`);
+      setTopics("");
+    } catch {
+      toast.error("Crawler could not run");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-3 space-y-2 rounded-xl border border-border bg-surface px-4 py-3">
+      <p className="text-sm font-semibold">FindMit library crawler</p>
+      <p className="text-xs text-muted-foreground">Collects trusted Ghana, school, health and world knowledge. Extra topics (comma separated) are optional.</p>
+      <Input value={topics} onChange={(e) => setTopics(e.target.value)} placeholder="e.g. Volta Region, Fishing" />
+      <Button onClick={go} disabled={busy} className="w-full">{busy ? "Crawling…" : "Run crawler now"}</Button>
+    </div>
   );
 }
