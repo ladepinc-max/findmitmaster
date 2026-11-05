@@ -160,6 +160,25 @@ function RootComponent() {
   }, []);
 
   useEffect(() => {
+    // Stop old screens bouncing back: a frozen tab restored from memory, or a tab
+    // left in the background for hours, reloads to the newest version when online.
+    let hiddenAt = 0;
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted && navigator.onLine) window.location.reload();
+    };
+    const onVis = () => {
+      if (document.hidden) hiddenAt = Date.now();
+      else if (hiddenAt && Date.now() - hiddenAt > 30 * 60 * 1000 && navigator.onLine) window.location.reload();
+    };
+    window.addEventListener("pageshow", onShow);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("pageshow", onShow);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  useEffect(() => {
     // After a new publish, old page files disappear: reload once to get the new version.
     const isChunkError = (m: string) =>
       /dynamically imported module|Importing a module script failed|error loading dynamically/i.test(m);
