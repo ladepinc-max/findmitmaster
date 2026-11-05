@@ -84,9 +84,13 @@ import { clearDraft, loadDraft, saveDraft, useDraftState } from "@/lib/form-draf
 const JOB_DRAFT_KEY = "job-post";
 
 export const Route = createFileRoute("/jobs")({
-  validateSearch: (search: Record<string, unknown>): { tab?: "jobs" | "talent" | "ghana" } => {
+  validateSearch: (search: Record<string, unknown>): { tab?: "jobs" | "talent" | "ghana"; q?: string } => {
     const tab = search["tab"];
-    return tab === "jobs" || tab === "talent" || tab === "ghana" ? { tab } : {};
+    const q = typeof search["q"] === "string" ? search["q"].slice(0, 80) : undefined;
+    return {
+      ...(tab === "jobs" || tab === "talent" || tab === "ghana" ? { tab } : {}),
+      ...(q ? { q } : {}),
+    };
   },
   head: () => ({
     meta: [
@@ -134,7 +138,7 @@ function JobsPage() {
   const pushToUser = useServerFn(sendPushToUser);
   const search = Route.useSearch();
   const [tab, setTab] = useState<"jobs" | "talent" | "ghana">(search.tab ?? "jobs");
-  const [term, setTerm] = useState("");
+  const [term, setTerm] = useState(search.q ?? "");
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [savedOnly, setSavedOnly] = useState(false);
   const [jobs, setJobs] = useCachedState<Job[] | null>("jobs:list", null);
@@ -181,7 +185,8 @@ function JobsPage() {
   // Deep links like /jobs?tab=ghana (e.g. from the FindMit logo) switch the tab.
   useEffect(() => {
     if (search.tab) setTab(search.tab);
-  }, [search.tab]);
+    if (search.q !== undefined) setTerm(search.q);
+  }, [search.tab, search.q]);
 
   const load = async () => {
     try {
