@@ -62,3 +62,35 @@ export const runKnowledgeCrawl = createServerFn({ method: "POST" })
     const { runCrawl } = await import("./knowledge.server");
     return runCrawl(supabaseAdmin, { topics: data.topics });
   });
+
+/** Evergreen library articles (never news) for saving on the phone; pages of 200, newest first. */
+export const getLibrarySnapshot = createServerFn({ method: "POST" })
+  .inputValidator((d: { since?: string | null; offset?: number }) => ({
+    since: d?.since ? String(d.since) : null,
+    offset: Math.max(0, Number(d?.offset ?? 0) | 0),
+  }))
+  .handler(async ({ data }) => {
+    let q = publicClient()
+      .from("crawled_knowledge")
+      .select("id,title,summary,content,category,source_name,source_url,image_url,crawled_at")
+      .eq("is_evergreen", true)
+      .neq("category", "news")
+      .order("crawled_at", { ascending: false })
+      .range(data.offset, data.offset + 199);
+    if (data.since) q = q.gt("crawled_at", data.since);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+/** One library article for the in-app reader. */
+export const getLibraryArticle = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => ({ id: String(d?.id ?? "").slice(0, 64) }))
+  .handler(async ({ data }) => {
+    const { data: row } = await publicClient()
+      .from("crawled_knowledge")
+      .select("id,title,summary,content,category,source_name,source_url,image_url,crawled_at")
+      .eq("id", data.id)
+      .maybeSingle();
+    return row;
+  });

@@ -27,3 +27,15 @@ describe("library cache on phone", () => {
     expect(out.map((h) => h.id)).toEqual(["2"]);
   });
 });
+
+import { rankArticles } from "./knowledge-cache";
+describe("offline library search", () => {
+  it("ranks title matches first and ignores unrelated articles", () => {
+    const items = [
+      { title: "Cocoa farming", summary: "", content: "Ghana constitution mentioned" },
+      { title: "Ghana constitution", summary: "", content: "" },
+      { title: "Malaria", summary: "", content: "mosquito" },
+    ];
+    expect(rankArticles(items, "Ghana constitution").map((a) => a.title)).toEqual(["Ghana constitution", "Cocoa farming"]);
+  });
+});

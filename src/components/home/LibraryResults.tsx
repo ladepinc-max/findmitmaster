@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { BookOpen, Calculator, Coins, WifiOff } from "lucide-react";
 import { searchKnowledge, type QuickAnswer } from "@/lib/knowledge.functions";
-import { readCached, saveCached, type CachedHit } from "@/lib/knowledge-cache";
+import { readCached, saveCached, searchOfflineLibrary, type CachedHit } from "@/lib/knowledge-cache";
 
 /** Instant answer card + FindMit library matches; library matches are kept on the phone for offline use. */
-export function LibraryResults({ q, onOpen }: { q: string; onOpen: (url: string) => void }) {
+export function LibraryResults({ q }: { q: string; onOpen?: (url: string) => void }) {
+  const navigate = useNavigate();
   const run = useServerFn(searchKnowledge);
   const [quick, setQuick] = useState<QuickAnswer | null>(null);
   const [hits, setHits] = useState<CachedHit[]>([]);
@@ -15,7 +17,12 @@ export function LibraryResults({ q, onOpen }: { q: string; onOpen: (url: string)
     let live = true;
     setQuick(null);
     setOffline(false);
-    void readCached(q).then((c) => live && c && setHits(c));
+    void readCached(q).then(async (c) => {
+      if (!live) return;
+      if (c?.length) return setHits(c);
+      const local = await searchOfflineLibrary(q);
+      if (live && local.length) setHits(local);
+    });
     run({ data: { q } })
       .then((r) => {
         if (!live) return;
@@ -54,7 +61,7 @@ export function LibraryResults({ q, onOpen }: { q: string; onOpen: (url: string)
           <ul className="mt-2 space-y-2">
             {hits.map((h) => (
               <li key={h.id}>
-                <button type="button" onClick={() => onOpen(h.source_url)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-left">
+                <button type="button" onClick={() => navigate({ to: "/library/$id", params: { id: h.id } })} className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-left">
                   <p className="text-sm font-semibold">{h.title}</p>
                   <p className="mt-0.5 line-clamp-3 text-xs text-muted-foreground">{h.summary}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">{h.source_name} · {h.category.replace(/_/g, " ")}</p>

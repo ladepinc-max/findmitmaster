@@ -43,6 +43,7 @@ import { Route as ApiCfTokenRouteImport } from './routes/api/cf-token'
 import { Route as ApiGeneralAiRouteImport } from './routes/api/general-ai'
 import { Route as CamIndexRouteImport } from './routes/cam.index'
 import { Route as CamCamRouteImport } from './routes/cam.$cam'
+import { Route as LibraryIdRouteImport } from './routes/library/$id'
 import { Route as LiveChannelRouteImport } from './routes/live.$channel'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
@@ -226,6 +227,11 @@ const CamCamRoute = CamCamRouteImport.update({
   path: '/cam/$cam',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryIdRoute = LibraryIdRouteImport.update({
+  id: '/library/$id',
+  path: '/library/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LiveChannelRoute = LiveChannelRouteImport.update({
   id: '/live/$channel',
   path: '/live/$channel',
@@ -307,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/api/cf-token': typeof ApiCfTokenRoute
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
+  '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
   '/tv/$category': typeof TvCategoryRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/api/cf-token': typeof ApiCfTokenRoute
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
+  '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
   '/tv/$category': typeof TvCategoryRoute
@@ -398,6 +406,7 @@ export interface FileRoutesById {
   '/api/cf-token': typeof ApiCfTokenRoute
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
+  '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
   '/tv/$category': typeof TvCategoryRoute
@@ -445,6 +454,7 @@ export interface FileRouteTypes {
     | '/api/cf-token'
     | '/api/general-ai'
     | '/cam/$cam'
+    | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
     | '/tv/$category'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/api/cf-token'
     | '/api/general-ai'
     | '/cam/$cam'
+    | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
     | '/tv/$category'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/api/cf-token'
     | '/api/general-ai'
     | '/cam/$cam'
+    | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
     | '/tv/$category'
@@ -581,6 +593,7 @@ export interface RootRouteChildren {
   ApiCfTokenRoute: typeof ApiCfTokenRoute
   ApiGeneralAiRoute: typeof ApiGeneralAiRoute
   CamCamRoute: typeof CamCamRoute
+  LibraryIdRoute: typeof LibraryIdRoute
   LiveChannelRoute: typeof LiveChannelRoute
   ProfileEditRoute: typeof ProfileEditRoute
   TvCategoryRoute: typeof TvCategoryRoute
@@ -833,6 +846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CamCamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library/$id': {
+      id: '/library/$id'
+      path: '/library/$id'
+      fullPath: '/library/$id'
+      preLoaderRoute: typeof LibraryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/live/$channel': {
       id: '/live/$channel'
       path: '/live/$channel'
@@ -933,6 +953,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCfTokenRoute: ApiCfTokenRoute,
   ApiGeneralAiRoute: ApiGeneralAiRoute,
   CamCamRoute: CamCamRoute,
+  LibraryIdRoute: LibraryIdRoute,
   LiveChannelRoute: LiveChannelRoute,
   ProfileEditRoute: ProfileEditRoute,
   TvCategoryRoute: TvCategoryRoute,

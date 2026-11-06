@@ -37,11 +37,17 @@ export function evictionPlan(entries: Pick<CacheEntry, "q" | "size" | "at">[], l
 
 const DB = "findmit-library";
 const STORE = "searches";
+const ARTICLES = "articles";
+
+export type LibraryArticle = CachedHit & { content: string; crawled_at: string };
 
 function open(): Promise<IDBDatabase> {
   return new Promise((res, rej) => {
-    const r = indexedDB.open(DB, 1);
-    r.onupgradeneeded = () => r.result.createObjectStore(STORE, { keyPath: "q" });
+    const r = indexedDB.open(DB, 2);
+    r.onupgradeneeded = () => {
+      if (!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE, { keyPath: "q" });
+      if (!r.result.objectStoreNames.contains(ARTICLES)) r.result.createObjectStore(ARTICLES, { keyPath: "id" });
+    };
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
   });
@@ -83,4 +89,72 @@ export async function saveCached(q: string, hits: CachedHit[]) {
 
 export async function clearKnowledgeCache() {
   if (typeof indexedDB !== "undefined") indexedDB.deleteDatabase(DB);
+}
+
+/** Ranks saved articles for a query by word matches (title counts more). */
+export function rankArticles<T extends { title: string; summary: string; content: string }>(items: T[], q: string, n = 6): T[] {
+  const words = q.toLowerCase().split(/\W+/).filter((w) => w.length > 2);
+  if (!words.length) return [];
+  return items
+    .map((a) => {
+      const t = a.title.toLowerCase(), b = (a.summary + " " + a.content).toLowerCase();
+      const score = words.reduce((s, w) => s + (t.includes(w) ? 3 : 0) + (b.includes(w) ? 1 : 0), 0);
+      return { a, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((x, y) => y.score - x.score)
+    .slice(0, n)
+    .map((x) => x.a);
+}
+
+async function allArticles(): Promise<(LibraryArticle & { size: number })[]> {
+  if (typeof indexedDB === "undefined") return [];
+  try {
+    const db = await open();
+    return await new Promise((res) => {
+      const r = db.transaction(ARTICLES).objectStore(ARTICLES).getAll();
+      r.onsuccess = () => res(r.result ?? []);
+      r.onerror = () => res([]);
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function searchOfflineLibrary(q: string) {
+  return rankArticles(await allArticles(), q);
+}
+
+export async function getOfflineArticle(id: string) {
+  return (await allArticles()).find((a) => a.id === id) ?? null;
+}
+
+/** Saves library articles on the phone; searches + articles together stay under 100 MB (oldest dropped first). */
+export async function saveArticles(items: LibraryArticle[]) {
+  if (typeof indexedDB === "undefined" || !items.length) return;
+  try {
+    const db = await open();
+    const tx = db.transaction([ARTICLES, STORE], "readwrite");
+    const as = tx.objectStore(ARTICLES), ss = tx.objectStore(STORE);
+    for (const a of items) {
+      if (VIDEO_RE.test(a.source_url)) continue;
+      const clean = { ...a, image_url: a.image_url && VIDEO_RE.test(a.image_url) ? null : a.image_url };
+      as.put({ ...clean, size: new Blob([JSON.stringify(clean)]).size, at: Date.parse(a.crawled_at) || Date.now() });
+    }
+    const ar = as.getAll(), sr = ss.getAll();
+    tx.oncomplete = () => undefined;
+    let done = 0;
+    const finish = () => {
+      if (++done < 2) return;
+      const entries = [
+        ...(ar.result as { id: string; size: number; at: number }[]).map((e) => ({ q: "a:" + e.id, size: e.size, at: e.at })),
+        ...(sr.result as CacheEntry[]).map((e) => ({ q: "s:" + e.q, size: e.size, at: e.at })),
+      ];
+      for (const k of evictionPlan(entries)) (k.startsWith("a:") ? as : ss).delete(k.slice(2));
+    };
+    ar.onsuccess = finish;
+    sr.onsuccess = finish;
+  } catch {
+    /* storage blocked */
+  }
 }

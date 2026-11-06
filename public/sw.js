@@ -2,11 +2,21 @@
  * plus cache-first storage of immutable hashed build assets (never HTML). */
 
 const ASSET_CACHE = "findmit-assets-v2";
+const PAGE_CACHE = "findmit-pages-v1";
 const isPreviewHost = /^(id-preview--|preview--)/.test(self.location.hostname) ||
   /lovableproject(-dev)?\.com$/.test(self.location.hostname) ||
   self.location.hostname === "localhost";
 
-self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+  if (isPreviewHost) return;
+  // Save the main screens up front so tabs open without data.
+  event.waitUntil(
+    caches.open(PAGE_CACHE).then((c) =>
+      Promise.allSettled(["/home", "/jobs", "/chat", "/profile"].map((p) => fetch(p).then((r) => r.ok && c.put(p, r)))),
+    ),
+  );
+});
 self.addEventListener("activate", (event) =>
   event.waitUntil(
     (async () => {
@@ -25,6 +35,24 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  // Pages: always try the network first (fresh when online), fall back to the last saved copy offline.
+  if (req.mode === "navigate") {
+    if (url.pathname.startsWith("/~oauth") || url.pathname.startsWith("/api/")) return;
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(PAGE_CACHE);
+        try {
+          const res = await fetch(req);
+          if (res.ok) cache.put(url.pathname, res.clone()).catch(() => undefined);
+          return res;
+        } catch {
+          return (await cache.match(url.pathname)) || (await cache.match("/home")) ||
+            (await cache.match("/")) || new Response("You are offline.", { status: 503, headers: { "Content-Type": "text/plain" } });
+        }
+      })(),
+    );
+    return;
+  }
   // Only content-hashed build files are safe to serve forever from cache.
   if (!url.pathname.startsWith("/assets/")) return;
   event.respondWith(

@@ -160,6 +160,19 @@ function RootComponent() {
   }, []);
 
   useEffect(() => {
+    // Keep the FindMit library saved on the phone for browsing without data.
+    const run = () => void import("@/lib/library-sync").then((m) => m.syncLibrary());
+    const t = window.setTimeout(run, 4000);
+    const iv = window.setInterval(run, 60 * 60 * 1000);
+    window.addEventListener("online", run);
+    return () => {
+      window.clearTimeout(t);
+      window.clearInterval(iv);
+      window.removeEventListener("online", run);
+    };
+  }, []);
+
+  useEffect(() => {
     // Stop old screens bouncing back: a frozen tab restored from memory, or a tab
     // left in the background for hours, reloads to the newest version when online.
     let hiddenAt = 0;
