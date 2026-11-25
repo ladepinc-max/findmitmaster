@@ -218,6 +218,13 @@
       "when": 1793751336474,
       "tag": "0030_crawled_knowledge",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795642054949,
+      "tag": "0031_tighten_live_sessions_and_chat_media",
+      "breakpoints": true
     }
   ]
 }
