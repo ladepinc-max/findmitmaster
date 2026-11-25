@@ -31,7 +31,19 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const PROFILE_KEY = "fm-cache:v1:profile";
+function cachedProfile(userId: string): Profile | null {
+  try {
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null") as Profile | null;
+    return p && p.id === userId ? p : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchProfile(userId: string): Promise<Profile | null> {
+  // Offline (or network failure): keep the last saved profile so the app opens normally.
+  if (typeof navigator !== "undefined" && !navigator.onLine) return cachedProfile(userId);
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -39,7 +51,12 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
     .maybeSingle();
   if (error) {
     console.error("Failed to load profile", error);
-    return null;
+    return cachedProfile(userId);
+  }
+  try {
+    if (data) localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+  } catch {
+    /* storage full */
   }
   return (data as Profile | null) ?? null;
 }
@@ -91,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     clearPageCache();
+    try { localStorage.removeItem(PROFILE_KEY); } catch { /* ignore */ }
     await supabase.auth.signOut();
     setProfile(null);
     setSession(null);

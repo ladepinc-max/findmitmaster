@@ -49,7 +49,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
     if (/dynamically imported module|Importing a module script failed|error loading dynamically/i.test(msg)) {
       const key = "fm-chunk-reload";
       const last = Number(sessionStorage.getItem(key) || 0);
-      if (Date.now() - last > 10000) {
+      if (navigator.onLine && Date.now() - last > 10000) {
         sessionStorage.setItem(key, String(Date.now()));
         window.location.reload();
         return;
@@ -77,12 +77,14 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
           >
             Try again
           </button>
-          <a
-            href="/"
+          <button
+            onClick={() => {
+              void router.navigate({ to: "/home" }).then(() => reset());
+            }}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
           >
             Go home
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -159,6 +161,18 @@ function RootComponent() {
     void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
   }, []);
 
+  const rootRouter = useRouter();
+  useEffect(() => {
+    // While online, fetch the code for the main tabs so the phone keeps it for offline use.
+    const t = window.setTimeout(() => {
+      if (!navigator.onLine) return;
+      for (const to of ["/home", "/jobs", "/chat", "/profile"] as const) {
+        void rootRouter.preloadRoute({ to }).catch(() => undefined);
+      }
+    }, 6000);
+    return () => window.clearTimeout(t);
+  }, [rootRouter]);
+
   useEffect(() => {
     // Keep the FindMit library saved on the phone for browsing without data.
     const run = () => void import("@/lib/library-sync").then((m) => m.syncLibrary());
@@ -197,7 +211,7 @@ function RootComponent() {
       /dynamically imported module|Importing a module script failed|error loading dynamically/i.test(m);
     const reloadOnce = () => {
       const key = "fm-chunk-reload";
-      if (Date.now() - Number(sessionStorage.getItem(key) || 0) < 10000) return;
+      if (!navigator.onLine || Date.now() - Number(sessionStorage.getItem(key) || 0) < 10000) return;
       sessionStorage.setItem(key, String(Date.now()));
       window.location.reload();
     };

@@ -2,7 +2,7 @@
  * plus cache-first storage of immutable hashed build assets (never HTML). */
 
 const ASSET_CACHE = "findmit-assets-v2";
-const PAGE_CACHE = "findmit-pages-v1";
+const PAGE_CACHE = "findmit-pages-v2";
 const isPreviewHost = /^(id-preview--|preview--)/.test(self.location.hostname) ||
   /lovableproject(-dev)?\.com$/.test(self.location.hostname) ||
   self.location.hostname === "localhost";
@@ -22,7 +22,9 @@ self.addEventListener("activate", (event) =>
     (async () => {
       const keys = await caches.keys();
       await Promise.allSettled(
-        keys.filter((k) => k.startsWith("findmit-assets-") && k !== ASSET_CACHE).map((k) => caches.delete(k)),
+        keys
+          .filter((k) => (k.startsWith("findmit-assets-") && k !== ASSET_CACHE) || (k.startsWith("findmit-pages-") && k !== PAGE_CACHE))
+          .map((k) => caches.delete(k)),
       );
       await self.clients.claim();
     })(),
