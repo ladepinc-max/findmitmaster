@@ -690,8 +690,10 @@ export type Database = {
           created_at: string
           created_by: string
           description: string
+          discussion_chat_id: string | null
           id: string
           name: string
+          name_key: string | null
           updated_at: string
         }
         Insert: {
@@ -700,8 +702,10 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string
+          discussion_chat_id?: string | null
           id?: string
           name: string
+          name_key?: string | null
           updated_at?: string
         }
         Update: {
@@ -710,8 +714,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string
+          discussion_chat_id?: string | null
           id?: string
           name?: string
+          name_key?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -803,6 +809,119 @@ export type Database = {
           voice_note_url?: string | null
         }
         Relationships: []
+      }
+      community_news: {
+        Row: {
+          ad_cta: string | null
+          ad_link: string | null
+          ad_rating: number | null
+          ad_tagline: string | null
+          ad_title: string | null
+          author_id: string
+          community_id: string | null
+          community_name: string
+          created_at: string
+          description: string
+          duration_seconds: number | null
+          id: string
+          media_path: string
+          media_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          views_count: number
+        }
+        Insert: {
+          ad_cta?: string | null
+          ad_link?: string | null
+          ad_rating?: number | null
+          ad_tagline?: string | null
+          ad_title?: string | null
+          author_id: string
+          community_id?: string | null
+          community_name: string
+          created_at?: string
+          description?: string
+          duration_seconds?: number | null
+          id?: string
+          media_path: string
+          media_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          views_count?: number
+        }
+        Update: {
+          ad_cta?: string | null
+          ad_link?: string | null
+          ad_rating?: number | null
+          ad_tagline?: string | null
+          ad_title?: string | null
+          author_id?: string
+          community_id?: string | null
+          community_name?: string
+          created_at?: string
+          description?: string
+          duration_seconds?: number | null
+          id?: string
+          media_path?: string
+          media_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_news_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_news_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          news_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          news_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          news_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_news_comments_news_id_fkey"
+            columns: ["news_id"]
+            isOneToOne: false
+            referencedRelation: "community_news"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_news_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_verification_applications: {
         Row: {
@@ -2130,6 +2249,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      news_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          news_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          news_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          news_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notification_prefs: {
         Row: {
@@ -3921,6 +4070,10 @@ export type Database = {
         Args: { _replay_id: string; _user_id: string }
         Returns: boolean
       }
+      community_member_count: {
+        Args: { _community_id: string }
+        Returns: number
+      }
       confirm_community_name: {
         Args: { _id: string; _photo: string; _voice: string }
         Returns: {
@@ -3938,6 +4091,10 @@ export type Database = {
         }
         Returns: string
       }
+      ensure_news_community: {
+        Args: { _name: string; _owner: string }
+        Returns: string
+      }
       get_visible_contact: {
         Args: { _owner_id: string }
         Returns: {
@@ -3952,6 +4109,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_community_news_view: {
+        Args: { _id: string }
+        Returns: undefined
       }
       increment_partner_tv_viewers: {
         Args: { _id: string }
@@ -3974,6 +4135,10 @@ export type Database = {
       is_shop_handle_available: { Args: { _handle: string }; Returns: boolean }
       is_shop_name_available: { Args: { _name: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      join_community_discussion: {
+        Args: { _community_id: string }
+        Returns: string
+      }
       match_ges_vault_jhs: {
         Args: {
           match_count?: number
@@ -4047,6 +4212,18 @@ export type Database = {
           _photo: string
           _reason: string
           _route_id: string
+        }
+        Returns: string
+      }
+      review_community_news: {
+        Args: {
+          _ad_cta?: string
+          _ad_link?: string
+          _ad_rating?: number
+          _ad_tagline?: string
+          _ad_title?: string
+          _approve: boolean
+          _id: string
         }
         Returns: string
       }

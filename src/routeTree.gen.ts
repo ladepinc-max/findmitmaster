@@ -31,6 +31,7 @@ import { Route as ShopsRouteImport } from './routes/shops'
 import { Route as StationsRouteImport } from './routes/stations'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as AdminClassControlRouteImport } from './routes/admin.class-control'
+import { Route as AdminCommunityNewsRouteImport } from './routes/admin.community-news'
 import { Route as AdminPartnerTvsRouteImport } from './routes/admin.partner-tvs'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as AdminRoadsRouteImport } from './routes/admin.roads'
@@ -43,6 +44,7 @@ import { Route as ApiCfTokenRouteImport } from './routes/api/cf-token'
 import { Route as ApiGeneralAiRouteImport } from './routes/api/general-ai'
 import { Route as CamIndexRouteImport } from './routes/cam.index'
 import { Route as CamCamRouteImport } from './routes/cam.$cam'
+import { Route as CommunityNewsIdRouteImport } from './routes/community-news.$id'
 import { Route as LibraryIdRouteImport } from './routes/library/$id'
 import { Route as LiveChannelRouteImport } from './routes/live.$channel'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
@@ -166,6 +168,11 @@ const AdminClassControlRoute = AdminClassControlRouteImport.update({
   path: '/admin/class-control',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCommunityNewsRoute = AdminCommunityNewsRouteImport.update({
+  id: '/admin/community-news',
+  path: '/admin/community-news',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPartnerTvsRoute = AdminPartnerTvsRouteImport.update({
   id: '/admin/partner-tvs',
   path: '/admin/partner-tvs',
@@ -225,6 +232,11 @@ const CamIndexRoute = CamIndexRouteImport.update({
 const CamCamRoute = CamCamRouteImport.update({
   id: '/cam/$cam',
   path: '/cam/$cam',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityNewsIdRoute = CommunityNewsIdRouteImport.update({
+  id: '/community-news/$id',
+  path: '/community-news/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryIdRoute = LibraryIdRouteImport.update({
@@ -302,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
+  '/admin/community-news': typeof AdminCommunityNewsRoute
   '/admin/partner-tvs': typeof AdminPartnerTvsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/roads': typeof AdminRoadsRoute
@@ -313,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/api/cf-token': typeof ApiCfTokenRoute
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
+  '/community-news/$id': typeof CommunityNewsIdRoute
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -348,6 +362,7 @@ export interface FileRoutesByTo {
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
+  '/admin/community-news': typeof AdminCommunityNewsRoute
   '/admin/partner-tvs': typeof AdminPartnerTvsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/roads': typeof AdminRoadsRoute
@@ -359,6 +374,7 @@ export interface FileRoutesByTo {
   '/api/cf-token': typeof ApiCfTokenRoute
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
+  '/community-news/$id': typeof CommunityNewsIdRoute
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -395,6 +411,7 @@ export interface FileRoutesById {
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
+  '/admin/community-news': typeof AdminCommunityNewsRoute
   '/admin/partner-tvs': typeof AdminPartnerTvsRoute
   '/admin/posts': typeof AdminPostsRoute
   '/admin/roads': typeof AdminRoadsRoute
@@ -406,6 +423,7 @@ export interface FileRoutesById {
   '/api/cf-token': typeof ApiCfTokenRoute
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
+  '/community-news/$id': typeof CommunityNewsIdRoute
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -443,6 +461,7 @@ export interface FileRouteTypes {
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
+    | '/admin/community-news'
     | '/admin/partner-tvs'
     | '/admin/posts'
     | '/admin/roads'
@@ -454,6 +473,7 @@ export interface FileRouteTypes {
     | '/api/cf-token'
     | '/api/general-ai'
     | '/cam/$cam'
+    | '/community-news/$id'
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
@@ -489,6 +509,7 @@ export interface FileRouteTypes {
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
+    | '/admin/community-news'
     | '/admin/partner-tvs'
     | '/admin/posts'
     | '/admin/roads'
@@ -500,6 +521,7 @@ export interface FileRouteTypes {
     | '/api/cf-token'
     | '/api/general-ai'
     | '/cam/$cam'
+    | '/community-news/$id'
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
@@ -535,6 +557,7 @@ export interface FileRouteTypes {
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
+    | '/admin/community-news'
     | '/admin/partner-tvs'
     | '/admin/posts'
     | '/admin/roads'
@@ -546,6 +569,7 @@ export interface FileRouteTypes {
     | '/api/cf-token'
     | '/api/general-ai'
     | '/cam/$cam'
+    | '/community-news/$id'
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
@@ -582,6 +606,7 @@ export interface RootRouteChildren {
   StationsRoute: typeof StationsRoute
   TutorRoute: typeof TutorRoute
   AdminClassControlRoute: typeof AdminClassControlRoute
+  AdminCommunityNewsRoute: typeof AdminCommunityNewsRoute
   AdminPartnerTvsRoute: typeof AdminPartnerTvsRoute
   AdminPostsRoute: typeof AdminPostsRoute
   AdminRoadsRoute: typeof AdminRoadsRoute
@@ -593,6 +618,7 @@ export interface RootRouteChildren {
   ApiCfTokenRoute: typeof ApiCfTokenRoute
   ApiGeneralAiRoute: typeof ApiGeneralAiRoute
   CamCamRoute: typeof CamCamRoute
+  CommunityNewsIdRoute: typeof CommunityNewsIdRoute
   LibraryIdRoute: typeof LibraryIdRoute
   LiveChannelRoute: typeof LiveChannelRoute
   ProfileEditRoute: typeof ProfileEditRoute
@@ -762,6 +788,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClassControlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/community-news': {
+      id: '/admin/community-news'
+      path: '/admin/community-news'
+      fullPath: '/admin/community-news'
+      preLoaderRoute: typeof AdminCommunityNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/partner-tvs': {
       id: '/admin/partner-tvs'
       path: '/admin/partner-tvs'
@@ -844,6 +877,13 @@ declare module '@tanstack/react-router' {
       path: '/cam/$cam'
       fullPath: '/cam/$cam'
       preLoaderRoute: typeof CamCamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community-news/$id': {
+      id: '/community-news/$id'
+      path: '/community-news/$id'
+      fullPath: '/community-news/$id'
+      preLoaderRoute: typeof CommunityNewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library/$id': {
@@ -942,6 +982,7 @@ const rootRouteChildren: RootRouteChildren = {
   StationsRoute: StationsRoute,
   TutorRoute: TutorRoute,
   AdminClassControlRoute: AdminClassControlRoute,
+  AdminCommunityNewsRoute: AdminCommunityNewsRoute,
   AdminPartnerTvsRoute: AdminPartnerTvsRoute,
   AdminPostsRoute: AdminPostsRoute,
   AdminRoadsRoute: AdminRoadsRoute,
@@ -953,6 +994,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCfTokenRoute: ApiCfTokenRoute,
   ApiGeneralAiRoute: ApiGeneralAiRoute,
   CamCamRoute: CamCamRoute,
+  CommunityNewsIdRoute: CommunityNewsIdRoute,
   LibraryIdRoute: LibraryIdRoute,
   LiveChannelRoute: LiveChannelRoute,
   ProfileEditRoute: ProfileEditRoute,

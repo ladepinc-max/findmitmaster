@@ -225,6 +225,20 @@
       "when": 1795642054949,
       "tag": "0031_tighten_live_sessions_and_chat_media",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795646990818,
+      "tag": "0032_community_news",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795647005590,
+      "tag": "0033_community_news_storage",
+      "breakpoints": true
     }
   ]
 }

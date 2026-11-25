@@ -10,6 +10,7 @@ import { AppShell } from "@/components/AppShell";
 import { ConversationList } from "@/components/chat/ConversationList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { GroupChatWindow } from "@/components/chat/GroupChatWindow";
+import { CommunityChatWindow } from "@/components/chat/CommunityChatWindow";
 import { NewGroupDialog } from "@/components/chat/NewGroupDialog";
 import { ContactInfo } from "@/components/chat/ContactInfo";
 import { AmaClassCheck } from "@/components/tutor/AmaClassCheck";
@@ -40,7 +41,8 @@ import {
 
 
 export const Route = createFileRoute("/chat")({
-  validateSearch: (search: Record<string, unknown>): { c?: string | undefined; ama?: "1" | undefined } => ({
+  validateSearch: (search: Record<string, unknown>): { c?: string | undefined; ama?: "1" | undefined; community?: string | undefined } => ({
+    community: typeof search["community"] === "string" ? (search["community"] as string) : undefined,
     c: typeof search['c'] === "string" ? (search['c'] as string) : undefined,
     ama: search["ama"] === "1" || search["ama"] === 1 ? ("1" as const) : undefined,
   }),
@@ -73,6 +75,7 @@ function ChatSurface() {
   const [activeId, setActiveId] = useState<string | null>(initialConversationId ?? null);
   const [activeOther, setActiveOther] = useState<ProfileLite | null>(null);
   const [activeGroup, setActiveGroup] = useState<GroupSummary | null>(null);
+  const [activeCommunity, setActiveCommunity] = useState<string | null>(Route.useSearch().community ?? null);
   const [showInfo, setShowInfo] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [mutedIds, setMutedIds] = useState<string[]>([]);
@@ -218,6 +221,11 @@ function ChatSurface() {
     setAmaOpen(false);
     setActiveOther(null);
     setShowInfo(false);
+    if (group.community_id && !group.is_community) {
+      setActiveGroup(null);
+      setActiveCommunity(group.community_id);
+      return;
+    }
     setActiveGroup(group);
     setActiveId(group.id);
   }, []);
@@ -234,7 +242,11 @@ function ChatSurface() {
 
   const handleJoinCommunity = useCallback(
     async (community: CommunitySummary) => {
-      if (!profile || !community.announcement_chat_id) return;
+      if (!profile) return;
+      if (!community.announcement_chat_id) {
+        setActiveCommunity(community.id);
+        return;
+      }
       try {
         await joinChat(community.announcement_chat_id, profile.id);
 
@@ -286,7 +298,7 @@ function ChatSurface() {
       >
       <aside
         className={`min-h-0 w-full shrink-0 border-r border-wa-divider md:w-[35%] ${
-          activeId || amaOpen || mapOpen ? "hidden md:block" : "block"
+          activeId || activeCommunity || amaOpen || mapOpen ? "hidden md:block" : "block"
         }`}
       >
         <div className="flex h-full min-h-0 flex-col">
@@ -361,7 +373,7 @@ function ChatSurface() {
         </div>
       </aside>
 
-      <section className={`min-h-0 min-w-0 flex-1 overflow-hidden ${activeId || amaOpen || mapOpen ? "block" : "hidden md:block"} ${showInfo ? "hidden md:block" : ""}`}>
+      <section className={`min-h-0 min-w-0 flex-1 overflow-hidden ${activeId || activeCommunity || amaOpen || mapOpen ? "block" : "hidden md:block"} ${showInfo ? "hidden md:block" : ""}`}>
         {navTarget ? (
           <LiveNavigation target={navTarget} onClose={() => setNavTarget(null)} />
         ) : mapOpen ? (
@@ -373,6 +385,16 @@ function ChatSurface() {
           />
         ) : amaOpen ? (
           <AmaChatWindow userId={me.id} onBack={() => setAmaOpen(false)} />
+        ) : activeCommunity ? (
+          <CommunityChatWindow
+            key={activeCommunity}
+            communityId={activeCommunity}
+            me={me}
+            onBack={() => {
+              setActiveCommunity(null);
+              void reload();
+            }}
+          />
         ) : activeGroup ? (
           <GroupChatWindow
             key={activeGroup.id}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LibraryResults } from "@/components/home/LibraryResults";
-import { NewsFeed } from "@/components/home/NewsFeed";
+import { CommunityNewsFeed } from "@/components/news/CommunityNewsFeed";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -351,7 +351,7 @@ function HomeScreen() {
           </section>
         ) : null}
 
-        <NewsFeed />
+        <CommunityNewsFeed />
       </div>
     </AppShell>
   );
