@@ -30,6 +30,7 @@ import { LiveReplaysSection } from "@/components/profile/LiveReplaysSection";
 import { AmaLauncher } from "@/components/tutor/AmaLauncher";
 import { FreeAccessManager } from "@/components/admin/FreeAccessManager";
 import { SectionWaivers } from "@/components/admin/SectionWaivers";
+import { CommunityNewsReviewCard } from "@/components/admin/CommunityNewsReviewCard";
 import { ShopCategoryPricing } from "@/components/admin/ShopCategoryPricing";
 import { FindMitApplications } from "@/components/admin/FindMitApplications";
 import { WalletFund, WalletPackagesAdmin } from "@/components/profile/WalletSection";
@@ -497,7 +498,7 @@ function ProfilePage() {
       )}
 
       <div className="px-4"><WalletFund /></div>
-      {isAdmin ? <div className="px-4"><WalletPackagesAdmin /><SectionWaivers /><ShopCategoryPricing /><FreeAccessManager /><FindMitApplications /></div> : null}
+      {isAdmin ? <div className="px-4"><CommunityNewsReviewCard /><WalletPackagesAdmin /><SectionWaivers /><ShopCategoryPricing /><FreeAccessManager /><FindMitApplications /></div> : null}
 
       <FolderDialog
         open={dialogOpen}
