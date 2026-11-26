@@ -3320,6 +3320,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           name: string
+          origin: string
           owner_id: string
           phone: string
           photo_url: string | null
@@ -3336,6 +3337,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name: string
+          origin?: string
           owner_id: string
           phone: string
           photo_url?: string | null
@@ -3352,6 +3354,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name?: string
+          origin?: string
           owner_id?: string
           phone?: string
           photo_url?: string | null

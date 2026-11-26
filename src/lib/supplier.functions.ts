@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { originFromGps, SUPPLIER_CURRENCY, SUPPLIER_FEE_KEY, type SupplierOrigin } from "@/lib/supplier-origin";
 
 const SUPER_ADMIN_EMAILS = ["findmitedutech@gmail.com", "ladepinc@gmail.com"];
-const DEFAULT_FEE = 200;
 type Admin = { from: (table: string) => any };
 
 async function admin(): Promise<Admin> {
@@ -12,18 +12,14 @@ async function admin(): Promise<Admin> {
 }
 
 async function supplierFee(db: Admin, supplierId: string) {
-  const { data: supplier } = await db.from("suppliers").select("category").eq("id", supplierId).maybeSingle();
-  const category = (supplier as { category?: string } | null)?.category ?? "";
-  const { data: categoryRow } = await db.from("shop_categories").select("registration_fee, is_waived, is_active").eq("value", category).maybeSingle();
-  const row = categoryRow as { registration_fee?: number; is_waived?: boolean; is_active?: boolean } | null;
-  if (row?.is_active) {
-    const amount = Number(row.registration_fee ?? DEFAULT_FEE);
-    return { amount, free: Boolean(row.is_waived) || amount <= 0 };
-  }
-  const { data } = await db.from("app_pricing").select("amount, is_waived").eq("key", "shop_registration").maybeSingle();
-  const fallback = data as { amount?: number; is_waived?: boolean } | null;
-  const amount = Number(fallback?.amount ?? DEFAULT_FEE);
-  return { amount, free: Boolean(fallback?.is_waived) || amount <= 0 };
+  const { data: supplier } = await db.from("suppliers").select("lat, lng").eq("id", supplierId).maybeSingle();
+  const row = supplier as { lat?: number | null; lng?: number | null } | null;
+  // Tier comes from the saved phone GPS position, never the request IP, so VPNs cannot change it.
+  const origin: SupplierOrigin = row?.lat != null && row?.lng != null ? originFromGps(row.lat, row.lng) : "gh";
+  const { data } = await db.from("app_pricing").select("amount, is_waived").eq("key", SUPPLIER_FEE_KEY[origin]).maybeSingle();
+  const price = data as { amount?: number; is_waived?: boolean } | null;
+  const amount = Number(price?.amount ?? (origin === "gh" ? 2500 : 600));
+  return { amount, origin, currency: SUPPLIER_CURRENCY[origin], free: Boolean(price?.is_waived) || amount <= 0 };
 }
 
 async function activateSupplier(db: Admin, supplierId: string) {
@@ -63,10 +59,10 @@ export const startSupplierCheckout = createServerFn({ method: "POST" })
       body: JSON.stringify({
         email: email || "customer@findmit.app",
         amount: Math.round(fee.amount * 100),
-        currency: "GHS",
+        currency: fee.currency,
         reference,
         callback_url: data.callbackUrl,
-        channels: ["mobile_money", "card"],
+        channels: fee.origin === "gh" ? ["mobile_money", "card"] : ["card"],
         metadata: { kind: "supplier", target_id: data.supplierId, user_id: context.userId, momo_number: (data.momoNumber ?? "").replace(/\D/g, "") },
       }),
     });
@@ -95,7 +91,7 @@ export const completeSupplierCheckout = createServerFn({ method: "POST" })
     });
     const payload = await response.json() as {
       status?: boolean;
-      data?: { status?: string; amount?: number; channel?: string; metadata?: { kind?: string; target_id?: string; user_id?: string } };
+      data?: { status?: string; amount?: number; currency?: string; channel?: string; metadata?: { kind?: string; target_id?: string; user_id?: string } };
     };
     const transaction = payload.data;
     if (!payload.status || transaction?.status !== "success") throw new Error("Payment could not be verified");
@@ -103,7 +99,7 @@ export const completeSupplierCheckout = createServerFn({ method: "POST" })
     if (transaction.metadata.user_id !== context.userId) throw new Error("This payment belongs to another account");
     const supplierId = transaction.metadata.target_id;
     const fee = await supplierFee(db, supplierId);
-    if (!fee.free && (transaction.amount ?? 0) < fee.amount * 100) throw new Error("Payment amount does not match the supplier fee");
+    if (!fee.free && ((transaction.amount ?? 0) < fee.amount * 100 || (transaction.currency ?? "GHS").toUpperCase() !== fee.currency)) throw new Error("Payment amount does not match the supplier fee");
     const { data: supplier } = await db.from("suppliers").select("owner_id, name").eq("id", supplierId).maybeSingle();
     if (!supplier || (supplier as { owner_id: string }).owner_id !== context.userId) throw new Error("Supplier profile not found");
     const { error } = await db.from("supplier_payments").insert({

@@ -10,7 +10,9 @@ import { CommunityMapView } from "@/components/chat/CommunityMapView";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { captureAccurateLocation } from "@/lib/community-map";
-import { useCategoryFee, useShopCategories } from "@/lib/shop-categories";
+import { useShopCategories } from "@/lib/shop-categories";
+import { useAppPrice } from "@/lib/pricing";
+import { formatSupplierFee, originFromGps, SUPPLIER_FEE_KEY, type SupplierOrigin } from "@/lib/supplier-origin";
 import { CUSTOM_CATEGORY, SHOP_CATEGORIES, daysLeft, isShopActive, uploadShopPhoto } from "@/lib/shops";
 import { startSupplierCheckout } from "@/lib/supplier.functions";
 import { checkoutCallbackUrl, openCheckout } from "@/lib/open-checkout";
@@ -93,15 +95,18 @@ function RegisterSupplierForm({ userId, onCreated }: { userId: string; onCreated
   const [saving, setSaving] = useState(false);
   const { rows: categoryRows } = useShopCategories();
   const finalCategory = category === CUSTOM_CATEGORY ? customCategory.trim() : category;
-  const { amount, waived } = useCategoryFee(finalCategory);
+  const origin: SupplierOrigin | null = gps ? originFromGps(gps.lat, gps.lng) : null;
+  const { amount, waived } = useSupplierFee(origin ?? "gh");
 
-  const locate = async () => {
+  const locate = async (silent = false) => {
     setLocating(true);
     const result = await captureAccurateLocation();
     setLocating(false);
-    if (result.quality === "blocked") return void toast.error(result.message);
+    if (result.quality === "blocked") return void (!silent && toast.error(result.message));
     setGps({ lat: result.point.lat, lng: result.point.lng, msg: result.message });
   };
+  // Read the phone's real GPS position as soon as the form opens; a VPN only changes the IP, not GPS.
+  useEffect(() => { void locate(true); }, []);
 
   const save = async () => {
     if (name.trim().length < 2 || !phone.trim()) return void toast.error("Add your supplier name and phone number");
@@ -146,6 +151,12 @@ function RegisterSupplierForm({ userId, onCreated }: { userId: string; onCreated
       <Input value={phone} onChange={(event) => setPhone(event.target.value)} type="tel" placeholder="Phone for supply orders" maxLength={30} />
       <Input value={landmark} onChange={(event) => setLandmark(event.target.value)} placeholder="Landmark (optional)" maxLength={200} />
       <textarea className="min-h-20 w-full rounded-md border border-input bg-background p-3 text-sm" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What do you supply?" maxLength={2000} />
+      <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm" aria-live="polite">
+        {locating ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin" /> Detecting your real location from GPS…</span>
+          : origin === "gh" ? <span>🇬🇭 <b>Ghanaian supplier</b> — detected from your phone's GPS</span>
+          : origin === "intl" ? <span>🌍 <b>International supplier</b> — detected from your phone's GPS</span>
+          : <span>Turn on location so we can detect where you are registering from.</span>}
+      </div>
       <Button variant="outline" className="w-full" onClick={() => void locate()} disabled={locating}>
         {locating ? <Loader2 className="size-4 animate-spin" /> : <MapPin className="size-4" />}
         {gps ? "Location captured — tap to retry" : "Capture supplier location"}
@@ -162,13 +173,14 @@ function RegisterSupplierForm({ userId, onCreated }: { userId: string; onCreated
         <Camera className="size-4" /> {photo ? photo.name : "Add a supplier profile photo"}
         <input type="file" accept="image/*" className="hidden" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} />
       </label>
-      <Button className="w-full" onClick={() => void save()} disabled={saving}>{saving ? "Saving…" : `Continue to register — ${waived || amount <= 0 ? "Free" : `GH₵ ${amount}`}`}</Button>
+      <Button className="w-full" onClick={() => void save()} disabled={saving || !origin}>{saving ? "Saving…" : !origin ? "Capture location to see your fee" : `Continue to register — ${waived || amount <= 0 ? "Free" : `${formatSupplierFee(origin, amount)}/year`}`}</Button>
     </section>
   );
 }
 
 function SupplierPayCard({ supplier, onActivated }: { supplier: Supplier; onActivated: () => void }) {
-  const { amount, waived } = useCategoryFee(supplier.category);
+  const origin: SupplierOrigin = supplier.lat != null && supplier.lng != null ? originFromGps(supplier.lat, supplier.lng) : "gh";
+  const { amount, waived } = useSupplierFee(origin);
   const start = useServerFn(startSupplierCheckout);
   const [momo, setMomo] = useState("");
   const [busy, setBusy] = useState(false);
@@ -186,9 +198,9 @@ function SupplierPayCard({ supplier, onActivated }: { supplier: Supplier; onActi
     <section className="space-y-4 rounded-2xl bg-card p-5 text-center shadow-sm">
       <Lock className="mx-auto size-9 text-wa-green" />
       <div><p className="font-display text-lg font-bold">{supplier.name}</p><p className="text-sm text-muted-foreground">{expired ? "Your supplier registration has expired. Renew to appear in the directory." : "Your supplier profile is reserved but not live yet."}</p></div>
-      <ul className="space-y-1 text-left text-sm"><li>✓ Listed beside shops with your profile photo</li><li>✓ Customers can call and find your location</li><li>✓ Same yearly category registration as shops</li></ul>
-      <p className="font-display text-2xl font-bold">{waived || amount <= 0 ? "Free for now" : `GH₵ ${amount}`}{!waived && amount > 0 ? <span className="text-sm font-normal text-muted-foreground"> / year</span> : null}</p>
-      {!waived && amount > 0 ? <Input value={momo} onChange={(event) => setMomo(event.target.value)} type="tel" placeholder="Mobile Money number (MTN, Telecel, AT)" /> : null}
+      <ul className="space-y-1 text-left text-sm"><li>✓ Listed beside shops with your profile photo</li><li>✓ Customers can call and find your location</li><li>{origin === "gh" ? "🇬🇭 Ghanaian supplier yearly registration" : "🌍 International supplier yearly registration (card)"}</li></ul>
+      <p className="font-display text-2xl font-bold">{waived || amount <= 0 ? "Free for now" : formatSupplierFee(origin, amount)}{!waived && amount > 0 ? <span className="text-sm font-normal text-muted-foreground"> / year</span> : null}</p>
+      {!waived && amount > 0 && origin === "gh" ? <Input value={momo} onChange={(event) => setMomo(event.target.value)} type="tel" placeholder="Mobile Money number (MTN, Telecel, AT)" /> : null}
       <Button className="w-full" onClick={() => void pay()} disabled={busy}>{busy ? "Please wait…" : waived || amount <= 0 ? "Activate my supplier profile" : expired ? "Renew with Mobile Money" : "Pay with Mobile Money"}</Button>
     </section>
   );
@@ -234,8 +246,14 @@ function ManageSupplier({ supplier, onChanged }: { supplier: Supplier; onChanged
         <Input value={landmark} onChange={(event) => setLandmark(event.target.value)} placeholder="Landmark" maxLength={200} />
         <textarea className="min-h-24 w-full rounded-md border border-input bg-background p-3 text-sm" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What do you supply?" maxLength={2000} />
         <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border p-3 text-sm"><Camera className="size-4" />{photo ? photo.name : "Replace profile photo"}<input type="file" accept="image/*" className="hidden" onChange={(event) => setPhoto(event.target.files?.[0] ?? null)} /></label>
-        <Button className="w-full" onClick={() => void save()} disabled={saving}>{saving ? "Saving…" : "Save supplier details"}</Button>
+        <Button className="w-full" onClick={() => void save()} disabled={saving || !origin}>{saving ? "Saving…" : "Save supplier details"}</Button>
       </section>
     </>
   );
+}
+
+function useSupplierFee(origin: SupplierOrigin) {
+  const gh = useAppPrice(SUPPLIER_FEE_KEY.gh);
+  const intl = useAppPrice(SUPPLIER_FEE_KEY.intl);
+  return origin === "gh" ? gh : intl;
 }

@@ -281,6 +281,13 @@
       "when": 1795694319821,
       "tag": "0039_create_supplier_directory",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795698345942,
+      "tag": "0040_supplier_origin_fees",
+      "breakpoints": true
     }
   ]
 }
