@@ -1,9 +1,8 @@
 import { takePendingNav } from "@/lib/share-location";
 import { useCachedState } from "@/lib/page-cache";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { MapPin, MessageCircle, ShieldCheck } from "lucide-react";
-import { CommunityMapPanel } from "@/components/chat/CommunityMapPanel";
+import { MessageCircle, ShieldCheck } from "lucide-react";
 import { LiveNavigation, type NavTarget } from "@/components/chat/LiveNavigation";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -81,22 +80,8 @@ function ChatSurface() {
   const [mutedIds, setMutedIds] = useState<string[]>([]);
   const [dialogKind, setDialogKind] = useState<"group" | "community" | null>(null);
   const [amaOpen, setAmaOpen] = useState(openAma === "1");
-  const [mapOpen, setMapOpen] = useState(false);
   const [navTarget, setNavTarget] = useState<NavTarget | null>(null);
   const { settings: tutor } = useTutorSettings();
-  const mapPersistReady = useRef(false);
-  useEffect(() => {
-    if (!mapPersistReady.current) {
-      mapPersistReady.current = true;
-      return;
-    }
-    try {
-      if (mapOpen) sessionStorage.setItem("findmit:mapOpen", "1");
-      else sessionStorage.removeItem("findmit:mapOpen");
-    } catch {
-      /* ignore */
-    }
-  }, [mapOpen]);
 
   useEffect(() => {
     const onNav = (e: Event) => {
@@ -106,11 +91,6 @@ function ChatSurface() {
     window.addEventListener("findmit:navigate", onNav);
     const pending = takePendingNav();
     if (pending) setNavTarget(pending);
-    try {
-      if (sessionStorage.getItem("findmit:mapOpen") === "1") setMapOpen(true);
-    } catch {
-      /* ignore */
-    }
     return () => window.removeEventListener("findmit:navigate", onNav);
   }, []);
 
@@ -298,7 +278,7 @@ function ChatSurface() {
       >
       <aside
         className={`min-h-0 w-full shrink-0 border-r border-wa-divider md:w-[35%] ${
-          activeId || activeCommunity || amaOpen || mapOpen ? "hidden md:block" : "block"
+          activeId || activeCommunity || amaOpen || navTarget ? "hidden md:block" : "block"
         }`}
       >
         <div className="flex h-full min-h-0 flex-col">
@@ -309,7 +289,6 @@ function ChatSurface() {
             setActiveOther(null);
             setShowInfo(false);
             setActiveId(null);
-            setMapOpen(false);
             setAmaOpen(true);
           }}
           className={`flex w-full items-center gap-3 border-b border-wa-divider px-3 py-3 text-left ${
@@ -324,30 +303,6 @@ function ChatSurface() {
             </span>
             <span className="block truncate text-xs text-muted-foreground">
               Ask anything · tap CLASSROOM for lessons
-            </span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setActiveGroup(null);
-            setActiveOther(null);
-            setShowInfo(false);
-            setActiveId(null);
-            setAmaOpen(false);
-            setMapOpen(true);
-          }}
-          className={`flex w-full items-center gap-3 border-b border-wa-divider px-3 py-3 text-left ${
-            mapOpen ? "bg-muted" : "bg-card"
-          }`}
-        >
-          <span className="flex size-9 items-center justify-center rounded-full bg-wa-green/15">
-            <MapPin className="size-5 text-wa-green" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold">Ghana Community Map</span>
-            <span className="block truncate text-xs text-muted-foreground">
-              Name places, learn roads, volunteer for Ghana
             </span>
           </span>
         </button>
@@ -373,16 +328,9 @@ function ChatSurface() {
         </div>
       </aside>
 
-      <section className={`min-h-0 min-w-0 flex-1 overflow-hidden ${activeId || activeCommunity || amaOpen || mapOpen ? "block" : "hidden md:block"} ${showInfo ? "hidden md:block" : ""}`}>
+      <section className={`min-h-0 min-w-0 flex-1 overflow-hidden ${activeId || activeCommunity || amaOpen || navTarget ? "block" : "hidden md:block"} ${showInfo ? "hidden md:block" : ""}`}>
         {navTarget ? (
           <LiveNavigation target={navTarget} onClose={() => setNavTarget(null)} />
-        ) : mapOpen ? (
-          <CommunityMapPanel
-            userId={me.id}
-            displayName={profile?.display_name || profile?.username || "Volunteer"}
-            onBack={() => setMapOpen(false)}
-            onNavigate={setNavTarget}
-          />
         ) : amaOpen ? (
           <AmaChatWindow userId={me.id} onBack={() => setAmaOpen(false)} />
         ) : activeCommunity ? (

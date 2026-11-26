@@ -94,7 +94,7 @@ function MyShopPage() {
   return (
     <main className="min-h-dvh bg-background pb-16">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-        <Link to="/chat" search={{ c: undefined }} aria-label="Back">
+        <Link to="/community-map" aria-label="Back">
           <ArrowLeft className="size-5" />
         </Link>
         <h1 className="font-display text-lg font-bold">My Shop</h1>

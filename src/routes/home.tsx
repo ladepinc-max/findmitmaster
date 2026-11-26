@@ -10,6 +10,7 @@ import {
   Briefcase,
   Globe,
   Loader2,
+  MapPin,
   Mic,
   Radio,
   Search,
@@ -25,6 +26,7 @@ import { AppShell } from "@/components/AppShell";
 import { FindMitLogo } from "@/components/FindMitLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoriesAccess } from "@/lib/stories-access";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/home")({
   head: () => ({
@@ -215,13 +217,19 @@ function HomeScreen() {
             enterKeyHint="search"
             aria-label="Search or type website"
           />
-          {loading ? (
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          ) : (
-            <button type="button" aria-label="Voice search" onClick={startVoice} className={listening ? "text-wa-green" : "text-muted-foreground"}>
-              <Mic className="size-5" />
-            </button>
-          )}
+          <div className="flex shrink-0 items-center gap-0.5">
+            <Button type="button" size="icon" variant="ghost" aria-label="Voice search" title="Voice search" disabled={loading} onClick={startVoice} className={`size-8 rounded-full ${listening ? "text-wa-green" : "text-muted-foreground"}`}>
+              {loading ? <Loader2 className="size-5 animate-spin" /> : <Mic className="size-5" />}
+            </Button>
+            <Button asChild size="icon" variant="ghost" className="size-8 rounded-full text-wa-green">
+              <Link to="/community-map" aria-label="Community map" title="Community map">
+                <span className="relative size-6" aria-hidden="true">
+                  <Globe className="absolute left-0 top-0 size-5" />
+                  <MapPin className="absolute bottom-0 right-0 size-3.5 fill-secondary" strokeWidth={2.5} />
+                </span>
+              </Link>
+            </Button>
+          </div>
         </form>
 
 

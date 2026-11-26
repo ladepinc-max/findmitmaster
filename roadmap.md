@@ -11,6 +11,8 @@
 - [ ] Verify stock, closed-shop access, and in-shop conversation.
 # Home browser
 - [x] Phoenix-style Home matching design, in-app browser, admin Quick Access + news/ads feed.
+- [x] Move Community Map from Chat to a globe-and-pin beside Home voice search; phone and desktop navigation verified.
+- [ ] Repair the reported shop-button problem — both Register and Manage open correctly with a temporary signed-in account; blocked on the user's description of what happens when tapped.
 
 # Shop advert improvements
 - [x] Show product thumbnails and automatically use the selected product photo.
