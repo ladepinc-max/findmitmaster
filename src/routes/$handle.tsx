@@ -32,7 +32,9 @@ export const Route = createFileRoute("/$handle")({
         { property: "og:description", content: `See products, call to order and get live directions to @${h}.` },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary" },
+        { property: "og:url", content: `https://findmit.world/@${h}` },
       ],
+      links: [{ rel: "canonical", href: `https://findmit.world/@${h}` }],
     };
   },
   component: StorefrontPage,

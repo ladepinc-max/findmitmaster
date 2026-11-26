@@ -30,6 +30,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PaymentVerifyRouteImport } from './routes/payment-verify'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ShopsRouteImport } from './routes/shops'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StationsRouteImport } from './routes/stations'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as AdminClassControlRouteImport } from './routes/admin.class-control'
@@ -47,6 +48,7 @@ import { Route as ApiGeneralAiRouteImport } from './routes/api/general-ai'
 import { Route as CamIndexRouteImport } from './routes/cam.index'
 import { Route as CamCamRouteImport } from './routes/cam.$cam'
 import { Route as CommunityNewsIdRouteImport } from './routes/community-news.$id'
+import { Route as JobIdRouteImport } from './routes/job.$id'
 import { Route as LibraryIdRouteImport } from './routes/library/$id'
 import { Route as LiveChannelRouteImport } from './routes/live.$channel'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
@@ -166,6 +168,11 @@ const ShopsRoute = ShopsRouteImport.update({
   path: '/shops',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StationsRoute = StationsRouteImport.update({
   id: '/stations',
   path: '/stations',
@@ -252,6 +259,11 @@ const CommunityNewsIdRoute = CommunityNewsIdRouteImport.update({
   path: '/community-news/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JobIdRoute = JobIdRouteImport.update({
+  id: '/job/$id',
+  path: '/job/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LibraryIdRoute = LibraryIdRouteImport.update({
   id: '/library/$id',
   path: '/library/$id',
@@ -331,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
   '/shops': typeof ShopsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
@@ -347,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
   '/community-news/$id': typeof CommunityNewsIdRoute
+  '/job/$id': typeof JobIdRoute
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -382,6 +396,7 @@ export interface FileRoutesByTo {
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
   '/shops': typeof ShopsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
@@ -398,6 +413,7 @@ export interface FileRoutesByTo {
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
   '/community-news/$id': typeof CommunityNewsIdRoute
+  '/job/$id': typeof JobIdRoute
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -434,6 +450,7 @@ export interface FileRoutesById {
   '/payment-verify': typeof PaymentVerifyRoute
   '/settings': typeof SettingsRoute
   '/shops': typeof ShopsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
   '/admin/class-control': typeof AdminClassControlRoute
@@ -450,6 +467,7 @@ export interface FileRoutesById {
   '/api/general-ai': typeof ApiGeneralAiRoute
   '/cam/$cam': typeof CamCamRoute
   '/community-news/$id': typeof CommunityNewsIdRoute
+  '/job/$id': typeof JobIdRoute
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
@@ -487,6 +505,7 @@ export interface FileRouteTypes {
     | '/payment-verify'
     | '/settings'
     | '/shops'
+    | '/sitemap.xml'
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
@@ -503,6 +522,7 @@ export interface FileRouteTypes {
     | '/api/general-ai'
     | '/cam/$cam'
     | '/community-news/$id'
+    | '/job/$id'
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
@@ -538,6 +558,7 @@ export interface FileRouteTypes {
     | '/payment-verify'
     | '/settings'
     | '/shops'
+    | '/sitemap.xml'
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
@@ -554,6 +575,7 @@ export interface FileRouteTypes {
     | '/api/general-ai'
     | '/cam/$cam'
     | '/community-news/$id'
+    | '/job/$id'
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
@@ -589,6 +611,7 @@ export interface FileRouteTypes {
     | '/payment-verify'
     | '/settings'
     | '/shops'
+    | '/sitemap.xml'
     | '/stations'
     | '/tutor'
     | '/admin/class-control'
@@ -605,6 +628,7 @@ export interface FileRouteTypes {
     | '/api/general-ai'
     | '/cam/$cam'
     | '/community-news/$id'
+    | '/job/$id'
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
@@ -641,6 +665,7 @@ export interface RootRouteChildren {
   PaymentVerifyRoute: typeof PaymentVerifyRoute
   SettingsRoute: typeof SettingsRoute
   ShopsRoute: typeof ShopsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StationsRoute: typeof StationsRoute
   TutorRoute: typeof TutorRoute
   AdminClassControlRoute: typeof AdminClassControlRoute
@@ -657,6 +682,7 @@ export interface RootRouteChildren {
   ApiGeneralAiRoute: typeof ApiGeneralAiRoute
   CamCamRoute: typeof CamCamRoute
   CommunityNewsIdRoute: typeof CommunityNewsIdRoute
+  JobIdRoute: typeof JobIdRoute
   LibraryIdRoute: typeof LibraryIdRoute
   LiveChannelRoute: typeof LiveChannelRoute
   ProfileEditRoute: typeof ProfileEditRoute
@@ -820,6 +846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stations': {
       id: '/stations'
       path: '/stations'
@@ -939,6 +972,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityNewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/job/$id': {
+      id: '/job/$id'
+      path: '/job/$id'
+      fullPath: '/job/$id'
+      preLoaderRoute: typeof JobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/library/$id': {
       id: '/library/$id'
       path: '/library/$id'
@@ -1041,6 +1081,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentVerifyRoute: PaymentVerifyRoute,
   SettingsRoute: SettingsRoute,
   ShopsRoute: ShopsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StationsRoute: StationsRoute,
   TutorRoute: TutorRoute,
   AdminClassControlRoute: AdminClassControlRoute,
@@ -1057,6 +1098,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGeneralAiRoute: ApiGeneralAiRoute,
   CamCamRoute: CamCamRoute,
   CommunityNewsIdRoute: CommunityNewsIdRoute,
+  JobIdRoute: JobIdRoute,
   LibraryIdRoute: LibraryIdRoute,
   LiveChannelRoute: LiveChannelRoute,
   ProfileEditRoute: ProfileEditRoute,

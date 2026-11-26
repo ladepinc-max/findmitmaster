@@ -110,7 +110,7 @@ export function showPushNotification(title: string, body: string) {
   if (typeof window === "undefined" || !("Notification" in window)) return;
   if (Notification.permission !== "granted") return;
   try {
-    new Notification(title, { body, icon: "/favicon.ico", tag: title });
+    new Notification(title, { body, icon: "/icon-192.png", tag: title });
   } catch {
     /* notification display is best-effort */
   }

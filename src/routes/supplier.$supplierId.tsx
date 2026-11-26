@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { categoryLabel } from "@/lib/shops";
 
 export const Route = createFileRoute("/supplier/$supplierId")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Supplier profile — FindMit" },
       { name: "description", content: "View this FindMit supplier's profile, supplies, phone number and location." },
@@ -16,7 +16,9 @@ export const Route = createFileRoute("/supplier/$supplierId")({
       { property: "og:description", content: "Contact a FindMit supplier and get directions to their business." },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: `https://findmit.world/supplier/${params.supplierId}` },
     ],
+    links: [{ rel: "canonical", href: `https://findmit.world/supplier/${params.supplierId}` }],
   }),
   component: SupplierProfilePage,
 });

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { InAppBrowser } from "@/components/home/InAppBrowser";
+import { Omnibox, rememberSearch } from "@/components/home/Omnibox";
 import { isEmbedBlocked, openExternal, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
 import { searchWeb, type KnowledgePanel, type WebHit } from "@/lib/web-search.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -92,6 +93,7 @@ function HomeScreen() {
   const [results, setResults] = useState<FindMitResults | null>(null);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
+  const [focused, setFocused] = useState(false);
   const { apps } = useQuickApps();
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -117,6 +119,8 @@ function HomeScreen() {
       return;
     }
     setBrowserUrl(null);
+    setFocused(false);
+    rememberSearch(q);
     setQuery(q);
     setLoading(true);
     setSearched(q);
@@ -203,6 +207,7 @@ function HomeScreen() {
         </header>
         {recording && profile ? <ComNewsRecorder userId={profile.id} onClose={() => setRecording(false)} /> : null}
 
+        <div className="relative">
         <form
           className="mt-4 flex items-center gap-3 rounded-full bg-secondary px-5 py-3.5"
           onSubmit={(e) => {
@@ -223,6 +228,8 @@ function HomeScreen() {
             placeholder="Search or type website"
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
             enterKeyHint="search"
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             aria-label="Search or type website"
           />
           <div className="flex shrink-0 items-center gap-0.5">
@@ -236,6 +243,17 @@ function HomeScreen() {
             </Button>
           </div>
         </form>
+        {focused ? (
+          <Omnibox
+            query={query}
+            apps={apps}
+            onPick={(q) => void runSearch(q)}
+            onFill={setQuery}
+            onOpenSite={(u) => { setFocused(false); openSite(u); }}
+            onOpenShop={(h) => { setFocused(false); void navigate({ to: "/$handle", params: { handle: `@${h}` } }); }}
+          />
+        ) : null}
+        </div>
 
 
         {searched ? <LibraryResults q={searched} onOpen={openSite} /> : null}
@@ -313,7 +331,7 @@ function HomeScreen() {
                   ))}
                   {results.jobs.map((j) => (
                     <li key={`job-${j.id}`}>
-                      <Link to="/jobs" search={{ tab: "jobs" }} className={rowCls}>
+                      <Link to="/job/$id" params={{ id: j.id }} className={rowCls}>
                         <Briefcase className="size-5 shrink-0 text-primary" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{j.title}</p>

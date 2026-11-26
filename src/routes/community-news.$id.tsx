@@ -21,7 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/community-news/$id")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Community News — FindMit" },
       { name: "description", content: "A verified on-the-ground report from a FindMit community, with public comments." },
@@ -29,7 +29,9 @@ export const Route = createFileRoute("/community-news/$id")({
       { property: "og:description", content: "Verified local news reported by FindMit users." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: `https://findmit.world/community-news/${params.id}` },
     ],
+    links: [{ rel: "canonical", href: `https://findmit.world/community-news/${params.id}` }],
   }),
   component: StoryPage,
 });
