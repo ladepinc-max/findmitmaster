@@ -1,36 +1,11 @@
 import { clearPageCache } from "@/lib/page-cache";
 import { clearInterfaceImages } from "@/lib/interface-image-cache";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
-export interface Profile {
-  id: string;
-  username: string;
-  display_name: string;
-  photo_path: string | null;
-  bio: string | null;
-  website: string | null;
-  social_links: Record<string, string>;
-  is_verified: boolean;
-  followers_count: number;
-  following_count: number;
-  posts_count: number;
-  likes_count: number;
-  created_at: string;
-}
-
-interface AuthContextValue {
-  session: Session | null;
-  user: User | null;
-  profile: Profile | null;
-  loading: boolean;
-  refreshProfile: () => Promise<void>;
-  signOut: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+import { AuthContext, type AuthContextValue, type Profile } from "./auth-context";
+export type { Profile } from "./auth-context";
 
 const PROFILE_KEY = "fm-cache:v1:profile";
 function cachedProfile(userId: string): Profile | null {
