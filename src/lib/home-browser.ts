@@ -77,10 +77,38 @@ const EMBED_BLOCKED = [
   "skysports.com", "espn.com", "telegram.org", "snapchat.com", "pinterest.com",
 ];
 
+const LEARNED_KEY = "findmit-blocked-hosts";
+const bareHost = (url: string) => new URL(url).hostname.replace(/^(www|m|mobile|edition)\./, "");
+function learned(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(LEARNED_KEY) ?? "[]") as string[];
+  } catch {
+    return [];
+  }
+}
+
+/** Remembers a site that refused to load inside FindMit so next time it opens outside instantly. */
+export function rememberBlocked(url: string) {
+  try {
+    const h = bareHost(url);
+    const list = learned();
+    if (!list.includes(h)) localStorage.setItem(LEARNED_KEY, JSON.stringify([...list, h].slice(-300)));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Opens a site in the phone's browser right away, without asking. */
+export function openExternal(url: string) {
+  const w = window.open(url, "_blank", "noopener,noreferrer");
+  if (!w) window.location.assign(url);
+}
+
 export function isEmbedBlocked(url: string): boolean {
   try {
-    const h = new URL(url).hostname.replace(/^(www|m|mobile|edition)\./, "");
-    return EMBED_BLOCKED.some((d) => h === d || h.endsWith(`.${d}`));
+    const h = bareHost(url);
+    const all = typeof window === "undefined" ? EMBED_BLOCKED : [...EMBED_BLOCKED, ...learned()];
+    return all.some((d) => h === d || h.endsWith(`.${d}`));
   } catch {
     return false;
   }

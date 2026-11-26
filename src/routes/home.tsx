@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { InAppBrowser } from "@/components/home/InAppBrowser";
-import { isEmbedBlocked, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
-import { searchWeb, type WebHit } from "@/lib/web-search.functions";
+import { isEmbedBlocked, openExternal, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
+import { searchWeb, type KnowledgePanel, type WebHit } from "@/lib/web-search.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
 import { FindMitLogo } from "@/components/FindMitLogo";
@@ -100,9 +100,11 @@ function HomeScreen() {
   const searchWebFn = useServerFn(searchWeb);
   const [webHits, setWebHits] = useState<WebHit[] | null>(null);
   const [webLoading, setWebLoading] = useState(false);
+  const [panel, setPanel] = useState<KnowledgePanel | null>(null);
+  const [filter, setFilter] = useState<"all" | "findmit" | "news" | "images" | "web">("all");
 
   const openSite = (url: string) => {
-    if (isEmbedBlocked(url)) window.open(url, "_blank", "noopener,noreferrer");
+    if (isEmbedBlocked(url)) openExternal(url);
     else setBrowserUrl(url);
   };
 
@@ -119,9 +121,14 @@ function HomeScreen() {
     setLoading(true);
     setSearched(q);
     setWebHits(null);
+    setPanel(null);
+    setFilter("all");
     setWebLoading(true);
     void searchWebFn({ data: { q } })
-      .then((r) => setWebHits(r.hits))
+      .then((r) => {
+        setWebHits(r.hits);
+        setPanel(r.panel ?? null);
+      })
       .catch(() => setWebHits([]))
       .finally(() => setWebLoading(false));
     const like = `%${q.replace(/[%_,]/g, " ")}%`;
@@ -234,7 +241,45 @@ function HomeScreen() {
         {searched ? <LibraryResults q={searched} onOpen={openSite} /> : null}
         {results ? (
           <section className="mt-4 space-y-5">
-            <div>
+            <nav className="-mx-4 flex gap-5 overflow-x-auto border-b border-border px-4 text-sm font-semibold" aria-label="Result type">
+              {(["all", "findmit", "news", "images", "web"] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilter(f)}
+                  className={`shrink-0 border-b-2 pb-2 capitalize ${filter === f ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+                >
+                  {f === "findmit" ? "FindMit" : f}
+                </button>
+              ))}
+            </nav>
+            {panel && (filter === "all" || filter === "web") ? (
+              <article className="overflow-hidden rounded-2xl border border-border bg-card">
+                {panel.image ? <img src={panel.image} alt={panel.title} className="max-h-64 w-full object-cover" loading="lazy" /> : null}
+                <div className="space-y-2 p-4">
+                  <h2 className="font-display text-2xl font-bold">{panel.title}</h2>
+                  {panel.description ? <p className="text-sm text-muted-foreground">{panel.description}</p> : null}
+                  <div className="rounded-xl bg-secondary p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Overview</p>
+                    <p className="mt-1 line-clamp-6 text-sm">{panel.extract}</p>
+                    <button type="button" onClick={() => openSite(panel.url)} className="mt-2 text-sm font-semibold text-primary">
+                      Wikipedia ›
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ) : null}
+            {filter === "images" ? (
+              <div className="grid grid-cols-3 gap-2">
+                {[panel?.image, ...(webHits ?? []).map((h) => h.image)].filter(Boolean).map((src, i) => (
+                  <img key={`${src}-${i}`} src={src!} alt="" loading="lazy" className="aspect-square w-full rounded-lg object-cover" />
+                ))}
+                {!panel?.image && !(webHits ?? []).some((h) => h.image) ? (
+                  <p className="col-span-3 text-sm text-muted-foreground">{webLoading ? "Loading images…" : "No images found."}</p>
+                ) : null}
+              </div>
+            ) : null}
+            <div className={filter === "all" || filter === "findmit" ? "" : "hidden"}>
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-wa-green">
                 <span className="size-2 rounded-full bg-wa-green" /> Found on FindMit
               </h2>
@@ -285,9 +330,9 @@ function HomeScreen() {
                 </p>
               )}
             </div>
-            <div>
+            <div className={filter === "all" || filter === "web" || filter === "news" ? "" : "hidden"}>
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-primary">
-                <Globe className="size-4" /> Found on the web
+                <Globe className="size-4" /> {filter === "news" ? "Top stories" : "Found on the web"}
               </h2>
               {webLoading ? (
                 <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
@@ -295,7 +340,7 @@ function HomeScreen() {
                 </p>
               ) : webHits && webHits.length > 0 ? (
                 <ul className="mt-3 space-y-2">
-                  {webHits.map((h) => (
+                  {webHits.filter((h) => (filter === "news" ? h.kind === "news" : filter === "web" ? h.kind !== "news" : true)).map((h) => (
                     <li key={h.url}>
                       <button type="button" onClick={() => openSite(h.url)} className={`${rowCls} w-full items-start text-left`}>
                         <img
@@ -309,6 +354,7 @@ function HomeScreen() {
                           <p className="line-clamp-2 text-sm font-semibold text-primary">{h.title}</p>
                           {h.snippet ? <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{h.snippet}</p> : null}
                         </div>
+                        {h.image ? <img src={h.image} alt="" loading="lazy" className="size-16 shrink-0 rounded-lg object-cover" /> : null}
                       </button>
                     </li>
                   ))}

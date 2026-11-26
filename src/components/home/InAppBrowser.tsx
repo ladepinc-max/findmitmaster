@@ -15,7 +15,9 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { isEmbedBlocked, resolveDestination } from "@/lib/home-browser";
+import { useServerFn } from "@tanstack/react-start";
+import { isEmbedBlocked, openExternal, rememberBlocked, resolveDestination } from "@/lib/home-browser";
+import { checkFrameable } from "@/lib/frame-check.functions";
 import {
   closeTab,
   currentUrl,
@@ -49,6 +51,7 @@ export function InAppBrowser({ startUrl, onClose, onSearch }: { startUrl: string
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   const [ready, setReady] = useState(false);
+  const checkFrame = useServerFn(checkFrameable);
 
   // Restore saved tabs, then open the requested page in a new tab.
   useEffect(() => {
@@ -78,10 +81,40 @@ export function InAppBrowser({ startUrl, onClose, onSearch }: { startUrl: string
     if (!isNew) setHistory((h) => recordVisit(h, url));
   }, [url, isNew, reloadKey]);
 
+  // Sites that refuse to show inside FindMit open in the phone's browser automatically.
+  useEffect(() => {
+    if (isNew) return;
+    const leave = () => {
+      openExternal(url);
+      if (tab.index > 0) {
+        setState((s) => updateTab(s, s.activeId, (x) => ({ ...x, index: x.index - 1, history: x.history.slice(0, x.index) })));
+        return;
+      }
+      const next = closeTab(state, state.activeId);
+      if (next) setState(next);
+      else {
+        saveTabs(null);
+        onClose();
+      }
+    };
+    if (isEmbedBlocked(url)) return leave();
+    let live = true;
+    void checkFrame({ data: { url } }).then((r) => {
+      if (live && r.blocked) {
+        rememberBlocked(url);
+        leave();
+      }
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, isNew, checkFrame]);
+
   const go = (raw: string) => {
     const next = resolveDestination(raw);
     if (!next) return onSearch(raw.trim());
-    if (isEmbedBlocked(next)) return void window.open(next, "_blank", "noopener,noreferrer");
+    if (isEmbedBlocked(next)) return openExternal(next);
     setState((s) => updateTab(s, s.activeId, (t) => (currentUrl(t) === NEW_TAB ? { ...t, history: [next], index: 0 } : navigateTab(t, next))));
     setView("page");
   };
@@ -207,7 +240,7 @@ export function InAppBrowser({ startUrl, onClose, onSearch }: { startUrl: string
                 <MenuItem icon={<Plus className="size-4" />} label="New tab" onClick={addTab} />
                 <MenuItem icon={<History className="size-4" />} label="History" onClick={() => { setView("history"); setMenu(false); }} />
                 {!isNew ? (
-                  <MenuItem icon={<ExternalLink className="size-4" />} label="Open in external browser" onClick={() => { window.open(url, "_blank", "noopener,noreferrer"); setMenu(false); }} />
+                  <MenuItem icon={<ExternalLink className="size-4" />} label="Open in external browser" onClick={() => { openExternal(url); setMenu(false); }} />
                 ) : null}
               </div>
             </>

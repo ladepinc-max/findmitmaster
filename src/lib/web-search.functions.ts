@@ -5,6 +5,16 @@ export interface WebHit {
   url: string;
   snippet: string;
   domain: string;
+  kind?: "web" | "news" | "wiki";
+  image?: string;
+}
+
+export interface KnowledgePanel {
+  title: string;
+  description?: string;
+  extract: string;
+  image?: string;
+  url: string;
 }
 
 const decode = (s: string) =>
@@ -41,7 +51,7 @@ async function bing(q: string): Promise<WebHit[]> {
     .slice(1, 11)
     .map((b) => {
       const url = tag(b, "link");
-      return { title: tag(b, "title"), url, snippet: tag(b, "description"), domain: host(url) };
+      return { title: tag(b, "title"), url, snippet: tag(b, "description"), domain: host(url), kind: "web" as const };
     })
     .filter((h) => h.title && /^https?:\/\//.test(h.url));
 }
@@ -64,6 +74,7 @@ async function news(q: string): Promise<WebHit[]> {
         url: tag(b, "link"),
         snippet: ["News", source, date ? new Date(date).toDateString() : ""].filter(Boolean).join(" · "),
         domain: host(srcUrl) || "news",
+        kind: "news" as const,
       };
     })
     .filter((h) => h.title && /^https?:\/\//.test(h.url));
@@ -80,7 +91,24 @@ async function wiki(q: string): Promise<WebHit[]> {
     url: `https://en.m.wikipedia.org/wiki/${encodeURIComponent(r.title.replace(/ /g, "_"))}`,
     snippet: decode(r.snippet),
     domain: "en.wikipedia.org",
+    kind: "wiki" as const,
   }));
+}
+
+async function summary(title: string): Promise<KnowledgePanel | null> {
+  const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, "_"))}`, {
+    headers: { "User-Agent": "FindMit/1.0 (search)" },
+  });
+  if (!res.ok) return null;
+  const b = (await res.json()) as { type?: string; title: string; description?: string; extract?: string; originalimage?: { source: string }; thumbnail?: { source: string }; content_urls?: { mobile?: { page?: string } } };
+  if (b.type === "disambiguation" || !b.extract) return null;
+  return {
+    title: b.title,
+    ...(b.description ? { description: b.description } : {}),
+    extract: b.extract,
+    ...(b.originalimage?.source || b.thumbnail?.source ? { image: (b.thumbnail?.source ?? b.originalimage?.source)!.replace(/\/\d+px-/, "/640px-") } : {}),
+    url: b.content_urls?.mobile?.page ?? `https://en.m.wikipedia.org/wiki/${encodeURIComponent(b.title)}`,
+  };
 }
 
 const safe = (p: Promise<WebHit[]>) => p.catch((e) => (console.error("search source failed", e), [] as WebHit[]));
@@ -88,7 +116,7 @@ const safe = (p: Promise<WebHit[]>) => p.catch((e) => (console.error("search sou
 /** Fetches web results from several sources server-side and returns plain cards — no search-engine page is shown. */
 export const searchWeb = createServerFn({ method: "POST" })
   .inputValidator((d: { q: string }) => ({ q: String(d?.q ?? "").slice(0, 200) }))
-  .handler(async ({ data }): Promise<{ hits: WebHit[]; error?: string }> => {
+  .handler(async ({ data }): Promise<{ hits: WebHit[]; panel?: KnowledgePanel | null; error?: string }> => {
     const q = data.q.trim();
     if (!q) return { hits: [] };
     const [web, nw, wk] = await Promise.all([safe(bing(q)), safe(news(q)), safe(wiki(q))]);
@@ -101,7 +129,9 @@ export const searchWeb = createServerFn({ method: "POST" })
       if (nw[i]) merged.push(nw[i]!);
       if (wk[i]) merged.push(wk[i]!);
     }
+    const top = wk[0]?.title.replace(/ — Wikipedia$/, "");
+    const panel = top ? await summary(top).catch(() => null) : null;
     const seen = new Set<string>();
     const hits = merged.filter((h) => (seen.has(h.url) ? false : (seen.add(h.url), true))).slice(0, 20);
-    return hits.length ? { hits } : { hits, error: "Web results are unavailable right now" };
+    return hits.length ? { hits, panel } : { hits, panel, error: "Web results are unavailable right now" };
   });
