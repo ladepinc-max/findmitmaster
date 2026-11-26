@@ -6,6 +6,8 @@ import { AppShell } from "@/components/AppShell";
 import { UserAvatar } from "@/components/UserAvatar";
 import { CommunityLogo } from "@/components/news/CommunityLogo";
 import { NewsMedia } from "@/components/news/NewsMedia";
+import { NewsSponsor } from "@/components/news/NewsSponsor";
+import { AdsCarousel } from "@/components/ads/AdsCarousel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -88,6 +90,8 @@ function StoryPage() {
           </p>
           {news.description ? <p className="whitespace-pre-line leading-relaxed">{news.description}</p> : null}
 
+          <NewsSponsor news={news} />
+
           {news.community_id ? (
             <Link
               to="/chat"
@@ -102,6 +106,11 @@ function StoryPage() {
               <MessageCircle className="size-5" />
             </Link>
           ) : null}
+
+          <div className="pt-2">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Offers near you</p>
+            <AdsCarousel feed={[]} onOpenSite={(url) => window.open(url, "_blank", "noopener")} />
+          </div>
 
           <h2 className="pt-4 font-bold">Comments ({comments.length})</h2>
           <div className="flex gap-2">

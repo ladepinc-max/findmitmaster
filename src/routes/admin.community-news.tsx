@@ -1,3 +1,4 @@
+import { fetchLiveAds, type ShopAd } from "@/lib/shop-ads";
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, Loader2, X } from "lucide-react";
@@ -53,6 +54,12 @@ function ReviewPage() {
 function ReviewCard({ news, onDone }: { news: CommunityNews; onDone: () => void }) {
   const [ad, setAd] = useState({ title: "", tagline: "", cta: "", link: "", rating: "" });
   const [busy, setBusy] = useState(false);
+  const [liveAds, setLiveAds] = useState<ShopAd[]>([]);
+  useEffect(() => { void fetchLiveAds().then(setLiveAds).catch(() => undefined); }, []);
+  const pickAd = (id: string) => {
+    const a = liveAds.find((x) => x.id === id);
+    if (a) setAd((cur) => ({ ...cur, title: a.title, tagline: a.caption ?? "", cta: "View offer", link: `/ad/${a.id}` }));
+  };
   const set = (k: keyof typeof ad) => (e: React.ChangeEvent<HTMLInputElement>) => setAd((a) => ({ ...a, [k]: e.target.value }));
 
   async function act(approve: boolean) {
@@ -80,6 +87,12 @@ function ReviewCard({ news, onDone }: { news: CommunityNews; onDone: () => void 
         <details className="rounded-xl bg-muted p-3">
           <summary className="cursor-pointer text-sm font-bold">Add sponsored ad (optional)</summary>
           <div className="mt-2 space-y-2">
+            {liveAds.length ? (
+              <select className="w-full rounded-md border border-input bg-background p-2 text-sm" defaultValue="" onChange={(e) => pickAd(e.target.value)}>
+                <option value="" disabled>Pick a live FindMit shop advert…</option>
+                {liveAds.map((a) => <option key={a.id} value={a.id}>{a.title}</option>)}
+              </select>
+            ) : null}
             <Input placeholder="Ad title e.g. Truck engine services" value={ad.title} onChange={set("title")} />
             <Input placeholder="Tagline e.g. Certified mechanics near Kaneshie" value={ad.tagline} onChange={set("tagline")} />
             <Input placeholder="Button text e.g. View services" value={ad.cta} onChange={set("cta")} />
