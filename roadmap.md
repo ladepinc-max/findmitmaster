@@ -20,3 +20,7 @@
 - [x] Show product thumbnails and automatically use the selected product photo.
 - [x] Save and display optional advert price and percentage discount.
 - [x] Run advert tests and verify the seller flow with a temporary account; photo and offer saved and seller list restored without making a payment.
+
+# Shop backgrounds
+- [x] Add automatically matched shop-type images while retaining custom photos and opacity.
+- [x] Save adjustable background blur; eleven tests passed and a temporary signed-in shop verified automatic/custom photos, saved blur, storefront rendering, and resetting to automatic on phone and desktop.

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { openShopConversation, useShopInbox } from "@/lib/shop-chat";
+import { ShopBackground } from "@/components/shop/ShopBackground";
 import { ShopChatSheet } from "@/components/shop/ShopChatSheet";
 import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
 import { useCachedState } from "@/lib/page-cache";
@@ -50,6 +51,7 @@ type Shop = {
   opening_hours: string | null;
   bg_photo_url?: string | null;
   bg_opacity?: number | null;
+  bg_blur?: number;
 };
 type Product = { id: string; name: string; description: string | null; price_ghc: number; photo_url: string | null; is_available: boolean };
 const db = supabase as unknown as { from: (t: string) => any };
@@ -99,7 +101,7 @@ function StorefrontPage() {
       // Only paid, unexpired shops are visible to customers.
       const { data, error } = await db
         .from("shops")
-        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours, bg_photo_url, bg_opacity")
+        .select("id, owner_id, handle, name, category, phone, landmark, description, lat, lng, photo_url, subscription_status, subscription_expires_at, is_open, opening_hours, bg_photo_url, bg_opacity, bg_blur")
         .eq("handle", h)
         .eq("subscription_status", "active")
         .gt("subscription_expires_at", new Date().toISOString())
@@ -245,7 +247,8 @@ function StorefrontPage() {
   ];
 
   return (
-    <main className="min-h-dvh bg-background pb-28">
+    <main className="relative isolate min-h-dvh overflow-hidden bg-background pb-28">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"><ShopBackground shopId={shop.id} category={police ? "police" : shop.category} customUrl={bg} opacity={shop.bg_opacity} blur={shop.bg_blur} /></div>
       <header className="sticky top-0 z-10 flex items-center border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
         <button type="button" aria-label="Back" onClick={() => window.history.length > 1 ? window.history.back() : void navigate({ to: "/jobs", search: { tab: "jobs" } })}>
           <ChevronLeft className="size-6" />
@@ -300,8 +303,7 @@ function StorefrontPage() {
           <p className="mt-2 text-sm text-muted-foreground">No services listed yet — call to ask.</p>
         ) : (
           <div className="relative mt-3 overflow-hidden rounded-2xl">
-          {bg ? <img src={bg} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" style={{ opacity: shop.bg_opacity ?? 0.2 }} /> : null}
-          <div className={`relative grid grid-cols-2 gap-3 ${bg ? "p-2" : ""}`}>
+          <div className="relative grid grid-cols-2 gap-3">
             {products.map((p) => (
               <div
                 key={p.id}
@@ -396,8 +398,8 @@ function StorefrontPage() {
       {chat && user ? <ShopChatSheet key={chat.id} conversationId={chat.id} meId={user.id} otherId={shop.owner_id} title={shop.name} subtitle={`@${shop.handle} · ${shop.is_open === false ? "Closed" : "Open"}`} draft={chat.draft} onClose={() => { setChat(null); void inbox.refresh(); }} /> : null}
       {ownerInboxOpen && user ? <ShopInboxSheet shopId={shop.id} meId={user.id} onClose={() => { setOwnerInboxOpen(false); void inbox.refresh(); }} /> : null}
       {zoom ? (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background" onClick={() => setZoom(null)}>
-          {bg ? <img src={bg} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full object-cover" style={{ opacity: shop.bg_opacity ?? 0.2 }} /> : null}
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background" onClick={() => setZoom(null)}>
+          <ShopBackground shopId={shop.id} category={shop.category} customUrl={bg} opacity={shop.bg_opacity} blur={shop.bg_blur} />
           <div className="relative flex min-h-0 flex-1 flex-col">
           <div className="flex justify-end p-3">
             <Button size="icon" variant="ghost" aria-label="Close"><X className="size-6" /></Button>

@@ -1,0 +1,1 @@
+ALTER TABLE public.shops ADD COLUMN IF NOT EXISTS bg_blur integer NOT NULL DEFAULT 0 CHECK (bg_blur BETWEEN 0 AND 20);
