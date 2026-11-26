@@ -25,6 +25,8 @@ import { isEmbedBlocked, openExternal, resolveDestination, useHomeFeed, useQuick
 import { searchWeb, type KnowledgePanel, type WebHit } from "@/lib/web-search.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
+import { SerpResult } from "@/components/home/SerpResult";
+import { relatedSearches } from "@/lib/serp";
 import { FindMitLogo } from "@/components/FindMitLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoriesAccess } from "@/lib/stories-access";
@@ -299,7 +301,7 @@ function HomeScreen() {
             ) : null}
             <div className={filter === "all" || filter === "findmit" ? "" : "hidden"}>
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-wa-green">
-                <span className="size-2 rounded-full bg-wa-green" /> Found on FindMit
+                <span className="size-2 rounded-full bg-wa-green" /> FindMit Spotlight · Verified local
               </h2>
               {hasFindMitHits ? (
                 <ul className="mt-3 space-y-2">
@@ -357,26 +359,19 @@ function HomeScreen() {
                   <Loader2 className="size-4 animate-spin" /> Searching the web…
                 </p>
               ) : webHits && webHits.length > 0 ? (
-                <ul className="mt-3 space-y-2">
+                <div className="mt-1">
                   {webHits.filter((h) => (filter === "news" ? h.kind === "news" : filter === "web" ? h.kind !== "news" : true)).map((h) => (
-                    <li key={h.url}>
-                      <button type="button" onClick={() => openSite(h.url)} className={`${rowCls} w-full items-start text-left`}>
-                        <img
-                          src={`https://icons.duckduckgo.com/ip3/${h.domain}.ico`}
-                          alt=""
-                          className="mt-0.5 size-5 shrink-0 rounded"
-                          loading="lazy"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs text-muted-foreground">{h.domain}</p>
-                          <p className="line-clamp-2 text-sm font-semibold text-primary">{h.title}</p>
-                          {h.snippet ? <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{h.snippet}</p> : null}
-                        </div>
-                        {h.image ? <img src={h.image} alt="" loading="lazy" className="size-16 shrink-0 rounded-lg object-cover" /> : null}
-                      </button>
-                    </li>
+                    <SerpResult key={h.url} hit={h} q={searched ?? ""} onOpen={openSite} />
                   ))}
-                </ul>
+                  <h3 className="mt-5 text-base font-semibold">People also search for</h3>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {relatedSearches(searched ?? "", webHits.map((h) => h.title)).map((r) => (
+                      <button key={r} type="button" onClick={() => void runSearch(r)} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm">
+                        <Search className="size-3.5 text-muted-foreground" /> {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <p className="mt-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
                   No web results for “{searched}”.

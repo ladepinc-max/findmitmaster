@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { AD_SLIDE_MS, adHref, adMediaUrl, discountedAdPrice, countAdClick, fetchLiveAds, type ShopAd } from "@/lib/shop-ads";
+import { AD_SLIDE_MS, adMediaUrl, discountedAdPrice, fetchLiveAds, type ShopAd } from "@/lib/shop-ads";
 import { normalizeUrl, type FeedItem } from "@/lib/home-browser";
 import { useCachedState } from "@/lib/page-cache";
 
@@ -63,8 +63,7 @@ export function AdsCarousel({ feed, onOpenSite }: { feed: FeedItem[]; onOpenSite
     if (current.kind === "shop") {
       const handle = current.ad.shop?.handle;
       if (!handle) return;
-      countAdClick(current.ad.id);
-      void navigate({ href: adHref(handle, current.ad.product_id) });
+      void navigate({ to: "/ad/$id", params: { id: current.ad.id } });
     } else if (current.item.link_url) {
       onOpenSite(normalizeUrl(current.item.link_url));
     }

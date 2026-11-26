@@ -33,6 +33,7 @@ import { Route as ShopsRouteImport } from './routes/shops'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StationsRouteImport } from './routes/stations'
 import { Route as TutorRouteImport } from './routes/tutor'
+import { Route as AdIdRouteImport } from './routes/ad.$id'
 import { Route as AdminClassControlRouteImport } from './routes/admin.class-control'
 import { Route as AdminCommunityNewsRouteImport } from './routes/admin.community-news'
 import { Route as AdminPartnerTvsRouteImport } from './routes/admin.partner-tvs'
@@ -181,6 +182,11 @@ const StationsRoute = StationsRouteImport.update({
 const TutorRoute = TutorRouteImport.update({
   id: '/tutor',
   path: '/tutor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdIdRoute = AdIdRouteImport.update({
+  id: '/ad/$id',
+  path: '/ad/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminClassControlRoute = AdminClassControlRouteImport.update({
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
+  '/ad/$id': typeof AdIdRoute
   '/admin/class-control': typeof AdminClassControlRoute
   '/admin/community-news': typeof AdminCommunityNewsRoute
   '/admin/partner-tvs': typeof AdminPartnerTvsRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
+  '/ad/$id': typeof AdIdRoute
   '/admin/class-control': typeof AdminClassControlRoute
   '/admin/community-news': typeof AdminCommunityNewsRoute
   '/admin/partner-tvs': typeof AdminPartnerTvsRoute
@@ -453,6 +461,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stations': typeof StationsRoute
   '/tutor': typeof TutorRoute
+  '/ad/$id': typeof AdIdRoute
   '/admin/class-control': typeof AdminClassControlRoute
   '/admin/community-news': typeof AdminCommunityNewsRoute
   '/admin/partner-tvs': typeof AdminPartnerTvsRoute
@@ -508,6 +517,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/stations'
     | '/tutor'
+    | '/ad/$id'
     | '/admin/class-control'
     | '/admin/community-news'
     | '/admin/partner-tvs'
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/stations'
     | '/tutor'
+    | '/ad/$id'
     | '/admin/class-control'
     | '/admin/community-news'
     | '/admin/partner-tvs'
@@ -614,6 +625,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/stations'
     | '/tutor'
+    | '/ad/$id'
     | '/admin/class-control'
     | '/admin/community-news'
     | '/admin/partner-tvs'
@@ -668,6 +680,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StationsRoute: typeof StationsRoute
   TutorRoute: typeof TutorRoute
+  AdIdRoute: typeof AdIdRoute
   AdminClassControlRoute: typeof AdminClassControlRoute
   AdminCommunityNewsRoute: typeof AdminCommunityNewsRoute
   AdminPartnerTvsRoute: typeof AdminPartnerTvsRoute
@@ -865,6 +878,13 @@ declare module '@tanstack/react-router' {
       path: '/tutor'
       fullPath: '/tutor'
       preLoaderRoute: typeof TutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ad/$id': {
+      id: '/ad/$id'
+      path: '/ad/$id'
+      fullPath: '/ad/$id'
+      preLoaderRoute: typeof AdIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/class-control': {
@@ -1084,6 +1104,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StationsRoute: StationsRoute,
   TutorRoute: TutorRoute,
+  AdIdRoute: AdIdRoute,
   AdminClassControlRoute: AdminClassControlRoute,
   AdminCommunityNewsRoute: AdminCommunityNewsRoute,
   AdminPartnerTvsRoute: AdminPartnerTvsRoute,
