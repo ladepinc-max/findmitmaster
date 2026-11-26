@@ -3143,6 +3143,7 @@ export type Database = {
           bg_opacity: number
           bg_photo_url: string | null
           category: string
+          com_handle_paid: boolean
           created_at: string
           description: string | null
           handle: string
@@ -3166,6 +3167,7 @@ export type Database = {
           bg_opacity?: number
           bg_photo_url?: string | null
           category?: string
+          com_handle_paid?: boolean
           created_at?: string
           description?: string | null
           handle: string
@@ -3189,6 +3191,7 @@ export type Database = {
           bg_opacity?: number
           bg_photo_url?: string | null
           category?: string
+          com_handle_paid?: boolean
           created_at?: string
           description?: string | null
           handle?: string

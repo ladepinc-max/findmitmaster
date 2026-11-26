@@ -116,6 +116,7 @@ export const SHOP_EXTENSIONS = [
   { value: "school", label: ".school", hint: "Schools and academies", category: "school" },
   { value: "hospital", label: ".hospital", hint: "Hospitals, clinics, pharmacies", category: "clinic" },
   { value: "services", label: ".services", hint: "Mechanics, salons, plumbers…", category: "services" },
+  { value: "com", label: ".com ★", hint: "Premium link — one-time fee added to your first payment", category: null },
 ] as const;
 export type ShopExtension = (typeof SHOP_EXTENSIONS)[number]["value"];
 

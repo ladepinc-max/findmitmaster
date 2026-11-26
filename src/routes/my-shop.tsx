@@ -20,6 +20,7 @@ import { useCategoryFee, useShopCategories } from "@/lib/shop-categories";
 import { captureAccurateLocation } from "@/lib/community-map";
 import { CommunityMapView } from "@/components/chat/CommunityMapView";
 import { startShopCheckout } from "@/lib/shop.functions";
+import { useAppPrice } from "@/lib/pricing";
 import {
   CUSTOM_CATEGORY,
   SHOP_CATEGORIES,
@@ -54,6 +55,7 @@ export const Route = createFileRoute("/my-shop")({
 type Shop = {
   id: string;
   handle: string;
+  com_handle_paid?: boolean;
   name: string;
   category: string;
   phone: string;
@@ -223,7 +225,11 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
   };
 
   const { rows: categoryRows } = useShopCategories();
-  const { amount: regAmount, waived: regWaived } = useCategoryFee(category === CUSTOM_CATEGORY ? customCategory.trim() : category);
+  const { amount: catAmount, waived: catWaived } = useCategoryFee(category === CUSTOM_CATEGORY ? customCategory.trim() : category);
+  const { amount: comAmount } = useAppPrice("shop_com_handle");
+  const comFee = ext === "com" ? comAmount : 0;
+  const regAmount = (catWaived ? 0 : catAmount) + comFee;
+  const regWaived = regAmount <= 0;
   return (
     <section className="space-y-4 rounded-2xl bg-card p-4 shadow-sm">
       <div>
@@ -258,6 +264,11 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
           ))}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{SHOP_EXTENSIONS.find((x) => x.value === ext)?.hint}</p>
+        {ext === "com" ? (
+          <p className="mt-1 text-xs font-medium text-primary">
+            .com link: GH₵ {comAmount} one-time + yearly shop fee GH₵ {catWaived ? 0 : catAmount}. Renewals charge only the shop fee.
+          </p>
+        ) : null}
       </div>
       <div className="rounded-xl border border-border bg-muted/40 p-3">
         <p className="text-xs text-muted-foreground">Your shop link</p>
@@ -329,8 +340,16 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
   );
 }
 
+function useShopTotal(shop: Shop) {
+  const cat = useCategoryFee(shop.category);
+  const com = useAppPrice("shop_com_handle");
+  const comFee = shop.handle.endsWith(".com") && !shop.com_handle_paid ? com.amount : 0;
+  const amount = (cat.waived ? 0 : cat.amount) + comFee;
+  return { amount, waived: amount <= 0 };
+}
+
 function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void }) {
-  const { amount, waived } = useCategoryFee(shop.category);
+  const { amount, waived } = useShopTotal(shop);
   const start = useServerFn(startShopCheckout);
   const [momo, setMomo] = useState("");
   const [busy, setBusy] = useState(false);
@@ -570,7 +589,7 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
 
 function RenewButton({ shop }: { shop: Shop }) {
   const start = useServerFn(startShopCheckout);
-  const { amount, waived } = useCategoryFee(shop.category);
+  const { amount, waived } = useShopTotal(shop);
   return (
     <Button
       className="flex-1"

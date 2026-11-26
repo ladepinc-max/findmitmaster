@@ -12,7 +12,24 @@ async function admin(): Promise<Admin> {
   return supabaseAdmin as unknown as Admin;
 }
 
+async function comHandleFee(db: Admin, shopId: string) {
+  const { data: shop } = await db.from("shops").select("handle, com_handle_paid").eq("id", shopId).maybeSingle();
+  const s = shop as { handle?: string; com_handle_paid?: boolean } | null;
+  if (!s?.handle?.endsWith(".com") || s.com_handle_paid) return 0;
+  const { data } = await db.from("app_pricing").select("amount, is_waived").eq("key", "shop_com_handle").maybeSingle();
+  const row = data as { amount?: number; is_waived?: boolean } | null;
+  return row?.is_waived ? 0 : Number(row?.amount ?? 200);
+}
+
+/** Yearly category fee plus the one-time .com link fee when it is still unpaid. */
 async function shopFee(db: Admin, shopId: string) {
+  const base = await baseShopFee(db, shopId);
+  const com = await comHandleFee(db, shopId);
+  const amount = (base.free ? 0 : base.amount) + com;
+  return { amount, free: amount <= 0 };
+}
+
+async function baseShopFee(db: Admin, shopId: string) {
   const { data: shop } = await db.from("shops").select("category").eq("id", shopId).maybeSingle();
   const category = (shop as { category?: string } | null)?.category ?? "";
   const { data: cat } = await db.from("shop_categories").select("registration_fee, is_waived, is_active").eq("value", category).maybeSingle();
@@ -35,7 +52,7 @@ async function activate(db: Admin, shopId: string) {
   base.setDate(base.getDate() + 365);
   const { error } = await db
     .from("shops")
-    .update({ subscription_status: "active", subscription_expires_at: base.toISOString() })
+    .update({ subscription_status: "active", subscription_expires_at: base.toISOString(), com_handle_paid: true })
     .eq("id", shopId);
   if (error) throw new Error(error.message);
   return base.toISOString();
