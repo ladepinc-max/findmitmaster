@@ -1,8 +1,8 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-type LogoSize = "sm" | "md" | "lg" | "xl";
+type LogoSize = "xs" | "sm" | "md" | "lg" | "xl";
 
-const ICON_SIZES: Record<LogoSize, number> = { sm: 32, md: 64, lg: 120, xl: 180 };
-const FULL_LOGO_SIZES: Record<LogoSize, number> = { sm: 52, md: 80, lg: 120, xl: 180 };
+const ICON_SIZES: Record<LogoSize, number> = { xs: 24, sm: 32, md: 64, lg: 120, xl: 180 };
+const FULL_LOGO_SIZES: Record<LogoSize, number> = { xs: 60, sm: 52, md: 80, lg: 120, xl: 180 };
 const FULL_LOGO_SRC = "/FindMit-Logo-Kente-Crisp-v2.png";
 const ICON_SRC = "/FindMit-Icon-Transparent-FINAL.png";
 

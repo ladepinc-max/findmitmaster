@@ -177,9 +177,9 @@ function HomeScreen() {
     <AppShell>
       {browserUrl ? <InAppBrowser startUrl={browserUrl} onClose={() => setBrowserUrl(null)} onSearch={(q) => void runSearch(q)} /> : null}
 
-      <div className="mx-auto max-w-xl px-4 pb-28 pt-8">
-        <header className="flex items-start justify-between gap-3">
-          <FindMitLogo size="lg" linkToHome={false} />
+      <div className="mx-auto max-w-xl px-4 pb-28 pt-5">
+        <header className="flex items-center justify-between gap-3">
+          <FindMitLogo size="xs" linkToHome={false} />
           <div className="flex flex-col items-end gap-2">
             <LiveTvBadge />
             <button
@@ -194,7 +194,7 @@ function HomeScreen() {
         {recording && profile ? <ComNewsRecorder userId={profile.id} onClose={() => setRecording(false)} /> : null}
 
         <form
-          className="mt-6 flex items-center gap-3 rounded-full bg-secondary px-5 py-3.5"
+          className="mt-4 flex items-center gap-3 rounded-full bg-secondary px-5 py-3.5"
           onSubmit={(e) => {
             e.preventDefault();
             void runSearch();
