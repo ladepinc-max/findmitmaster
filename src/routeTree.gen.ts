@@ -17,6 +17,7 @@ import { Route as ApplyTeacherRouteImport } from './routes/apply-teacher'
 import { Route as AssignSoundsRouteImport } from './routes/assign-sounds'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CommunityMapRouteImport } from './routes/community-map'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as EmployerRouteImport } from './routes/employer'
 import { Route as HomeRouteImport } from './routes/home'
@@ -96,6 +97,11 @@ const AuthRoute = AuthRouteImport.update({
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityMapRoute = CommunityMapRouteImport.update({
+  id: '/community-map',
+  path: '/community-map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreateRoute = CreateRouteImport.update({
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/assign-sounds': typeof AssignSoundsRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/community-map': typeof CommunityMapRoute
   '/create': typeof CreateRoute
   '/employer': typeof EmployerRoute
   '/home': typeof HomeRoute
@@ -348,6 +355,7 @@ export interface FileRoutesByTo {
   '/assign-sounds': typeof AssignSoundsRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/community-map': typeof CommunityMapRoute
   '/create': typeof CreateRoute
   '/employer': typeof EmployerRoute
   '/home': typeof HomeRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/assign-sounds': typeof AssignSoundsRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/community-map': typeof CommunityMapRoute
   '/create': typeof CreateRoute
   '/employer': typeof EmployerRoute
   '/home': typeof HomeRoute
@@ -447,6 +456,7 @@ export interface FileRouteTypes {
     | '/assign-sounds'
     | '/auth'
     | '/chat'
+    | '/community-map'
     | '/create'
     | '/employer'
     | '/home'
@@ -495,6 +505,7 @@ export interface FileRouteTypes {
     | '/assign-sounds'
     | '/auth'
     | '/chat'
+    | '/community-map'
     | '/create'
     | '/employer'
     | '/home'
@@ -543,6 +554,7 @@ export interface FileRouteTypes {
     | '/assign-sounds'
     | '/auth'
     | '/chat'
+    | '/community-map'
     | '/create'
     | '/employer'
     | '/home'
@@ -592,6 +604,7 @@ export interface RootRouteChildren {
   AssignSoundsRoute: typeof AssignSoundsRoute
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
+  CommunityMapRoute: typeof CommunityMapRoute
   CreateRoute: typeof CreateRoute
   EmployerRoute: typeof EmployerRoute
   HomeRoute: typeof HomeRoute
@@ -688,6 +701,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community-map': {
+      id: '/community-map'
+      path: '/community-map'
+      fullPath: '/community-map'
+      preLoaderRoute: typeof CommunityMapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create': {
@@ -968,6 +988,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssignSoundsRoute: AssignSoundsRoute,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
+  CommunityMapRoute: CommunityMapRoute,
   CreateRoute: CreateRoute,
   EmployerRoute: EmployerRoute,
   HomeRoute: HomeRoute,
