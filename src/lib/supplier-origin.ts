@@ -36,9 +36,9 @@ export type SpoofCheckInput = {
   gpsOrigin: SupplierOrigin;
   ipCountry?: string | null;
   networkOrg?: string | null;
-  timeZone?: string;
-  offsetMinutes?: number;
-  momoNumber?: string;
+  timeZone?: string | undefined;
+  offsetMinutes?: number | undefined;
+  momoNumber?: string | undefined;
 };
 
 /** Returns a reason the Ghana rate is refused, or null when every signal agrees with a Ghana location. */
