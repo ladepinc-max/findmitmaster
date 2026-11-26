@@ -8,6 +8,9 @@ import { useAuth } from "@/lib/auth";
 import { shopDirectoryAction, supplierDirectoryAction } from "@/lib/directory";
 import { categoryLabel } from "@/lib/shops";
 import { useCachedState } from "@/lib/page-cache";
+import { useRole } from "@/lib/roles";
+import { useLongPress } from "@/hooks/use-long-press";
+import { AdminDeleteDialog, type DeleteTarget } from "@/components/AdminDeleteDialog";
 
 export const Route = createFileRoute("/shops")({
   head: () => ({
@@ -35,6 +38,9 @@ function ShopsPage() {
   const [hasShop, setHasShop] = useState(false);
   const [hasSupplier, setHasSupplier] = useState(false);
   const [q, setQ] = useState("");
+  const { isAdmin } = useRole();
+  const longPress = useLongPress(isAdmin);
+  const [target, setTarget] = useState<DeleteTarget>(null);
 
   useEffect(() => {
     let active = true;
@@ -101,7 +107,7 @@ function ShopsPage() {
             <ul className="mt-3 space-y-2.5">
               {shopList.map((shop) => (
                 <li key={shop.id}>
-                  <Link to="/$handle" params={{ handle: `@${shop.handle}` }} className="block overflow-hidden rounded-xl border border-border bg-card transition-colors hover:bg-secondary" aria-label={`Open ${shop.name} shop`}>
+                  <Link {...longPress(() => setTarget({ kind: "shop", id: shop.id, name: shop.name }))} to="/$handle" params={{ handle: `@${shop.handle}` }} className="block overflow-hidden rounded-xl border border-border bg-card transition-colors hover:bg-secondary" aria-label={`Open ${shop.name} shop`}>
                     <DirectoryPhoto path={shop.photo_url} cacheKey={shop.id} name={shop.name} kind="shop" />
                     <div className="p-2.5">
                       <p className="line-clamp-2 text-xs font-bold leading-4">{shop.name}</p>
@@ -128,7 +134,7 @@ function ShopsPage() {
             <ul className="mt-3 space-y-2.5">
               {supplierList.map((supplier) => (
                 <li key={supplier.id}>
-                  <Link to="/supplier/$supplierId" params={{ supplierId: supplier.id }} className="block overflow-hidden rounded-xl border border-border bg-card transition-colors hover:bg-secondary" aria-label={`Open ${supplier.name} supplier profile`}>
+                  <Link {...longPress(() => setTarget({ kind: "supplier", id: supplier.id, name: supplier.name }))} to="/supplier/$supplierId" params={{ supplierId: supplier.id }} className="block overflow-hidden rounded-xl border border-border bg-card transition-colors hover:bg-secondary" aria-label={`Open ${supplier.name} supplier profile`}>
                     <DirectoryPhoto path={supplier.photo_url} cacheKey={supplier.id} name={supplier.name} kind="supplier" />
                     <div className="p-2.5">
                       <p className="line-clamp-2 text-xs font-bold leading-4">{supplier.name}</p>
@@ -141,7 +147,13 @@ function ShopsPage() {
             </ul>
           </section>
         </div>
+        {isAdmin ? <p className="mt-6 text-center text-[10px] text-muted-foreground">Admin: long-press a shop or supplier to delete it.</p> : null}
       </div>
+      <AdminDeleteDialog
+        target={target}
+        onClose={() => setTarget(null)}
+        onDeleted={(id) => { setShops((l) => l.filter((x) => x.id !== id)); setSuppliers((l) => l.filter((x) => x.id !== id)); }}
+      />
     </AppShell>
   );
 }

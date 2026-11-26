@@ -7,6 +7,8 @@ import { useCachedState } from "@/lib/page-cache";
 import { fetchApprovedNews, fetchUnreadNotices, markNoticeRead, type CommunityNews, type NewsNotice } from "@/lib/community-news";
 import { timeAgo } from "@/lib/news";
 import { NewsMedia } from "./NewsMedia";
+import { useLongPress } from "@/hooks/use-long-press";
+import { AdminDeleteDialog, type DeleteTarget } from "@/components/AdminDeleteDialog";
 
 /** FindMit's own Community News, replacing the old aggregated feed. */
 export function CommunityNewsFeed() {
@@ -15,6 +17,8 @@ export function CommunityNewsFeed() {
   const [items, setItems] = useCachedState<CommunityNews[] | null>("home:community-news", null);
   const [notices, setNotices] = useState<NewsNotice[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const longPress = useLongPress(isAdmin);
+  const [target, setTarget] = useState<DeleteTarget>(null);
 
   useEffect(() => {
     void fetchApprovedNews(60).then(setItems).catch(() => setItems((v) => v ?? []));
@@ -77,7 +81,7 @@ export function CommunityNewsFeed() {
         <ul className="divide-y divide-border">
           {shown.map((n) => (
             <li key={n.id}>
-              <Link to="/community-news/$id" params={{ id: n.id }} className="flex gap-3 py-4">
+              <Link {...longPress(() => setTarget({ kind: "news", id: n.id, name: n.title }))} to="/community-news/$id" params={{ id: n.id }} className="flex gap-3 py-4">
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="text-[0.65rem] font-bold uppercase tracking-wider text-primary">{n.community_name}</span>
                   <p className="line-clamp-3 font-bold leading-snug">{n.title}</p>
@@ -94,6 +98,11 @@ export function CommunityNewsFeed() {
           ))}
         </ul>
       )}
+      <AdminDeleteDialog
+        target={target}
+        onClose={() => setTarget(null)}
+        onDeleted={() => { void fetchApprovedNews(60).then(setItems); }}
+      />
     </section>
   );
 }
