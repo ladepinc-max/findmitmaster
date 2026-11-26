@@ -188,7 +188,7 @@ function SupplierPayCard({ supplier, onActivated }: { supplier: Supplier; onActi
   const pay = async () => {
     setBusy(true);
     try {
-      const result = await start({ data: { supplierId: supplier.id, momoNumber: momo, callbackUrl: checkoutCallbackUrl() } });
+      const result = await start({ data: { supplierId: supplier.id, momoNumber: momo, callbackUrl: checkoutCallbackUrl(), timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, offsetMinutes: new Date().getTimezoneOffset() } });
       if (result.activated) { toast.success("Your supplier profile is live!"); onActivated(); }
       else if (result.authorizationUrl) openCheckout(result.authorizationUrl);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Could not start payment"); }
@@ -198,7 +198,7 @@ function SupplierPayCard({ supplier, onActivated }: { supplier: Supplier; onActi
     <section className="space-y-4 rounded-2xl bg-card p-5 text-center shadow-sm">
       <Lock className="mx-auto size-9 text-wa-green" />
       <div><p className="font-display text-lg font-bold">{supplier.name}</p><p className="text-sm text-muted-foreground">{expired ? "Your supplier registration has expired. Renew to appear in the directory." : "Your supplier profile is reserved but not live yet."}</p></div>
-      <ul className="space-y-1 text-left text-sm"><li>✓ Listed beside shops with your profile photo</li><li>✓ Customers can call and find your location</li><li>{origin === "gh" ? "🇬🇭 Ghanaian supplier yearly registration" : "🌍 International supplier yearly registration (card)"}</li></ul>
+      <ul className="space-y-1 text-left text-sm"><li>✓ Listed beside shops with your profile photo</li><li>✓ Customers can call and find your location</li><li>{origin === "gh" ? "🇬🇭 Ghanaian supplier yearly registration (Ghana Mobile Money only)" : "🌍 International supplier yearly registration (card)"}</li></ul>
       <p className="font-display text-2xl font-bold">{waived || amount <= 0 ? "Free for now" : formatSupplierFee(origin, amount)}{!waived && amount > 0 ? <span className="text-sm font-normal text-muted-foreground"> / year</span> : null}</p>
       {!waived && amount > 0 && origin === "gh" ? <Input value={momo} onChange={(event) => setMomo(event.target.value)} type="tel" placeholder="Mobile Money number (MTN, Telecel, AT)" /> : null}
       <Button className="w-full" onClick={() => void pay()} disabled={busy}>{busy ? "Please wait…" : waived || amount <= 0 ? "Activate my supplier profile" : expired ? "Renew with Mobile Money" : "Pay with Mobile Money"}</Button>

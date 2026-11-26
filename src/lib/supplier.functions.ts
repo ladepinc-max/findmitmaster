@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { originFromGps, SUPPLIER_CURRENCY, SUPPLIER_FEE_KEY, type SupplierOrigin } from "@/lib/supplier-origin";
+import { getRequest } from "@tanstack/react-start/server";
+import { ghanaSpoofReason, originFromGps, SUPPLIER_CURRENCY, SUPPLIER_FEE_KEY, type SupplierOrigin } from "@/lib/supplier-origin";
 
 const SUPER_ADMIN_EMAILS = ["findmitedutech@gmail.com", "ladepinc@gmail.com"];
 type Admin = { from: (table: string) => any };
@@ -39,6 +40,8 @@ export const startSupplierCheckout = createServerFn({ method: "POST" })
     supplierId: z.string().uuid(),
     momoNumber: z.string().max(20).optional(),
     callbackUrl: z.string().url(),
+    timeZone: z.string().max(64).optional(),
+    offsetMinutes: z.number().int().min(-900).max(900).optional(),
   }).parse(input))
   .handler(async ({ data, context }) => {
     const db = await admin();
@@ -49,6 +52,19 @@ export const startSupplierCheckout = createServerFn({ method: "POST" })
     if (fee.free || SUPER_ADMIN_EMAILS.includes(email)) {
       const expiresAt = await activateSupplier(db, data.supplierId);
       return { activated: true as const, expiresAt, authorizationUrl: null };
+    }
+    if (fee.origin === "gh") {
+      const request = getRequest();
+      const cf = (request as unknown as { cf?: { country?: string; asOrganization?: string } }).cf;
+      const reason = ghanaSpoofReason({
+        gpsOrigin: "gh",
+        ipCountry: request.headers.get("cf-ipcountry") ?? cf?.country ?? null,
+        networkOrg: cf?.asOrganization ?? null,
+        timeZone: data.timeZone,
+        offsetMinutes: data.offsetMinutes,
+        momoNumber: data.momoNumber,
+      });
+      if (reason) throw new Error(reason);
     }
     const secret = process.env["PAYSTACK_SECRET_KEY"];
     if (!secret) throw new Error("Mobile Money payments are not switched on yet. Please try again later.");
@@ -62,7 +78,7 @@ export const startSupplierCheckout = createServerFn({ method: "POST" })
         currency: fee.currency,
         reference,
         callback_url: data.callbackUrl,
-        channels: fee.origin === "gh" ? ["mobile_money", "card"] : ["card"],
+        channels: fee.origin === "gh" ? ["mobile_money"] : ["card"],
         metadata: { kind: "supplier", target_id: data.supplierId, user_id: context.userId, momo_number: (data.momoNumber ?? "").replace(/\D/g, "") },
       }),
     });
@@ -100,6 +116,7 @@ export const completeSupplierCheckout = createServerFn({ method: "POST" })
     const supplierId = transaction.metadata.target_id;
     const fee = await supplierFee(db, supplierId);
     if (!fee.free && ((transaction.amount ?? 0) < fee.amount * 100 || (transaction.currency ?? "GHS").toUpperCase() !== fee.currency)) throw new Error("Payment amount does not match the supplier fee");
+    if (!fee.free && fee.origin === "gh" && transaction.channel !== "mobile_money") throw new Error("The Ghana supplier rate must be paid with Ghanaian Mobile Money");
     const { data: supplier } = await db.from("suppliers").select("owner_id, name").eq("id", supplierId).maybeSingle();
     if (!supplier || (supplier as { owner_id: string }).owner_id !== context.userId) throw new Error("Supplier profile not found");
     const { error } = await db.from("supplier_payments").insert({
