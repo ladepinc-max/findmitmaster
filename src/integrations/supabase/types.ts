@@ -1190,6 +1190,65 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_reports: {
+        Row: {
+          accuracy_m: number | null
+          created_at: string
+          description: string | null
+          id: string
+          incident_type: string
+          lat: number | null
+          lng: number | null
+          media_kind: string | null
+          media_path: string | null
+          reporter_id: string
+          reporter_phone: string | null
+          shop_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          incident_type: string
+          lat?: number | null
+          lng?: number | null
+          media_kind?: string | null
+          media_path?: string | null
+          reporter_id: string
+          reporter_phone?: string | null
+          shop_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          incident_type?: string
+          lat?: number | null
+          lng?: number | null
+          media_kind?: string | null
+          media_path?: string | null
+          reporter_id?: string
+          reporter_phone?: string | null
+          shop_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_reports_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employer_credits: {
         Row: {
           contacts_remaining: number

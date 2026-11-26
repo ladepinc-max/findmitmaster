@@ -52,9 +52,11 @@ interface Props {
   onBack: () => void;
   onChanged: () => void;
   onToggleInfo?: () => void;
+  autoCall?: CallKind | undefined;
 }
 
-export function ChatWindow({ conversationId, me, other, onBack, onChanged, onToggleInfo }: Props) {
+export function ChatWindow({ conversationId, me, other, onBack, onChanged, onToggleInfo, autoCall }: Props) {
+  const autoCalled = useRef(false);
   const [loading, setLoading] = useState(true);
   // Last-shown messages paint instantly; the fetch below only merges changes.
   const [messages, setMessages] = useCachedState<ChatMessage[]>(`chat:conv:${conversationId}`, [], (rows) => {
@@ -192,6 +194,13 @@ export function ChatWindow({ conversationId, me, other, onBack, onChanged, onTog
       toast.error("Could not start the call");
     }
   };
+
+  useEffect(() => {
+    if (!autoCall || autoCalled.current) return;
+    autoCalled.current = true;
+    void placeCall(autoCall);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoCall]);
 
   // No answer after 30s counts as a missed call.
   useEffect(() => {

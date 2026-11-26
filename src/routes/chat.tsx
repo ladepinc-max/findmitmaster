@@ -40,7 +40,8 @@ import {
 
 
 export const Route = createFileRoute("/chat")({
-  validateSearch: (search: Record<string, unknown>): { c?: string | undefined; ama?: "1" | undefined; community?: string | undefined } => ({
+  validateSearch: (search: Record<string, unknown>): { c?: string | undefined; ama?: "1" | undefined; community?: string | undefined; call?: "video" | undefined } => ({
+    call: search["call"] === "video" ? ("video" as const) : undefined,
     community: typeof search["community"] === "string" ? (search["community"] as string) : undefined,
     c: typeof search['c'] === "string" ? (search['c'] as string) : undefined,
     ama: search["ama"] === "1" || search["ama"] === 1 ? ("1" as const) : undefined,
@@ -67,7 +68,7 @@ function ChatPage() {
 
 function ChatSurface() {
   const { profile } = useAuth();
-  const { c: initialConversationId, ama: openAma } = Route.useSearch();
+  const { c: initialConversationId, ama: openAma, call: autoCall } = Route.useSearch();
   const [conversations, setConversations] = useCachedState<ConversationSummary[]>("chat:conversations", []);
   const [groups, setGroups] = useCachedState<GroupSummary[]>("chat:groups", []);
   const [communities, setCommunities] = useCachedState<CommunitySummary[]>("chat:communities", []);
@@ -360,6 +361,7 @@ function ChatSurface() {
           <ChatWindow
             key={activeId}
             conversationId={activeId}
+            autoCall={autoCall && activeId === initialConversationId ? autoCall : undefined}
             me={me}
             other={activeOther}
             onBack={() => {

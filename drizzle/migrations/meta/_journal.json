@@ -288,6 +288,13 @@
       "when": 1795698345942,
       "tag": "0040_supplier_origin_fees",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795700573869,
+      "tag": "0041_station_emergency_reports",
+      "breakpoints": true
     }
   ]
 }

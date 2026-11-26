@@ -26,3 +26,4 @@
 
 - Shop registration fees come from the admin-managed shop_categories table (per-category fee, big-shop flag, waiver); unlisted owner-written categories fall back to app_pricing.shop_registration, and server checkout re-reads the fee — keeps admin pricing authoritative.
 - Suppliers use their own owner-scoped profiles and payments but share shop category fees and media storage; only active, unexpired suppliers appear in the public split directory — mirrors shop visibility without mixing supplier records into storefront handles.
+- Police and fire station reports go to the private emergency_reports table and emergency-evidence bucket (station-owner-only RLS, edits blocked by trigger); stationKind() in src/lib/emergency-reports.ts decides which shops get the reporter — keeps evidence untampered and off the public storefront.

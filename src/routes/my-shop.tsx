@@ -1,4 +1,6 @@
 import { openCheckout, checkoutCallbackUrl } from "@/lib/open-checkout";
+import { EmergencyReportsDesk } from "@/components/emergency/EmergencyReportsDesk";
+import { stationKind } from "@/lib/emergency-reports";
 import policeCrest from "@/assets/ghana-police-crest.png.asset.json";
 import { useCachedState } from "@/lib/page-cache";
 import { useCallback, useEffect, useState } from "react";
@@ -514,6 +516,7 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
           {left <= 30 ? <RenewButton shop={shop} /> : null}
         </div>
       </section>
+      {stationKind(shop) ? <EmergencyReportsDesk shopId={shop.id} /> : null}
       <ShopBackgroundEditor shop={shop} userId={userId} />
 
       {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}

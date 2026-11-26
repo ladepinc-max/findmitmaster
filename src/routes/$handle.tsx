@@ -12,6 +12,9 @@ import policeCrest from "@/assets/ghana-police-crest.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { EmergencyReporter } from "@/components/emergency/EmergencyReporter";
+import { STATION_INCIDENTS, stationKind } from "@/lib/emergency-reports";
+import { Flame, Wind, LifeBuoy, TriangleAlert } from "lucide-react";
 const LiveNavigation = lazy(() => import("@/components/chat/LiveNavigation").then((m) => ({ default: m.LiveNavigation })));
 import { categoryEmoji, categoryLabel, isPoliceShop, normaliseHandle, shopPhotoUrl, priceLabel } from "@/lib/shops";
 
@@ -81,6 +84,7 @@ function StorefrontPage() {
   const [thumbs, setThumbs] = useCachedState<Record<string, string | null>>(`shop:${h}:thumbs`, {});
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [report, setReport] = useState<string | null>(null);
   const cartKey = `findmit:cart:${h}`;
   useEffect(() => {
     try { const raw = localStorage.getItem(cartKey); setCart(raw ? (JSON.parse(raw) as CartItem[]) : []); } catch { /* ignore */ }
@@ -236,15 +240,26 @@ function StorefrontPage() {
     );
   };
 
-  const police = isPoliceShop(shop);
+  const station = stationKind(shop);
+  const police = isPoliceShop(shop) || station === "fire";
   const tel = `tel:${shop.phone.replace(/\s/g, "")}`;
   const avatar = police ? policeCrest.url : cover;
-  const policeServices = [
-    { label: "Report Theft", Icon: ShieldAlert, tone: "text-orange-400" },
-    { label: "Domestic Case", Icon: HomeIcon, tone: "text-rose-400" },
-    { label: "Lost ID", Icon: IdCard, tone: "text-sky-400" },
-    { label: "Community Help", Icon: Users, tone: "text-emerald-400" },
-  ];
+  const icons = station === "fire"
+    ? [{ Icon: Flame, tone: "text-orange-500" }, { Icon: Wind, tone: "text-amber-400" }, { Icon: LifeBuoy, tone: "text-sky-400" }, { Icon: TriangleAlert, tone: "text-rose-400" }]
+    : [{ Icon: ShieldAlert, tone: "text-orange-400" }, { Icon: HomeIcon, tone: "text-rose-400" }, { Icon: IdCard, tone: "text-sky-400" }, { Icon: Users, tone: "text-emerald-400" }];
+  const policeServices = STATION_INCIDENTS[station ?? "police"].map((label, i) => ({ label, ...icons[i]! }));
+  const openReporter = (label: string) => {
+    if (!session || !user) { toast("Sign in to send a report"); return void navigate({ to: "/auth" }); }
+    if (user.id === shop.owner_id) { toast("This is your station — reports appear in Manage shop"); return; }
+    setReport(label);
+  };
+  const goLive = async () => {
+    if (!user) return;
+    try {
+      const id = await openShopConversation(shop.id, user.id, shop.owner_id);
+      void navigate({ to: "/chat", search: { c: id, call: "video" } });
+    } catch { toast.error("Could not reach the station — use the call button"); }
+  };
 
   return (
     <main className="relative isolate min-h-dvh overflow-hidden bg-background pb-28">
@@ -291,13 +306,14 @@ function StorefrontPage() {
           <>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {policeServices.map(({ label, Icon, tone }) => (
-                <a key={label} href={tel} className="flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl bg-card p-3 text-center shadow-sm">
+                <button type="button" key={label} onClick={() => openReporter(label)} className="flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl bg-card p-3 text-center shadow-sm">
                   <Icon className={`size-14 ${tone}`} strokeWidth={1.75} />
                   <span className="text-sm font-semibold">{label}</span>
-                </a>
+                </button>
               ))}
             </div>
-            <p className="mt-4 text-center text-sm text-muted-foreground">Call your station for assistance</p>
+            <p className="mt-4 text-center text-sm text-muted-foreground">Tap a button to send pictures, video or a report — or call the station</p>
+            {report && user && station ? <EmergencyReporter kind={station} shop={shop} incident={report} userId={user.id} defaultPhone={user.phone ? `+${user.phone.replace(/^\+/, "")}` : ""} onGoLive={() => void goLive()} onClose={() => setReport(null)} /> : null}
           </>
         ) : products.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No services listed yet — call to ask.</p>
