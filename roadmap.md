@@ -10,6 +10,7 @@
 - [ ] Track shop visits and shop-specific unread messages.
 - [ ] Verify stock, closed-shop access, and in-shop conversation.
 # Home browser
+- [x] Replace the map icon with the uploaded image; cache fixed interface images and avatars with automatic replacement; replacement tests and phone/desktop checks completed with a temporary account.
 - [x] Phoenix-style Home matching design, in-app browser, admin Quick Access + news/ads feed.
 - [x] Move Community Map from Chat to a globe-and-pin beside Home voice search; phone and desktop navigation verified.
 - [ ] Repair Manage shop opening an error screen — both Register and Manage open correctly with a temporary signed-in account; current telemetry contains no captured runtime error; blocked on a screenshot of the user's error screen to identify the failure.

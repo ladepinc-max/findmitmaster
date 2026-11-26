@@ -1,4 +1,5 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { CachedInterfaceImage } from "@/components/CachedInterfaceImage";
 type LogoSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const ICON_SIZES: Record<LogoSize, number> = { xs: 24, sm: 32, md: 64, lg: 120, xl: 180 };
@@ -22,7 +23,8 @@ export function FindMitLogo({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const image = (
-    <img
+    <CachedInterfaceImage
+      cacheKey={showText ? "findmit-full-logo" : "findmit-icon"}
       src={showText ? FULL_LOGO_SRC : ICON_SRC}
       alt="FindMit"
       width={px}

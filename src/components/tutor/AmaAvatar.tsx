@@ -1,4 +1,5 @@
 import amaDefault from "@/assets/ama-tutor.png";
+import { CachedInterfaceImage } from "@/components/CachedInterfaceImage";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -23,7 +24,7 @@ export function AmaAvatar({ src, name, speaking = false, size = "lg", className 
           speaking ? "ama-speaking" : "ama-idle",
         )}
       >
-        <img
+        <CachedInterfaceImage cacheKey="findmit-tutor-avatar"
           src={src || amaDefault}
           alt={name}
           loading="lazy"

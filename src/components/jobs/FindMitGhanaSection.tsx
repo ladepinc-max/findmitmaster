@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CachedInterfaceImage } from "@/components/CachedInterfaceImage";
 import { AdminLongPressDelete } from "@/components/admin/AdminLongPressDelete";
 import { useRole } from "@/lib/roles";
 import { useNavigate } from "@tanstack/react-router";
@@ -186,7 +187,7 @@ export function FindMitGhanaSection({
           <ShieldCheck className="size-4" /> FindMit Ghana
         </div>
         <div className="relative overflow-hidden rounded-[2rem]">
-          <img
+          <CachedInterfaceImage cacheKey="findmit-graduates-meeting"
             src={heroAsset.url}
             alt="Verified FindMit professionals working together in an Accra office"
             className="aspect-[4/3] w-full object-cover sm:aspect-[16/10]"

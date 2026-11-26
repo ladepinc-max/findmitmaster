@@ -1,4 +1,5 @@
 import { clearPageCache } from "@/lib/page-cache";
+import { clearInterfaceImages } from "@/lib/interface-image-cache";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
@@ -108,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     clearPageCache();
+    await clearInterfaceImages();
     try { localStorage.removeItem(PROFILE_KEY); } catch { /* ignore */ }
     await supabase.auth.signOut();
     setProfile(null);

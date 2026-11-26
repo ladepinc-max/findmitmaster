@@ -1,4 +1,6 @@
 import { useState } from "react";
+import mapImage from "@/assets/community-map.jpg.asset.json";
+import { CachedInterfaceImage } from "@/components/CachedInterfaceImage";
 import { LibraryResults } from "@/components/home/LibraryResults";
 import { CommunityNewsFeed } from "@/components/news/CommunityNewsFeed";
 import { AdsCarousel } from "@/components/ads/AdsCarousel";
@@ -10,7 +12,6 @@ import {
   Briefcase,
   Globe,
   Loader2,
-  MapPin,
   Mic,
   Radio,
   Search,
@@ -223,10 +224,7 @@ function HomeScreen() {
             </Button>
             <Button asChild size="icon" variant="ghost" className="size-8 rounded-full text-wa-green">
               <Link to="/community-map" aria-label="Community map" title="Community map">
-                <span className="relative size-6" aria-hidden="true">
-                  <Globe className="absolute left-0 top-0 size-5" />
-                  <MapPin className="absolute bottom-0 right-0 size-3.5 fill-secondary" strokeWidth={2.5} />
-                </span>
+                <CachedInterfaceImage cacheKey="community-map-button" src={mapImage.url} alt="" aria-hidden="true" className="size-8 rounded-full object-contain" />
               </Link>
             </Button>
           </div>
