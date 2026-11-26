@@ -6,6 +6,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Camera, Check, Copy, Eye, Package, MessageCircle, Loader2, Lock, MapPin, Plus, Store, Trash2, Wallet, X } from "lucide-react";
 import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
+import { ShopAdsManager } from "@/components/ads/ShopAdsManager";
 import { ShopAccountsSheet } from "@/components/shop/ShopAccountsSheet";
 import { activeProductCount, useShopInbox } from "@/lib/shop-chat";
 import { toast } from "sonner";
@@ -465,6 +466,7 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
         <div className="rounded-lg border border-border bg-card p-3"><Package className="mb-2 size-5 text-wa-green" /><p className="text-xl font-bold">{activeProductCount(products)}</p><p className="text-xs text-muted-foreground">Active Products</p></div>
         <Button variant="outline" className="h-auto min-w-0 flex-col items-start gap-0 rounded-lg bg-card p-3 text-left" onClick={() => setInboxOpen(true)}><MessageCircle className="mb-2 size-5 text-primary" /><span className="text-xl font-bold">{inbox.unread}</span><span className="whitespace-normal text-xs font-normal text-muted-foreground">New Messages</span></Button>
       </div>
+      {!isPoliceShop(shop) ? <ShopAdsManager shopId={shop.id} userId={userId} products={products.map((p) => ({ id: p.id, name: p.name }))} /> : null}
       <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
         <div className="flex items-center gap-2">
           {isPoliceShop(shop) ? (

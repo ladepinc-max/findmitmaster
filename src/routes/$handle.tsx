@@ -129,6 +129,17 @@ function StorefrontPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [h]);
 
+  // Opened from an advert: pop the advertised product open once, then the shop stays browsable behind it.
+  const adProductOpened = useRef(false);
+  useEffect(() => {
+    if (adProductOpened.current || !products.length) return;
+    const wanted = new URLSearchParams(window.location.search).get("product");
+    const p = wanted ? products.find((x) => x.id === wanted) : undefined;
+    if (!p) return;
+    adProductOpened.current = true;
+    setZoom(p);
+  }, [products]);
+
   if (state === "loading")
     return (
       <main className="flex min-h-dvh items-center justify-center bg-background">

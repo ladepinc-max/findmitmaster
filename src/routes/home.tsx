@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { LibraryResults } from "@/components/home/LibraryResults";
 import { CommunityNewsFeed } from "@/components/news/CommunityNewsFeed";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { AdsCarousel } from "@/components/ads/AdsCarousel";
+import { ComNewsRecorder } from "@/components/news/ComNewsRecorder";
+import { useAuth } from "@/lib/auth";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   Briefcase,
@@ -11,10 +14,11 @@ import {
   Radio,
   Search,
   Store,
+  Video,
 } from "lucide-react";
 import { toast } from "sonner";
 import { InAppBrowser } from "@/components/home/InAppBrowser";
-import { isEmbedBlocked, normalizeUrl, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
+import { isEmbedBlocked, resolveDestination, useHomeFeed, useQuickApps } from "@/lib/home-browser";
 import { searchWeb, type WebHit } from "@/lib/web-search.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
@@ -86,6 +90,9 @@ function HomeScreen() {
   const [browserUrl, setBrowserUrl] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const { apps } = useQuickApps();
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [recording, setRecording] = useState(false);
   const { items: feed } = useHomeFeed();
   const searchWebFn = useServerFn(searchWeb);
   const [webHits, setWebHits] = useState<WebHit[] | null>(null);
@@ -171,9 +178,20 @@ function HomeScreen() {
       {browserUrl ? <InAppBrowser startUrl={browserUrl} onClose={() => setBrowserUrl(null)} onSearch={(q) => void runSearch(q)} /> : null}
 
       <div className="mx-auto max-w-xl px-4 pb-28 pt-8">
-        <div className="flex flex-col items-center">
+        <header className="flex items-start justify-between gap-3">
           <FindMitLogo size="lg" linkToHome={false} />
-        </div>
+          <div className="flex flex-col items-end gap-2">
+            <LiveTvBadge />
+            <button
+              type="button"
+              onClick={() => (profile ? setRecording(true) : void navigate({ to: "/auth" }))}
+              className="flex items-center gap-1.5 rounded-full bg-destructive px-4 py-1.5 text-sm font-bold text-destructive-foreground shadow-md"
+            >
+              <Video className="size-4" /> ComNews
+            </button>
+          </div>
+        </header>
+        {recording && profile ? <ComNewsRecorder userId={profile.id} onClose={() => setRecording(false)} /> : null}
 
         <form
           className="mt-6 flex items-center gap-3 rounded-full bg-secondary px-5 py-3.5"
@@ -206,9 +224,6 @@ function HomeScreen() {
           )}
         </form>
 
-        <div className="mt-2 flex justify-end">
-          <LiveTvBadge />
-        </div>
 
         {searched ? <LibraryResults q={searched} onOpen={openSite} /> : null}
         {results ? (
@@ -302,13 +317,13 @@ function HomeScreen() {
         ) : null}
 
         <h2 className="mt-6 font-display text-2xl font-bold">Quick Access</h2>
-        <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2">
-          {apps.map((a) => (
+        <div className="mt-3 grid grid-cols-4 gap-x-3 gap-y-4">
+          {apps.slice(0, 12).map((a) => (
             <button
               key={a.id}
               type="button"
               onClick={() => openSite(a.url)}
-              className="flex w-[4.6rem] shrink-0 flex-col items-center gap-2 rounded-2xl bg-card p-2.5 shadow-md"
+              className="flex min-w-0 flex-col items-center gap-1.5"
             >
               <span
                 className="flex size-12 items-center justify-center rounded-full text-xl font-black text-primary-foreground"
@@ -323,33 +338,12 @@ function HomeScreen() {
 
         <Link
           to="/shops"
-          className="mt-8 flex w-full items-center justify-center rounded-full bg-wa-green py-4 text-lg font-bold text-primary-foreground shadow-md"
+          className="mt-6 flex w-full items-center justify-center rounded-full bg-wa-green py-4 text-lg font-bold text-primary-foreground shadow-md"
         >
           Find suppliers on FindMit
         </Link>
 
-        {feed.length > 0 ? (
-          <section className="mt-8 space-y-4">
-            <h2 className="font-display text-xl font-bold">For you</h2>
-            {feed.map((f) => (
-              <article
-                key={f.id}
-                onClick={() => (f.link_url ? openSite(normalizeUrl(f.link_url)) : undefined)}
-                className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
-                role={f.link_url ? "link" : undefined}
-              >
-                {f.image_url ? <img src={f.image_url} alt="" className="aspect-video w-full object-cover" loading="lazy" /> : null}
-                <div className="p-4">
-                  <span className="text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground">
-                    {f.kind === "ad" ? "Sponsored" : "News"}
-                  </span>
-                  <h3 className="mt-1 font-bold leading-snug">{f.title}</h3>
-                  {f.body ? <p className="mt-1 text-sm text-muted-foreground">{f.body}</p> : null}
-                </div>
-              </article>
-            ))}
-          </section>
-        ) : null}
+        <AdsCarousel feed={feed} onOpenSite={openSite} />
 
         <CommunityNewsFeed />
       </div>

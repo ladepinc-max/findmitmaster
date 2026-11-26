@@ -1,22 +1,20 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Bell, Loader2, ShieldCheck, Video, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { useCachedState } from "@/lib/page-cache";
 import { fetchApprovedNews, fetchUnreadNotices, markNoticeRead, type CommunityNews, type NewsNotice } from "@/lib/community-news";
 import { timeAgo } from "@/lib/news";
-import { ComNewsRecorder } from "./ComNewsRecorder";
 import { NewsMedia } from "./NewsMedia";
 
 /** FindMit's own Community News, replacing the old aggregated feed. */
 export function CommunityNewsFeed() {
   const { profile } = useAuth();
   const { isAdmin } = useRole();
-  const navigate = useNavigate();
   const [items, setItems] = useCachedState<CommunityNews[] | null>("home:community-news", null);
   const [notices, setNotices] = useState<NewsNotice[]>([]);
-  const [recording, setRecording] = useState(false);
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     void fetchApprovedNews(60).then(setItems).catch(() => setItems((v) => v ?? []));
@@ -26,6 +24,9 @@ export function CommunityNewsFeed() {
     if (!profile) return;
     void fetchUnreadNotices(profile.id).then(setNotices);
   }, [profile]);
+
+  const communities = useMemo(() => [...new Set((items ?? []).map((n) => n.community_name))].slice(0, 15), [items]);
+  const shown = (items ?? []).filter((n) => filter === "all" || n.community_name === filter);
 
   const dismiss = (n: NewsNotice) => {
     setNotices((list) => list.filter((x) => x.id !== n.id));
@@ -42,13 +43,6 @@ export function CommunityNewsFeed() {
               <ShieldCheck className="size-4" /> Review
             </Link>
           ) : null}
-          <button
-            type="button"
-            onClick={() => (profile ? setRecording(true) : void navigate({ to: "/auth" }))}
-            className="flex items-center gap-1.5 rounded-full bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground shadow-md"
-          >
-            <Video className="size-4" /> ComNews
-          </button>
         </div>
       </div>
 
@@ -60,13 +54,28 @@ export function CommunityNewsFeed() {
         </div>
       ))}
 
+      {communities.length > 1 ? (
+        <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+          {["all", ...communities].map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setFilter(c)}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold ${filter === c ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
+            >
+              {c === "all" ? "For You" : c}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {items === null ? (
         <div className="flex justify-center py-10"><Loader2 className="size-6 animate-spin text-primary" /></div>
       ) : items.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">No community news yet. Tap ComNews to report what is happening around you.</p>
       ) : (
         <ul className="divide-y divide-border">
-          {items.map((n) => (
+          {shown.map((n) => (
             <li key={n.id}>
               <Link to="/community-news/$id" params={{ id: n.id }} className="flex gap-3 py-4">
                 <div className="flex min-w-0 flex-1 flex-col">
@@ -85,7 +94,6 @@ export function CommunityNewsFeed() {
           ))}
         </ul>
       )}
-      {recording && profile ? <ComNewsRecorder userId={profile.id} onClose={() => setRecording(false)} /> : null}
     </section>
   );
 }

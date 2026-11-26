@@ -2895,6 +2895,72 @@ export type Database = {
           },
         ]
       }
+      shop_ads: {
+        Row: {
+          caption: string
+          clicks: number
+          created_at: string
+          expires_at: string | null
+          id: string
+          media_path: string
+          media_type: string
+          owner_id: string
+          paid_reference: string | null
+          product_id: string | null
+          shop_id: string
+          status: string
+          title: string
+          weeks: number
+        }
+        Insert: {
+          caption?: string
+          clicks?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          media_path: string
+          media_type: string
+          owner_id: string
+          paid_reference?: string | null
+          product_id?: string | null
+          shop_id: string
+          status?: string
+          title: string
+          weeks?: number
+        }
+        Update: {
+          caption?: string
+          clicks?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          media_path?: string
+          media_type?: string
+          owner_id?: string
+          paid_reference?: string | null
+          product_id?: string | null
+          shop_id?: string
+          status?: string
+          title?: string
+          weeks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_ads_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_ads_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_conversations: {
         Row: {
           conversation_id: string
@@ -4119,6 +4185,7 @@ export type Database = {
         Returns: undefined
       }
       increment_post_view: { Args: { _post_id: string }; Returns: undefined }
+      increment_shop_ad_click: { Args: { _ad_id: string }; Returns: undefined }
       increment_shop_view: { Args: { _shop_id: string }; Returns: undefined }
       increment_talent_view: {
         Args: { _talent_profile_id: string }
