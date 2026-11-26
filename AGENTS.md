@@ -23,3 +23,5 @@
 - Interface images use CachedInterfaceImage and avatars use useAvatarUrl with a separate Cache Storage slot per logical image or avatar owner; network refresh replaces bytes, offline reads use blobs, and sign-out clears images to prevent cross-account persistence without changing the existing app-shell worker.
 - Define AuthContext in the non-component auth-context module, separate from AuthProvider and useAuth, so Fast Refresh preserves the shared context identity for mounted routes.
 - Shop backgrounds resolve custom photos before a shared category-matched image library; the shared cached background layer applies saved opacity and blur in previews, storefronts, and product views so all shops have a consistent fallback without per-visit image generation.
+
+- Shop registration fees come from the admin-managed shop_categories table (per-category fee, big-shop flag, waiver); unlisted owner-written categories fall back to app_pricing.shop_registration, and server checkout re-reads the fee — keeps admin pricing authoritative.

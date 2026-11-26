@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { useAppPrice } from "@/lib/pricing";
+import { useCategoryFee, useShopCategories } from "@/lib/shop-categories";
 import { captureAccurateLocation } from "@/lib/community-map";
 import { CommunityMapView } from "@/components/chat/CommunityMapView";
 import { startShopCheckout } from "@/lib/shop.functions";
@@ -222,7 +222,8 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
     }
   };
 
-  const { amount: regAmount, waived: regWaived } = useAppPrice("shop_registration");
+  const { rows: categoryRows } = useShopCategories();
+  const { amount: regAmount, waived: regWaived } = useCategoryFee(category === CUSTOM_CATEGORY ? customCategory.trim() : category);
   return (
     <section className="space-y-4 rounded-2xl bg-card p-4 shadow-sm">
       <div>
@@ -269,7 +270,7 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
           {name.trim().length < 2
             ? "Type your business name above — your link is made automatically"
             : available === true
-              ? `Available: findmitmaster.lovable.app/@${h}`
+              ? `Available: findmit.world/@${h}`
               : available === false
                 ? "Could not find a free link — change the business name slightly"
                 : "Checking…"}
@@ -280,9 +281,9 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
         value={category}
         onChange={(e) => setCategory(e.target.value)}
       >
-        {SHOP_CATEGORIES.map((c) => (
+        {(categoryRows.some((c) => c.is_active) ? categoryRows.filter((c) => c.is_active) : SHOP_CATEGORIES.map((c) => ({ ...c, is_big_shop: false }))).map((c) => (
           <option key={c.value} value={c.value}>
-            {c.emoji} {c.label}
+            {c.emoji} {c.label}{c.is_big_shop ? " · Big shop" : ""}
           </option>
         ))}
         <option value={CUSTOM_CATEGORY}>✏️ Write yours…</option>
@@ -329,7 +330,7 @@ function RegisterForm({ userId, onCreated }: { userId: string; onCreated: () => 
 }
 
 function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void }) {
-  const { amount, waived } = useAppPrice("shop_registration");
+  const { amount, waived } = useCategoryFee(shop.category);
   const start = useServerFn(startShopCheckout);
   const [momo, setMomo] = useState("");
   const [busy, setBusy] = useState(false);
@@ -364,7 +365,7 @@ function PayCard({ shop, onActivated }: { shop: Shop; onActivated: () => void })
         </p>
       </div>
       <ul className="space-y-1 text-left text-sm">
-        <li>✓ Your shop link findmitmaster.lovable.app/@{shop.handle}</li>
+        <li>✓ Your shop link findmit.world/@{shop.handle}</li>
         <li>✓ Pin on the map with an "Enter Shop" button</li>
         <li>✓ Shop page with products and a Call button</li>
         <li>✓ Found when customers search @{shop.handle}</li>
@@ -569,7 +570,7 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
 
 function RenewButton({ shop }: { shop: Shop }) {
   const start = useServerFn(startShopCheckout);
-  const { amount, waived } = useAppPrice("shop_registration");
+  const { amount, waived } = useCategoryFee(shop.category);
   return (
     <Button
       className="flex-1"

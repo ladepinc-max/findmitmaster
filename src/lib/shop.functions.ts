@@ -12,7 +12,15 @@ async function admin(): Promise<Admin> {
   return supabaseAdmin as unknown as Admin;
 }
 
-async function shopFee(db: Admin) {
+async function shopFee(db: Admin, shopId: string) {
+  const { data: shop } = await db.from("shops").select("category").eq("id", shopId).maybeSingle();
+  const category = (shop as { category?: string } | null)?.category ?? "";
+  const { data: cat } = await db.from("shop_categories").select("registration_fee, is_waived, is_active").eq("value", category).maybeSingle();
+  const c = cat as { registration_fee?: number; is_waived?: boolean; is_active?: boolean } | null;
+  if (c?.is_active) {
+    const amount = Number(c.registration_fee ?? DEFAULT_FEE);
+    return { amount, free: Boolean(c.is_waived) || amount <= 0 };
+  }
   const { data } = await db.from("app_pricing").select("amount, is_waived").eq("key", "shop_registration").maybeSingle();
   const row = data as { amount?: number; is_waived?: boolean } | null;
   const amount = Number(row?.amount ?? DEFAULT_FEE);
@@ -45,7 +53,7 @@ export const startShopCheckout = createServerFn({ method: "POST" })
     if (!shop || (shop as { owner_id: string }).owner_id !== context.userId) throw new Error("Shop not found");
 
     const email = ((context.claims as { email?: string } | null)?.email ?? "").toLowerCase();
-    const fee = await shopFee(db);
+    const fee = await shopFee(db, data.shopId);
     if (fee.free || SUPER_ADMIN_EMAILS.includes(email)) {
       const expiresAt = await activate(db, data.shopId);
       return { activated: true as const, expiresAt, authorizationUrl: null };
@@ -99,7 +107,7 @@ export const completeShopCheckout = createServerFn({ method: "POST" })
     if (!payload.status || tx?.status !== "success") throw new Error("Payment could not be verified");
     if (tx.metadata?.kind !== "shop" || !tx.metadata.target_id) throw new Error("This payment is not for a shop");
     if (tx.metadata.user_id !== context.userId) throw new Error("This payment belongs to another account");
-    const fee = await shopFee(db);
+    const fee = await shopFee(db, tx.metadata.target_id);
     if (!fee.free && (tx.amount ?? 0) < fee.amount * 100) throw new Error("Payment amount does not match the shop fee");
 
     const shopId = tx.metadata.target_id;

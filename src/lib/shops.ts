@@ -87,8 +87,7 @@ export function daysLeft(expires: string | null, now = new Date()) {
 }
 
 export function shopLink(handle: string) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://findmitmaster.lovable.app";
-  return `${origin}/@${handle}`;
+  return `https://findmit.world/@${handle}`;
 }
 
 export async function shopPhotoUrl(path: string | null) {

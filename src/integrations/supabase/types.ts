@@ -2967,6 +2967,48 @@ export type Database = {
           },
         ]
       }
+      shop_categories: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          is_active: boolean
+          is_big_shop: boolean
+          is_waived: boolean
+          label: string
+          registration_fee: number
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          is_big_shop?: boolean
+          is_waived?: boolean
+          label: string
+          registration_fee?: number
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          is_big_shop?: boolean
+          is_waived?: boolean
+          label?: string
+          registration_fee?: number
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       shop_conversations: {
         Row: {
           conversation_id: string
