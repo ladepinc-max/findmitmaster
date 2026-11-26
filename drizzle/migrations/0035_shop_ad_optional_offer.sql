@@ -1,0 +1,2 @@
+ALTER TABLE public.shop_ads ADD COLUMN price_ghc numeric(12,2) CHECK (price_ghc >= 0 AND price_ghc < 10000000000), ADD COLUMN discount_percent numeric(5,2) CHECK (discount_percent >= 0 AND discount_percent <= 100);
+ALTER TABLE public.shop_ads ADD CONSTRAINT shop_ad_discount_requires_price CHECK (discount_percent IS NULL OR price_ghc IS NOT NULL);

@@ -2900,12 +2900,14 @@ export type Database = {
           caption: string
           clicks: number
           created_at: string
+          discount_percent: number | null
           expires_at: string | null
           id: string
           media_path: string
           media_type: string
           owner_id: string
           paid_reference: string | null
+          price_ghc: number | null
           product_id: string | null
           shop_id: string
           status: string
@@ -2916,12 +2918,14 @@ export type Database = {
           caption?: string
           clicks?: number
           created_at?: string
+          discount_percent?: number | null
           expires_at?: string | null
           id?: string
           media_path: string
           media_type: string
           owner_id: string
           paid_reference?: string | null
+          price_ghc?: number | null
           product_id?: string | null
           shop_id: string
           status?: string
@@ -2932,12 +2936,14 @@ export type Database = {
           caption?: string
           clicks?: number
           created_at?: string
+          discount_percent?: number | null
           expires_at?: string | null
           id?: string
           media_path?: string
           media_type?: string
           owner_id?: string
           paid_reference?: string | null
+          price_ghc?: number | null
           product_id?: string | null
           shop_id?: string
           status?: string

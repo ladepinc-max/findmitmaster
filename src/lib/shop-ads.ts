@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { SHOP_BUCKET } from "@/lib/shops";
 
 export const AD_BUCKET = "shop-ads";
 export const AD_SLIDE_MS = 7000;
@@ -17,12 +18,31 @@ export interface ShopAd {
   expires_at: string | null;
   clicks: number;
   created_at: string;
+  price_ghc?: number | null;
+  discount_percent?: number | null;
   shop?: { handle: string; name: string } | null;
 }
 
 /** Fee for an ad running the given number of weeks. */
 export function adFee(weeklyFee: number, weeks: number) {
   return Math.max(0, weeklyFee) * Math.min(8, Math.max(1, Math.round(weeks)));
+}
+
+export function adOffer(price: string, discount: string) {
+  const amount = price.trim() ? Number(price) : null;
+  const percent = discount.trim() ? Number(discount) : null;
+  if (amount !== null && (!Number.isFinite(amount) || amount < 0 || amount >= 10000000000)) throw new Error("Enter a valid price");
+  if (percent !== null && (!Number.isFinite(percent) || percent < 0 || percent > 100)) throw new Error("Discount must be between 0% and 100%");
+  if (percent !== null && amount === null) throw new Error("Add a price to use a discount");
+  return { price_ghc: amount === null ? null : Math.round(amount * 100) / 100, discount_percent: percent === null ? null : Math.round(percent * 100) / 100 };
+}
+
+export function discountedAdPrice(price: number, percent: number | null | undefined) {
+  return Math.round(price * (1 - (percent ?? 0) / 100) * 100) / 100;
+}
+
+export function selectedAdPhoto(products: { id: string; photo_url: string | null }[], productId: string) {
+  return products.find((product) => product.id === productId)?.photo_url ?? null;
 }
 
 /** Storefront link for an ad: opens the advertised product directly when one is set. */
@@ -68,12 +88,24 @@ export async function createShopAd(input: {
   title: string;
   caption: string;
   weeks: number;
-  file: File;
+  file: File | null;
+  productPhotoPath: string | null;
+  offerPrice: string;
+  discount: string;
 }) {
-  const type = input.file.type.startsWith("video/") ? "video" : "image";
-  const ext = input.file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (type === "video" ? "mp4" : "jpg");
+  const offer = adOffer(input.offerPrice, input.discount);
+  let file = input.file;
+  if (!file && input.productPhotoPath) {
+    const { data, error } = await supabase.storage.from(SHOP_BUCKET).download(input.productPhotoPath);
+    if (error) throw error;
+    if (!data) throw new Error("Could not load the product photo");
+    file = new File([data], input.productPhotoPath.split("/").pop() ?? "product.jpg", { type: data.type || "image/jpeg" });
+  }
+  if (!file) throw new Error("Add a photo or video");
+  const type = file.type.startsWith("video/") ? "video" : "image";
+  const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (type === "video" ? "mp4" : "jpg");
   const path = `${input.userId}/${Date.now()}.${ext}`;
-  const up = await supabase.storage.from(AD_BUCKET).upload(path, input.file, { contentType: input.file.type || "application/octet-stream" });
+  const up = await supabase.storage.from(AD_BUCKET).upload(path, file, { contentType: file.type || "application/octet-stream" });
   if (up.error) throw up.error;
   const { data, error } = await db
     .from("shop_ads")
@@ -86,6 +118,7 @@ export async function createShopAd(input: {
       media_path: path,
       media_type: type,
       weeks: input.weeks,
+      ...offer,
     })
     .select("*")
     .single();

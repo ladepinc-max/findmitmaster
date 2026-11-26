@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { AD_SLIDE_MS, adHref, adMediaUrl, countAdClick, fetchLiveAds, type ShopAd } from "@/lib/shop-ads";
+import { AD_SLIDE_MS, adHref, adMediaUrl, discountedAdPrice, countAdClick, fetchLiveAds, type ShopAd } from "@/lib/shop-ads";
 import { normalizeUrl, type FeedItem } from "@/lib/home-browser";
 import { useCachedState } from "@/lib/page-cache";
 
@@ -102,6 +102,7 @@ export function AdsCarousel({ feed, onOpenSite }: { feed: FeedItem[]; onOpenSite
               {current.kind === "shop" ? `Sponsored · @${current.ad.shop?.handle ?? ""}` : current.item.kind === "ad" ? "Sponsored" : "FindMit"}
             </span>
             <p className="line-clamp-1 font-bold">{current.title}</p>
+            {current.kind === "shop" && current.ad.price_ghc != null ? <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-primary"><span>GH₵ {discountedAdPrice(Number(current.ad.price_ghc), Number(current.ad.discount_percent ?? 0)).toFixed(2)}</span>{Number(current.ad.discount_percent ?? 0) > 0 ? <><del className="font-normal text-muted-foreground">GH₵ {Number(current.ad.price_ghc).toFixed(2)}</del><span>{current.ad.discount_percent}% off</span></> : null}</p> : null}
             {current.caption ? <p className="line-clamp-1 text-sm text-muted-foreground">{current.caption}</p> : null}
           </div>
         </button>

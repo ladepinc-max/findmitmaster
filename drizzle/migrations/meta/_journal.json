@@ -246,6 +246,13 @@
       "when": 1795651909607,
       "tag": "0034_shop_ads",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795655638477,
+      "tag": "0035_shop_ad_optional_offer",
+      "breakpoints": true
     }
   ]
 }

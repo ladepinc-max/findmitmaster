@@ -11,3 +11,8 @@
 - [ ] Verify stock, closed-shop access, and in-shop conversation.
 # Home browser
 - [x] Phoenix-style Home matching design, in-app browser, admin Quick Access + news/ads feed.
+
+# Shop advert improvements
+- [x] Show product thumbnails and automatically use the selected product photo.
+- [x] Save and display optional advert price and percentage discount.
+- [x] Run advert tests and verify the seller flow with a temporary account; photo and offer saved and seller list restored without making a payment.
