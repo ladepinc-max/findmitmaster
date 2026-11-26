@@ -24,6 +24,7 @@ import { Route as HomeRouteImport } from './routes/home'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as LRouteImport } from './routes/l'
 import { Route as MyShopRouteImport } from './routes/my-shop'
+import { Route as MySupplierRouteImport } from './routes/my-supplier'
 import { Route as NewsRouteImport } from './routes/news'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PaymentVerifyRouteImport } from './routes/payment-verify'
@@ -50,6 +51,7 @@ import { Route as LibraryIdRouteImport } from './routes/library/$id'
 import { Route as LiveChannelRouteImport } from './routes/live.$channel'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
+import { Route as SupplierSupplierIdRouteImport } from './routes/supplier.$supplierId'
 import { Route as TvCategoryRouteImport } from './routes/tv.$category'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
 import { Route as EducationSlugReplaysRouteImport } from './routes/education.$slug.replays'
@@ -132,6 +134,11 @@ const LRoute = LRouteImport.update({
 const MyShopRoute = MyShopRouteImport.update({
   id: '/my-shop',
   path: '/my-shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MySupplierRoute = MySupplierRouteImport.update({
+  id: '/my-supplier',
+  path: '/my-supplier',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsRoute = NewsRouteImport.update({
@@ -265,6 +272,11 @@ const ProfileEditRoute = ProfileEditRouteImport.update({
   path: '/profile/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupplierSupplierIdRoute = SupplierSupplierIdRouteImport.update({
+  id: '/supplier/$supplierId',
+  path: '/supplier/$supplierId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TvCategoryRoute = TvCategoryRouteImport.update({
   id: '/tv/$category',
   path: '/tv/$category',
@@ -313,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
+  '/my-supplier': typeof MySupplierRoute
   '/news': typeof NewsRoute
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
@@ -337,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
+  '/supplier/$supplierId': typeof SupplierSupplierIdRoute
   '/tv/$category': typeof TvCategoryRoute
   '/watch/$id': typeof WatchIdRoute
   '/cam/': typeof CamIndexRoute
@@ -362,6 +376,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
+  '/my-supplier': typeof MySupplierRoute
   '/news': typeof NewsRoute
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
@@ -386,6 +401,7 @@ export interface FileRoutesByTo {
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
+  '/supplier/$supplierId': typeof SupplierSupplierIdRoute
   '/tv/$category': typeof TvCategoryRoute
   '/watch/$id': typeof WatchIdRoute
   '/cam': typeof CamIndexRoute
@@ -412,6 +428,7 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/l': typeof LRoute
   '/my-shop': typeof MyShopRoute
+  '/my-supplier': typeof MySupplierRoute
   '/news': typeof NewsRoute
   '/onboarding': typeof OnboardingRoute
   '/payment-verify': typeof PaymentVerifyRoute
@@ -436,6 +453,7 @@ export interface FileRoutesById {
   '/library/$id': typeof LibraryIdRoute
   '/live/$channel': typeof LiveChannelRoute
   '/profile/edit': typeof ProfileEditRoute
+  '/supplier/$supplierId': typeof SupplierSupplierIdRoute
   '/tv/$category': typeof TvCategoryRoute
   '/watch/$id': typeof WatchIdRoute
   '/cam/': typeof CamIndexRoute
@@ -463,6 +481,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/l'
     | '/my-shop'
+    | '/my-supplier'
     | '/news'
     | '/onboarding'
     | '/payment-verify'
@@ -487,6 +506,7 @@ export interface FileRouteTypes {
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
+    | '/supplier/$supplierId'
     | '/tv/$category'
     | '/watch/$id'
     | '/cam/'
@@ -512,6 +532,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/l'
     | '/my-shop'
+    | '/my-supplier'
     | '/news'
     | '/onboarding'
     | '/payment-verify'
@@ -536,6 +557,7 @@ export interface FileRouteTypes {
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
+    | '/supplier/$supplierId'
     | '/tv/$category'
     | '/watch/$id'
     | '/cam'
@@ -561,6 +583,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/l'
     | '/my-shop'
+    | '/my-supplier'
     | '/news'
     | '/onboarding'
     | '/payment-verify'
@@ -585,6 +608,7 @@ export interface FileRouteTypes {
     | '/library/$id'
     | '/live/$channel'
     | '/profile/edit'
+    | '/supplier/$supplierId'
     | '/tv/$category'
     | '/watch/$id'
     | '/cam/'
@@ -611,6 +635,7 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   LRoute: typeof LRoute
   MyShopRoute: typeof MyShopRoute
+  MySupplierRoute: typeof MySupplierRoute
   NewsRoute: typeof NewsRoute
   OnboardingRoute: typeof OnboardingRoute
   PaymentVerifyRoute: typeof PaymentVerifyRoute
@@ -635,6 +660,7 @@ export interface RootRouteChildren {
   LibraryIdRoute: typeof LibraryIdRoute
   LiveChannelRoute: typeof LiveChannelRoute
   ProfileEditRoute: typeof ProfileEditRoute
+  SupplierSupplierIdRoute: typeof SupplierSupplierIdRoute
   TvCategoryRoute: typeof TvCategoryRoute
   WatchIdRoute: typeof WatchIdRoute
   CamIndexRoute: typeof CamIndexRoute
@@ -750,6 +776,13 @@ declare module '@tanstack/react-router' {
       path: '/my-shop'
       fullPath: '/my-shop'
       preLoaderRoute: typeof MyShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-supplier': {
+      id: '/my-supplier'
+      path: '/my-supplier'
+      fullPath: '/my-supplier'
+      preLoaderRoute: typeof MySupplierRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/news': {
@@ -934,6 +967,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/supplier/$supplierId': {
+      id: '/supplier/$supplierId'
+      path: '/supplier/$supplierId'
+      fullPath: '/supplier/$supplierId'
+      preLoaderRoute: typeof SupplierSupplierIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tv/$category': {
       id: '/tv/$category'
       path: '/tv/$category'
@@ -995,6 +1035,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   LRoute: LRoute,
   MyShopRoute: MyShopRoute,
+  MySupplierRoute: MySupplierRoute,
   NewsRoute: NewsRoute,
   OnboardingRoute: OnboardingRoute,
   PaymentVerifyRoute: PaymentVerifyRoute,
@@ -1019,6 +1060,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryIdRoute: LibraryIdRoute,
   LiveChannelRoute: LiveChannelRoute,
   ProfileEditRoute: ProfileEditRoute,
+  SupplierSupplierIdRoute: SupplierSupplierIdRoute,
   TvCategoryRoute: TvCategoryRoute,
   WatchIdRoute: WatchIdRoute,
   CamIndexRoute: CamIndexRoute,

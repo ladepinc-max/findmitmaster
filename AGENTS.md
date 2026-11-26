@@ -25,3 +25,4 @@
 - Shop backgrounds resolve custom photos before a shared category-matched image library; the shared cached background layer applies saved opacity and blur in previews, storefronts, and product views so all shops have a consistent fallback without per-visit image generation.
 
 - Shop registration fees come from the admin-managed shop_categories table (per-category fee, big-shop flag, waiver); unlisted owner-written categories fall back to app_pricing.shop_registration, and server checkout re-reads the fee — keeps admin pricing authoritative.
+- Suppliers use their own owner-scoped profiles and payments but share shop category fees and media storage; only active, unexpired suppliers appear in the public split directory — mirrors shop visibility without mixing supplier records into storefront handles.

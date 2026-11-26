@@ -392,7 +392,7 @@ function HomeScreen() {
           to="/shops"
           className="mt-6 flex w-full items-center justify-center rounded-full bg-wa-green py-4 text-lg font-bold text-primary-foreground shadow-md"
         >
-          Find suppliers on FindMit
+          Find shops & suppliers on FindMit
         </Link>
 
         <AdsCarousel feed={feed} onOpenSite={openSite} />

@@ -9,6 +9,12 @@
 - [ ] Connect existing customer and owner chat buttons to shop bottom sheets.
 - [ ] Track shop visits and shop-specific unread messages.
 - [ ] Verify stock, closed-shop access, and in-shop conversation.
+# Shops and suppliers directory
+- [x] Split Find Suppliers into side-by-side Shops and Suppliers lists with cached profile photos and working storefront/profile links.
+- [x] Show Register shop or Manage shop from the signed-in user's actual shop, and add equivalent supplier registration/management.
+- [x] Add supplier registration, category-based yearly payment, public supplier profiles, and payment return handling.
+- [x] Tested directory actions, supplier registration, both Manage buttons, photo display and supplier profile opening on a phone-sized signed-in account; no real payment was taken.
+
 # Home browser
 - [x] Fix Home's missing AuthProvider error during live updates; shared consumers audited, seven tests passed, signed-in main-tab navigation and live auth-module update verified with no page errors.
 - [x] Replace the map icon with the uploaded image; cache fixed interface images and avatars with automatic replacement; replacement tests and phone/desktop checks completed with a temporary account.

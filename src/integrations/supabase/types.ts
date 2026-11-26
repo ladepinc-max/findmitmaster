@@ -3269,6 +3269,106 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string | null
+          reference: string
+          status: string
+          supplier_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          reference: string
+          status?: string
+          supplier_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          reference?: string
+          status?: string
+          supplier_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          landmark: string | null
+          lat: number | null
+          lng: number | null
+          name: string
+          owner_id: string
+          phone: string
+          photo_url: string | null
+          subscription_expires_at: string | null
+          subscription_status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          landmark?: string | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          owner_id: string
+          phone: string
+          photo_url?: string | null
+          subscription_expires_at?: string | null
+          subscription_status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          landmark?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          owner_id?: string
+          phone?: string
+          photo_url?: string | null
+          subscription_expires_at?: string | null
+          subscription_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_contacts: {
         Row: {
           created_at: string

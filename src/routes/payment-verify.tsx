@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { completePaystackCheckout } from "@/lib/checkout.functions";
 import { completeShopCheckout } from "@/lib/shop.functions";
 import { completeShopAdCheckout } from "@/lib/shop-ads.functions";
+import { completeSupplierCheckout } from "@/lib/supplier.functions";
 import { safeReturnPath } from "@/lib/open-checkout";
 
 export const Route = createFileRoute("/payment-verify")({
@@ -34,6 +35,7 @@ function PaymentVerifyPage() {
   const complete = useServerFn(completePaystackCheckout);
   const completeShop = useServerFn(completeShopCheckout);
   const completeAd = useServerFn(completeShopAdCheckout);
+  const completeSupplier = useServerFn(completeSupplierCheckout);
   const search = useRouterState({ select: (state) => state.location.search }) as Record<string, string>;
   const [reference, setReference] = useState<string>(search["reference"] ?? search["trxref"] ?? "");
   const [back, setBack] = useState<string | null>(search["return"] ?? null);
@@ -42,7 +44,8 @@ function PaymentVerifyPage() {
   const started = useRef(false);
 
   const isShop = reference.startsWith("fm_shop_") || reference.startsWith("fm_ad_");
-  const fallback = isShop ? "/my-shop" : "/jobs";
+  const isSupplier = reference.startsWith("fm_supplier_");
+  const fallback = isSupplier ? "/my-supplier" : isShop ? "/my-shop" : "/jobs";
   const goBack = (dest?: string) => {
     const path = safeReturnPath(dest ?? back, fallback);
     void navigate({ href: path, replace: true });
@@ -62,11 +65,15 @@ function PaymentVerifyPage() {
       return;
     }
     const shop = ref.startsWith("fm_shop_") || ref.startsWith("fm_ad_");
+    const supplier = ref.startsWith("fm_supplier_");
     const run = async (attempt: number): Promise<void> => {
       try {
         if (ref.startsWith("fm_ad_")) {
           await completeAd({ data: { reference: ref } });
           setMessage("Payment confirmed — your advert is live in ADS. Taking you back…");
+        } else if (supplier) {
+          const r = await completeSupplier({ data: { reference: ref } });
+          setMessage(`Payment confirmed — ${r.name} is live. Taking you back…`);
         } else if (shop) {
           const r = await completeShop({ data: { reference: ref } });
           setMessage(`Payment confirmed — @${r.handle} is live. Taking you back…`);
@@ -79,7 +86,7 @@ function PaymentVerifyPage() {
           );
         }
         setState("done");
-        setTimeout(() => goBack(safeReturnPath(ret, shop ? "/my-shop" : "/jobs")), 1200);
+        setTimeout(() => goBack(safeReturnPath(ret, supplier ? "/my-supplier" : shop ? "/my-shop" : "/jobs")), 1200);
       } catch (error: unknown) {
         // Mobile Money can take a few seconds to settle — retry before giving up.
         if (attempt < 6) {

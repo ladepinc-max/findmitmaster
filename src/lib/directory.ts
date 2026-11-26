@@ -30,3 +30,11 @@ export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; ln
 export function safeInternalPath(href: string): string | null {
   return /^\/(?!\/)[\w@.\-/?=&%]*$/.test(href) ? href : null;
 }
+
+export function shopDirectoryAction(hasShop: boolean) {
+  return hasShop ? "Manage shop" : "Register shop";
+}
+
+export function supplierDirectoryAction(hasSupplier: boolean) {
+  return hasSupplier ? "Manage supplier" : "Register as a Supplier";
+}
