@@ -137,9 +137,11 @@ export function AppShell({
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const stories = useStoriesAccess();
+  const publicContent = pathname.startsWith("/community-news/") || pathname.startsWith("/ad/") || pathname.startsWith("/job/") || pathname.startsWith("/supplier/") || pathname.startsWith("/@");
 
   useEffect(() => {
     if (loading) return;
+    if (publicContent) return;
     if (!session) {
       void navigate({ to: "/auth", replace: true });
     } else if (!profile) {
@@ -149,7 +151,7 @@ export function AppShell({
       initialRedirectDone = true;
       void navigate({ to: "/chat", search: { c: undefined }, replace: true });
     }
-  }, [loading, session, profile, navigate, pathname]);
+  }, [loading, session, profile, navigate, pathname, publicContent]);
 
   // First launch lands on the Home browser screen instead of Stories.
   useEffect(() => {
@@ -168,14 +170,14 @@ export function AppShell({
     }
   }, [pathname, stories.loading, stories.allowed, navigate]);
 
-  if (loading || !session || !profile) return <AppSkeleton />;
+  if (!publicContent && (loading || !session || !profile)) return <AppSkeleton />;
   if (pathname === "/" && (stories.loading || !stories.allowed)) return <AppSkeleton />;
 
   const isStories = pathname === "/";
 
   return (
     <div className={`min-h-screen bg-background ${hideNavigation ? "" : "pb-28"}`}>
-      <AmaClassEndListener userId={profile.id} />
+      {profile ? <AmaClassEndListener userId={profile.id} /> : null}
       <div className={cn("mx-auto", wide ? "max-w-6xl" : "max-w-lg")}>{children}</div>
       {hideNavigation ? null : isStories ? <StoriesBottomNav /> : <BottomNav />}
     </div>

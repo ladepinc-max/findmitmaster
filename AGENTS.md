@@ -31,3 +31,4 @@
 - Google publication is read fail-closed from public publication_settings in server middleware and root metadata, and gates the existing sitemap — keeps crawler-visible responses aligned with the admin switch.
 - Community discussion joins use the confirmed membership RPC with an advisory user lock, private single-row membership and calendar-month switching deadline; member inserts and message access enforce the same membership — prevents direct-client and concurrent-join bypasses.
 - News capture encodes the shared canvas watermark into photo/video bytes before upload; older news stays nonpublic until admin media upgrading, and sponsor images use their recorded storage bucket — keeps visible media and historical upgrades consistent.
+- AppShell allows public detail content to render without a session while interactive account features retain their sign-in gates — keeps shared news comments and indexed details accessible to visitors.

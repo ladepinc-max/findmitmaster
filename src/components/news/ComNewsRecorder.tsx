@@ -36,6 +36,7 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
   const [sending, setSending] = useState(false);
   const [camError, setCamError] = useState<string | null>(null);
   const [logoReady, setLogoReady] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -45,6 +46,7 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
 
   useEffect(() => {
     if (captured) return;
+    setCameraReady(false);
     let cancelled = false;
     navigator.mediaDevices
       .getUserMedia({
@@ -163,7 +165,7 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
       {!captured ? (
         <>
           <div className="relative flex-1 overflow-hidden bg-muted">
-            <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+            <video ref={videoRef} autoPlay playsInline muted onLoadedData={() => setCameraReady(true)} className="h-full w-full object-cover" />
             {camError ? <p className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm">{camError}</p> : null}
             {recording ? (
               <span className="absolute left-4 top-4 rounded-full bg-destructive px-3 py-1 text-sm font-bold text-destructive-foreground">
@@ -184,7 +186,7 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
             <button
               type="button"
               aria-label={mode === "photo" ? "Take photo" : recording ? "Stop recording" : "Start recording"}
-              disabled={!!camError || !logoReady}
+              disabled={!!camError || !logoReady || !cameraReady}
               onClick={() => (mode === "photo" ? takePhoto() : recording ? stopRecording() : startRecording())}
               className="flex size-20 items-center justify-center rounded-full border-4 border-foreground"
             >
