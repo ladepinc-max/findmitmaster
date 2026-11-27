@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
+import { useStoriesAccess } from "@/lib/stories-access";
 import {
   DEFAULT_PREFS,
   enablePush,
@@ -45,6 +46,7 @@ const ROWS: {
 
 export function SettingsSection() {
   const { profile } = useAuth();
+  const { allowed: storiesAllowed } = useStoriesAccess();
   const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
   const [permission, setPermission] = useState<string>("default");
 
@@ -84,7 +86,7 @@ export function SettingsSection() {
             <div className="flex-1">
               <p className="text-sm font-medium">Turn on pop-up notifications</p>
               <p className="text-xs text-muted-foreground">
-                Get new messages and live classes on your screen even when FindMit is closed.
+                {storiesAllowed ? "Get new messages and live classes on your screen even when FindMit is closed." : "Get new messages on your screen even when FindMit is closed."}
               </p>
             </div>
           </div>
@@ -101,7 +103,7 @@ export function SettingsSection() {
       ) : null}
 
       <div className="mt-3 space-y-2">
-        {ROWS.map(({ key, label, hint, icon: Icon }) => (
+        {ROWS.filter((row) => storiesAllowed || row.key !== "liveEnabled").map(({ key, label, hint, icon: Icon }) => (
           <div
             key={key}
             className="flex items-center justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3"

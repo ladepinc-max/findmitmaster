@@ -1,0 +1,2 @@
+ALTER POLICY "Approved news is public" ON public.community_news USING (status='approved' AND watermarked);
+ALTER POLICY "community-news read" ON storage.objects USING (bucket_id='community-news' AND ((auth.uid() IS NOT NULL AND (storage.foldername(name))[1]=auth.uid()::text) OR EXISTS(SELECT 1 FROM public.community_news n WHERE n.status='approved' AND n.watermarked AND (n.media_path=objects.name OR (n.ad_image_bucket='community-news' AND n.ad_image_path=objects.name))) OR public.has_role(auth.uid(),'admin') OR public.is_super_admin()));

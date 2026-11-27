@@ -159,6 +159,8 @@
 }
 
 :root {
+  --news-watermark-background: #111111;
+  --news-watermark-foreground: #ffffff;
   --radius: 0.9rem;
 
   --background: #121212;

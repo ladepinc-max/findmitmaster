@@ -2,6 +2,14 @@ import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/r
 
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+import { setResponseHeader } from "@tanstack/react-start/server";
+import { readGooglePublication } from "./lib/publication.server";
+
+const publicationMiddleware = createMiddleware().server(async ({ next }) => {
+  if (!(await readGooglePublication())) setResponseHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  setResponseHeader("Cache-Control", "no-store");
+  return next();
+});
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -27,5 +35,5 @@ const csrfMiddleware = createCsrfMiddleware({
 
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [errorMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, csrfMiddleware, publicationMiddleware],
 }));

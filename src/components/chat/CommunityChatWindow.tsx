@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Clock, Eye, Paperclip, Plus, SendHorizontal, Star, Store } from "lucide-react";
+import { ArrowLeft, Clock, Eye, Paperclip, Plus, SendHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CommunityLogo } from "@/components/news/CommunityLogo";
 import { NewsMedia } from "@/components/news/NewsMedia";
+import { UserAvatar } from "@/components/UserAvatar";
+import { NewsSponsor } from "@/components/news/NewsSponsor";
+import { CommunityJoinGate } from "@/components/chat/CommunityJoinGate";
+import { canJoinCommunity } from "@/lib/community-membership";
+import { Button } from "@/components/ui/button";
 import { ComNewsRecorder } from "@/components/news/ComNewsRecorder";
 import { fetchGroupMembers, fetchGroupMessages, sendGroupMessage } from "@/lib/groups";
 import type { ChatMessage, ProfileLite } from "@/lib/chat";
@@ -15,16 +20,6 @@ import {
   joinCommunityDiscussion,
   type CommunityNews,
 } from "@/lib/community-news";
-
-const AVATAR_TONES = ["bg-wa-green", "bg-primary", "bg-destructive", "bg-accent", "bg-secondary"];
-function tone(id: string) {
-  let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return AVATAR_TONES[h % AVATAR_TONES.length];
-}
-function initials(name: string) {
-  return name.replace(/[_.-]/g, " ").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
-}
 
 interface Props {
   communityId: string;
@@ -39,32 +34,55 @@ export function CommunityChatWindow({ communityId, me, onBack }: Props) {
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [names, setNames] = useState<Map<string, string>>(new Map());
+  const [profiles, setProfiles] = useState<Map<string, ProfileLite>>(new Map());
+  const [joining, setJoining] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [lockedUntil, setLockedUntil] = useState<string | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [news, setNews] = useState<CommunityNews[]>([]);
   const [text, setText] = useState("");
   const [recorder, setRecorder] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  async function loadDiscussion(id: string) {
+    const [msgs, members] = await Promise.all([fetchGroupMessages(id), fetchGroupMembers(id)]);
+    const ids = [...new Set(msgs.map((message) => message.sender_id))];
+    const { data: authors } = ids.length ? await supabase.from("profiles").select("id, username, display_name, photo_path, last_seen, is_verified").in("id", ids) : { data: [] };
+    const people = new Map<string, ProfileLite>(members.map((member) => [member.id, member]));
+    for (const author of (authors ?? []) as ProfileLite[]) people.set(author.id, author);
+    people.set(me.id, me);
+    setProfiles(people);
+    setNames(new Map(members.map((member) => [member.id, member.username || member.display_name || "Member"])));
+    setMessages(msgs);
+    setChatId(id);
+  }
+
   useEffect(() => {
     let active = true;
+    setChatId(null); setMessages([]); setLoading(true); setLockedUntil(null); setJoinError(null);
     void (async () => {
-      const c = await fetchCommunity(communityId);
-      if (!active || !c) return;
-      setName(c.name);
       try {
-        const id = await joinCommunityDiscussion(communityId);
+        const c = await fetchCommunity(communityId);
+        if (!active || !c) return;
+        setName(c.name);
+        const { data: membership, error } = await supabase.from("community_discussion_memberships").select("community_id, switch_allowed_at").eq("user_id", me.id).maybeSingle();
+        if (error) throw error;
         if (!active) return;
-        setChatId(id);
-        const [msgs, members] = await Promise.all([fetchGroupMessages(id), fetchGroupMembers(id).catch(() => [])]);
-        if (!active) return;
-        setMessages(msgs);
-        setNames(new Map(members.map((m) => [m.id, m.username || m.display_name || "Member"])));
-      } catch {
-        toast.error("Could not open this community");
-      }
+        if (!canJoinCommunity(membership, communityId)) setLockedUntil(membership?.switch_allowed_at ?? null);
+        if (membership?.community_id === communityId) await loadDiscussion(await joinCommunityDiscussion(communityId));
+        if (active) setNews(await fetchApprovedNews(30, communityId));
+      } catch { if (active) setJoinError("Could not open this community. Please try again."); }
+      finally { if (active) setLoading(false); }
     })();
-    void fetchApprovedNews(30, communityId).then((n) => active && setNews(n));
     return () => { active = false; };
-  }, [communityId]);
+  }, [communityId, me.id]);
+
+  async function confirmJoin() {
+    setJoining(true); setJoinError(null);
+    try { await loadDiscussion(await joinCommunityDiscussion(communityId, true)); }
+    catch (error) { setJoinError(error instanceof Error ? error.message : "Could not join this community"); }
+    finally { setJoining(false); }
+  }
 
   useEffect(() => {
     if (!chatId) return;
@@ -74,11 +92,14 @@ export function CommunityChatWindow({ communityId, me, onBack }: Props) {
         const row = payload.new as ChatMessage;
         setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
         if (row.message_type === ("news" as never)) void fetchApprovedNews(30, communityId).then(setNews);
+        if (!profiles.has(row.sender_id)) void supabase.from("profiles").select("id, username, display_name, photo_path, last_seen, is_verified").eq("id", row.sender_id).maybeSingle().then(({ data }) => {
+          if (data) setProfiles((prev) => new Map(prev).set(data.id, data as ProfileLite));
+        });
         if (!names.has(row.sender_id)) void fetchGroupMembers(chatId).then((m) => setNames(new Map(m.map((x) => [x.id, x.username || x.display_name || "Member"]))));
       })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [chatId, communityId, names]);
+  }, [chatId, communityId, names, profiles]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ block: "end" }); }, [messages.length]);
 
@@ -101,12 +122,12 @@ export function CommunityChatWindow({ communityId, me, onBack }: Props) {
     }
   }
 
-  function openAd() {
-    const link = sponsor?.ad_link;
-    if (!link) return;
-    if (link.startsWith("/")) window.location.assign(link);
-    else window.open(link.startsWith("http") ? link : `https://${link}`, "_blank", "noopener");
-  }
+  if (loading || !chatId) return (
+    <div className="flex h-full flex-col bg-background">
+      <Button variant="ghost" size="icon" className="m-3" onClick={onBack} aria-label="Back"><ArrowLeft className="size-5" /></Button>
+      {loading ? <p className="p-6 text-center text-muted-foreground">Opening community…</p> : <CommunityJoinGate key={communityId} name={name || "this community"} lockedUntil={lockedUntil} error={joinError} busy={joining} onJoin={() => void confirmJoin()} />}
+    </div>
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background text-foreground">
@@ -144,33 +165,14 @@ export function CommunityChatWindow({ communityId, me, onBack }: Props) {
             <div className="flex items-center justify-center rounded-3xl bg-card p-3 text-center text-xs text-muted-foreground">No news here yet</div>
           )}
 
-          {sponsor ? (
-            <div className="flex flex-col rounded-3xl bg-card p-3 shadow-md">
-              <div className="flex items-center gap-2">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"><Store className="size-5" /></span>
-                <p className="text-sm font-bold leading-tight">{sponsor.ad_title}</p>
-              </div>
-              {sponsor.ad_tagline ? <p className="mt-2 text-xs text-muted-foreground">{sponsor.ad_tagline}</p> : null}
-              {sponsor.ad_rating != null ? (
-                <div className="mt-2">
-                  <div className="flex gap-0.5">{Array.from({ length: 5 }, (_, i) => <Star key={i} className={`size-3.5 ${i < Math.round(Number(sponsor.ad_rating)) ? "fill-accent text-accent" : "text-muted-foreground"}`} />)}</div>
-                  <p className="mt-1 text-[0.7rem] text-wa-green">{Number(sponsor.ad_rating).toFixed(1)} stars</p>
-                </div>
-              ) : null}
-              <button type="button" onClick={openAd} className="mt-auto rounded-full bg-primary py-1.5 text-xs font-bold text-primary-foreground">
-                {sponsor.ad_cta || "View"}
-              </button>
-              <span className="mt-1 text-center text-[0.55rem] uppercase tracking-wider text-muted-foreground">Sponsored</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center rounded-3xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">Ad space</div>
-          )}
+          {sponsor ? <NewsSponsor news={sponsor} /> : null}
         </div>
 
         <ul className="mt-4 space-y-3">
           {messages.filter((m) => !m.deleted_for_everyone).map((m) => {
             const mine = m.sender_id === me.id;
-            const who = mine ? "You" : names.get(m.sender_id) ?? "Member";
+            const person = profiles.get(m.sender_id);
+            const who = person?.username ? `@${person.username}` : person?.display_name || names.get(m.sender_id) || "Member";
             if (m.message_type === ("news" as never)) {
               const n = newsById.get(m.content ?? "");
               return (
@@ -186,17 +188,12 @@ export function CommunityChatWindow({ communityId, me, onBack }: Props) {
                 </li>
               );
             }
-            return mine ? (
-              <li key={m.id} className="flex flex-col items-end">
-                <span className="mr-2 text-[0.65rem] text-muted-foreground">{clock(m.created_at)}</span>
-                <p className="max-w-[80%] rounded-2xl bg-card px-4 py-2">{m.content}</p>
-              </li>
-            ) : (
-              <li key={m.id} className="flex items-start gap-2">
-                <span className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-primary-foreground ${tone(m.sender_id)}`}>{initials(who)}</span>
-                <div className="max-w-[80%] rounded-2xl bg-card px-4 py-2">
-                  <p className="flex justify-between gap-4 text-[0.7rem]"><span className="font-semibold text-primary">{who}</span><span className="text-muted-foreground">{clock(m.created_at)}</span></p>
-                  <p>{m.content}</p>
+            return (
+              <li key={m.id} className={`flex items-start gap-2 ${mine ? "flex-row-reverse" : ""}`}>
+                <UserAvatar profile={person} name={who} className="size-10 shrink-0" />
+                <div className="min-w-0 max-w-[80%] rounded-lg bg-card px-4 py-2">
+                  <p className="flex flex-wrap justify-between gap-x-4 text-[0.7rem]"><span className="break-all font-semibold text-primary">{who}{mine ? " · You" : ""}</span><span className="text-muted-foreground">{clock(m.created_at)}</span></p>
+                  <p className="whitespace-pre-wrap break-words">{m.content}</p>
                 </div>
               </li>
             );

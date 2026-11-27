@@ -730,6 +730,45 @@ export type Database = {
           },
         ]
       }
+      community_discussion_memberships: {
+        Row: {
+          community_id: string
+          confirmed_at: string
+          joined_at: string
+          switch_allowed_at: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          confirmed_at?: string
+          joined_at?: string
+          switch_allowed_at?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          confirmed_at?: string
+          joined_at?: string
+          switch_allowed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_discussion_memberships_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_discussion_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_name_confirmations: {
         Row: {
           community_id: string
@@ -813,6 +852,8 @@ export type Database = {
       community_news: {
         Row: {
           ad_cta: string | null
+          ad_image_bucket: string
+          ad_image_path: string | null
           ad_link: string | null
           ad_rating: number | null
           ad_tagline: string | null
@@ -831,9 +872,12 @@ export type Database = {
           status: string
           title: string
           views_count: number
+          watermarked: boolean
         }
         Insert: {
           ad_cta?: string | null
+          ad_image_bucket?: string
+          ad_image_path?: string | null
           ad_link?: string | null
           ad_rating?: number | null
           ad_tagline?: string | null
@@ -852,9 +896,12 @@ export type Database = {
           status?: string
           title: string
           views_count?: number
+          watermarked?: boolean
         }
         Update: {
           ad_cta?: string | null
+          ad_image_bucket?: string
+          ad_image_path?: string | null
           ad_link?: string | null
           ad_rating?: number | null
           ad_tagline?: string | null
@@ -873,6 +920,7 @@ export type Database = {
           status?: string
           title?: string
           views_count?: number
+          watermarked?: boolean
         }
         Relationships: [
           {
@@ -2773,6 +2821,21 @@ export type Database = {
         }
         Relationships: []
       }
+      publication_settings: {
+        Row: {
+          google_indexing_enabled: boolean
+          id: boolean
+        }
+        Insert: {
+          google_indexing_enabled?: boolean
+          id?: boolean
+        }
+        Update: {
+          google_indexing_enabled?: boolean
+          id?: boolean
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           created_at: string
@@ -4356,6 +4419,10 @@ export type Database = {
         Args: { _community_id: string }
         Returns: number
       }
+      confirm_community_discussion: {
+        Args: { _community_id: string; _confirmed: boolean }
+        Returns: string
+      }
       confirm_community_name: {
         Args: { _id: string; _photo: string; _voice: string }
         Returns: {
@@ -4543,6 +4610,14 @@ export type Database = {
           summary: string
           title: string
         }[]
+      }
+      set_news_sponsor_image: {
+        Args: { _id: string; _path: string }
+        Returns: undefined
+      }
+      set_news_watermarked_media: {
+        Args: { _id: string; _path: string }
+        Returns: undefined
       }
       shop_is_active: { Args: { _shop_id: string }; Returns: boolean }
       unlock_talent_contact: {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, MessageCircle, Send } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle, Send, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -85,6 +85,11 @@ function StoryPage() {
         <NewsMedia path={news.media_path} type={news.media_type} controls className="aspect-video w-full" />
         <div className="space-y-3 px-4 pt-4">
           <h1 className="font-display text-2xl font-bold leading-tight">{news.title}</h1>
+          <Button variant="outline" size="sm" onClick={() => {
+            const url = `https://findmit.world/community-news/${id}`;
+            if (navigator.share) void navigator.share({ title: news.title, url }).catch(() => undefined);
+            else void navigator.clipboard.writeText(url).then(() => toast.success("News link copied"));
+          }}><Share2 className="size-4" />Share news</Button>
           <p className="text-xs text-muted-foreground">
             {news.author?.display_name || news.author?.username || "Reporter"} · {timeAgo(news.created_at)} · {news.views_count} views
           </p>

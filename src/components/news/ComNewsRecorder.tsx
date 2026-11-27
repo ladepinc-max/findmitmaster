@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MAX_RECORD_SECONDS, RECORD_HEIGHT, RECORD_WIDTH, submitCommunityNews } from "@/lib/community-news";
+import { loadNewsLogo, drawNewsWatermark, watermarkedVideoStream } from "@/lib/news-watermark";
 
 type Captured = { blob: Blob; url: string; type: "video" | "photo"; seconds: number | null };
 
@@ -22,6 +23,8 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
   const recRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
   const startedAt = useRef(0);
+  const watermarkStop = useRef<(() => void) | null>(null);
+  const logoRef = useRef<HTMLImageElement | null>(null);
   const [facing, setFacing] = useState<"environment" | "user">("environment");
   const [mode, setMode] = useState<"video" | "photo">("video");
   const [recording, setRecording] = useState(false);
@@ -32,6 +35,13 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
   const [community, setCommunity] = useState("");
   const [sending, setSending] = useState(false);
   const [camError, setCamError] = useState<string | null>(null);
+  const [logoReady, setLogoReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void loadNewsLogo().then((logo) => { if (active) { logoRef.current = logo; setLogoReady(true); } }).catch(() => setCamError("FindMit logo could not load. Reopen the recorder to try again."));
+    return () => { active = false; recRef.current?.state === "recording" && recRef.current.stop(); watermarkStop.current?.(); };
+  }, []);
 
   useEffect(() => {
     if (captured) return;
@@ -70,12 +80,20 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
 
   function startRecording() {
     const stream = streamRef.current;
-    if (!stream) return;
+    const video = videoRef.current;
+    const logo = logoRef.current;
+    if (!stream || !video || !logo) return;
+    let capture: ReturnType<typeof watermarkedVideoStream>;
+    try { capture = watermarkedVideoStream(video, stream, logo); }
+    catch { toast.error("This browser cannot record watermarked news. Try a supported browser."); return; }
+    watermarkStop.current = capture.stop;
     const mime = pickMime();
-    const rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 700_000 } : { videoBitsPerSecond: 700_000 });
+    const rec = new MediaRecorder(capture.stream, mime ? { mimeType: mime, videoBitsPerSecond: 700_000 } : { videoBitsPerSecond: 700_000 });
     chunks.current = [];
     rec.ondataavailable = (e) => e.data.size && chunks.current.push(e.data);
     rec.onstop = () => {
+      watermarkStop.current?.();
+      watermarkStop.current = null;
       const blob = new Blob(chunks.current, { type: rec.mimeType || "video/webm" });
       const seconds = Math.min(MAX_RECORD_SECONDS, Math.round((Date.now() - startedAt.current) / 1000));
       setCaptured({ blob, url: URL.createObjectURL(blob), type: "video", seconds });
@@ -94,12 +112,16 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
 
   function takePhoto() {
     const v = videoRef.current;
-    if (!v || !v.videoWidth) return;
+    const logo = logoRef.current;
+    if (!v || !v.videoWidth || !logo) return;
     const scale = Math.min(1, RECORD_HEIGHT / Math.min(v.videoWidth, v.videoHeight));
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(v.videoWidth * scale);
     canvas.height = Math.round(v.videoHeight * scale);
-    canvas.getContext("2d")?.drawImage(v, 0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+    drawNewsWatermark(ctx, logo, canvas.width, canvas.height);
     canvas.toBlob((blob) => blob && setCaptured({ blob, url: URL.createObjectURL(blob), type: "photo", seconds: null }), "image/jpeg", 0.85);
   }
 
@@ -162,7 +184,7 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
             <button
               type="button"
               aria-label={mode === "photo" ? "Take photo" : recording ? "Stop recording" : "Start recording"}
-              disabled={!!camError}
+              disabled={!!camError || !logoReady}
               onClick={() => (mode === "photo" ? takePhoto() : recording ? stopRecording() : startRecording())}
               className="flex size-20 items-center justify-center rounded-full border-4 border-foreground"
             >
@@ -176,7 +198,7 @@ export function ComNewsRecorder({ userId, onClose }: { userId: string; onClose: 
       ) : (
         <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-6">
           {captured.type === "video" ? (
-            <video src={captured.url} controls playsInline className="aspect-video w-full rounded-xl bg-muted" />
+            <video src={captured.url} controls controlsList="nodownload noremoteplayback" disablePictureInPicture playsInline onContextMenu={(event) => event.preventDefault()} className="aspect-video w-full rounded-xl bg-muted" />
           ) : (
             <img src={captured.url} alt="Your photo" className="w-full rounded-xl" />
           )}

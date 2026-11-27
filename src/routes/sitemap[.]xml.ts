@@ -9,6 +9,8 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
+        const { readGooglePublication } = await import("@/lib/publication.server");
+        if (!(await readGooglePublication())) return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>', { headers: { "Content-Type": "application/xml", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } });
         const db = createClient(import.meta.env['VITE_SUPABASE_URL'] as string, import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] as string, {
           auth: { persistSession: false, autoRefreshToken: false },
         });
@@ -41,7 +43,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
           .map((u) => `  <url><loc>${esc(BASE + u.loc)}</loc>${u.lastmod ? `<lastmod>${u.lastmod.slice(0, 10)}</lastmod>` : ""}</url>`)
           .join("\n")}\n</urlset>`;
-        return new Response(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=3600" } });
+        return new Response(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "no-store" } });
       },
     },
   },

@@ -60,6 +60,8 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { TV_LABELS, TV_ORDER } from "@/lib/tv-live";
 import { useTvChoice } from "@/lib/tv-choice";
+import { useStoriesAccess } from "@/lib/stories-access";
+import { GooglePublicationSection } from "@/components/settings/GooglePublicationSection";
 
 
 export const Route = createFileRoute("/profile/")({
@@ -102,6 +104,7 @@ function postToItem(post: Post): MediaItem {
 function ProfilePage() {
   const { profile } = useAuth();
   const { isAdmin } = useRole();
+  const { allowed: storiesAllowed } = useStoriesAccess();
   const [tab, setTab] = useState<MediaTab>("posted");
   const [sort, setSort] = useState<SortKey>("recent");
   const [term, setTerm] = useState("");
@@ -265,12 +268,12 @@ function ProfilePage() {
       ) }],
     },
     {
-      id: "learning", label: "Learning & TV", icon: GraduationCap,
+      id: "learning", label: storiesAllowed ? "Learning & TV" : "Learning", icon: GraduationCap,
       items: [
         { id: "tutor", label: "Ama — WASSCE Tutor", hint: "Past questions and marking", render: () => (
           <Button asChild className="w-full"><Link to="/tutor">Open Ama Tutor</Link></Button>
         ) },
-        { id: "channel", label: "Choose Channel", hint: "Class TV on your Home tab", render: () => <ChooseChannel /> },
+        ...(storiesAllowed ? [{ id: "channel", label: "Choose Channel", hint: "Class TV on your Home tab", render: () => <ChooseChannel /> }] : []),
       ],
     },
     {
@@ -283,6 +286,7 @@ function ProfilePage() {
     {
       id: "admin", label: "Admin Desk", icon: ShieldCheck,
       items: isAdmin ? [
+        { id: "google", label: "Google visibility", render: () => <GooglePublicationSection /> },
         { id: "news", label: "Review Community News", render: () => <CommunityNewsReviewCard /> },
         { id: "packages", label: "Wallet packages", render: () => <WalletPackagesAdmin /> },
         { id: "waivers", label: "Waivers & fees", render: () => <SectionWaivers /> },
@@ -458,7 +462,7 @@ function ProfilePage() {
                 { id: "saved", label: "Saved" },
                 { id: "replays", label: "Live Replays" },
               ] as const
-            ).map(({ id, label }) => (
+            ).filter((item) => storiesAllowed || item.id !== "replays").map(({ id, label }) => (
               <button
                 key={id}
                 type="button"
@@ -476,14 +480,14 @@ function ProfilePage() {
           </nav>
 
           <section className="p-4">
-            {tab === "replays" ? (
+            {tab === "replays" && storiesAllowed ? (
               <LiveReplaysSection userId={profile.id} isMe />
             ) : tabItems.length === 0 ? (
               loaded ? (
                 <EmptyState
                   icon={Search}
                   title="Nothing here yet"
-                  description="Videos, pictures and live class replays you collect will show up here."
+                  description={storiesAllowed ? "Videos, pictures and live class replays you collect will show up here." : "Your collected items will show up here."}
                 />
               ) : (
                 <div className="flex justify-center py-16">

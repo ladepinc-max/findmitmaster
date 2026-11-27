@@ -14,6 +14,8 @@ import { ContactPrivacySection } from "@/components/settings/ContactPrivacySecti
 import { ApplicationsSection } from "@/components/settings/ApplicationsSection";
 import { PricingSection } from "@/components/settings/PricingSection";
 import { StoriesAccessSection } from "@/components/settings/StoriesAccessSection";
+import { GooglePublicationSection } from "@/components/settings/GooglePublicationSection";
+import { useStoriesAccess } from "@/lib/stories-access";
 import { HomeBrowserAdmin } from "@/components/settings/HomeBrowserAdmin";
 import { TutorSettingsSection } from "@/components/settings/TutorSettingsSection";
 import { AmaVoiceTuning } from "@/components/settings/AmaVoiceTuning";
@@ -38,6 +40,8 @@ export const Route = createFileRoute("/settings")({
       { name: "description", content: "Manage your FindMit account and sign out." },
       { property: "og:title", content: "Settings — FindMit" },
       { property: "og:description", content: "Manage your FindMit account and sign out." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: SettingsPage,
@@ -46,6 +50,7 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const { session, profile } = useAuth();
   const { isAdmin } = useRole();
+  const { allowed: storiesAllowed } = useStoriesAccess();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const removeAccount = useServerFn(deleteMyAccount);
@@ -106,9 +111,10 @@ function SettingsPage() {
 
       <ContactPrivacySection />
 
-      <ApplicationsSection />
+      {storiesAllowed ? <ApplicationsSection /> : null}
 
       {isAdmin ? <StoriesAccessSection /> : null}
+      {isAdmin ? <GooglePublicationSection /> : null}
 
       {isAdmin ? <HomeBrowserAdmin /> : null}
 

@@ -26,6 +26,9 @@ export interface CommunityNews {
   ad_cta: string | null;
   ad_link: string | null;
   ad_rating: number | null;
+  ad_image_path: string | null;
+  ad_image_bucket: string;
+  watermarked: boolean;
   views_count: number;
   created_at: string;
   author?: { id: string; username: string | null; display_name: string | null; photo_path: string | null } | null;
@@ -114,6 +117,7 @@ export async function submitCommunityNews(input: {
     media_path: path,
     media_type: input.mediaType,
     duration_seconds: input.durationSeconds,
+    watermarked: true,
   });
   if (error) throw error;
 }
@@ -133,7 +137,7 @@ export async function fetchNews(id: string) {
 }
 
 export async function fetchPendingNews() {
-  const { data } = await db.from("community_news").select("*").eq("status", "pending").order("created_at", { ascending: true });
+  const { data } = await db.from("community_news").select("*").or("status.eq.pending,and(status.eq.approved,watermarked.eq.false)").order("created_at", { ascending: true });
   return withAuthors((data ?? []) as CommunityNews[]);
 }
 
@@ -186,8 +190,8 @@ export async function addComment(newsId: string, userId: string, body: string) {
   if (error) throw error;
 }
 
-export async function joinCommunityDiscussion(communityId: string): Promise<string> {
-  const { data, error } = await db.rpc("join_community_discussion", { _community_id: communityId });
+export async function joinCommunityDiscussion(communityId: string, confirmed = false): Promise<string> {
+  const { data, error } = await db.rpc("confirm_community_discussion", { _community_id: communityId, _confirmed: confirmed });
   if (error) throw error;
   return data as string;
 }
