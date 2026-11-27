@@ -24,7 +24,7 @@ export type QuickAnswer =
 
 /** Searches FindMit's own library and computes instant answers (rates, maths). */
 export const searchKnowledge = createServerFn({ method: "POST" })
-  .inputValidator((d: { q: string }) => ({ q: String(d?.q ?? "").slice(0, 200) }))
+  .validator((d: { q: string }) => ({ q: String(d?.q ?? "").slice(0, 200) }))
   .handler(async ({ data }) => {
     const { searchKnowledgeDb } = await import("./knowledge.server");
     const q = data.q.trim();
@@ -52,7 +52,7 @@ export const searchKnowledge = createServerFn({ method: "POST" })
 /** Admin: run the crawler now and see how big the library is. */
 export const runKnowledgeCrawl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { topics?: string[] }) => ({
+  .validator((d: { topics?: string[] }) => ({
     topics: (d?.topics ?? []).map((t) => String(t).trim().slice(0, 120)).filter(Boolean).slice(0, 20),
   }))
   .handler(async ({ data, context }) => {
@@ -65,7 +65,7 @@ export const runKnowledgeCrawl = createServerFn({ method: "POST" })
 
 /** Evergreen library articles (never news) for saving on the phone; pages of 200, newest first. */
 export const getLibrarySnapshot = createServerFn({ method: "POST" })
-  .inputValidator((d: { since?: string | null; offset?: number }) => ({
+  .validator((d: { since?: string | null; offset?: number }) => ({
     since: d?.since ? String(d.since) : null,
     offset: Math.max(0, Number(d?.offset ?? 0) | 0),
   }))
@@ -85,7 +85,7 @@ export const getLibrarySnapshot = createServerFn({ method: "POST" })
 
 /** One library article for the in-app reader. */
 export const getLibraryArticle = createServerFn({ method: "POST" })
-  .inputValidator((d: { id: string }) => ({ id: String(d?.id ?? "").slice(0, 64) }))
+  .validator((d: { id: string }) => ({ id: String(d?.id ?? "").slice(0, 64) }))
   .handler(async ({ data }) => {
     const { data: row } = await publicClient()
       .from("crawled_knowledge")

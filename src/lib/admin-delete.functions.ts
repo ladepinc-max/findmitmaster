@@ -14,7 +14,7 @@ async function assertAdmin(supabase: any, userId: string) {
 /** Admin-only permanent removal of a shop, supplier, or community news item (optionally with its community chat page). */
 export const adminDelete = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { kind: Kind; id: string }) => {
+  .validator((input: { kind: Kind; id: string }) => {
     if (!["shop", "supplier", "news", "news_and_community"].includes(input.kind)) throw new Error("Bad kind");
     if (!/^[0-9a-f-]{36}$/i.test(input.id)) throw new Error("Bad id");
     return input;

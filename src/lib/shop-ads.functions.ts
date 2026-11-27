@@ -36,7 +36,7 @@ async function activate(db: Admin, adId: string, weeks: number, reference: strin
 /** Starts payment for a shop advert; goes live instantly when the admin has waived the fee. */
 export const startShopAdCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ adId: z.string().uuid(), momoNumber: z.string().max(20).optional(), callbackUrl: z.string().url() }).parse(d))
+  .validator((d: unknown) => z.object({ adId: z.string().uuid(), momoNumber: z.string().max(20).optional(), callbackUrl: z.string().url() }).parse(d))
   .handler(async ({ data, context }) => {
     const db = await admin();
     const ad = await loadOwnAd(db, data.adId, context.userId);
@@ -70,7 +70,7 @@ export const startShopAdCheckout = createServerFn({ method: "POST" })
 /** Verifies the Paystack payment and switches the advert on. */
 export const completeShopAdCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ reference: z.string().min(6) }).parse(d))
+  .validator((d: unknown) => z.object({ reference: z.string().min(6) }).parse(d))
   .handler(async ({ data, context }) => {
     const db = await admin();
     const { data: done } = await db.from("shop_ads").select("expires_at").eq("paid_reference", data.reference).maybeSingle();

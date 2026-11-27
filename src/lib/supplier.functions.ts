@@ -36,7 +36,7 @@ async function activateSupplier(db: Admin, supplierId: string) {
 
 export const startSupplierCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({
+  .validator((input: unknown) => z.object({
     supplierId: z.string().uuid(),
     momoNumber: z.string().max(20).optional(),
     callbackUrl: z.string().url(),
@@ -89,7 +89,7 @@ export const startSupplierCheckout = createServerFn({ method: "POST" })
 
 export const completeSupplierCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ reference: z.string().min(6) }).parse(input))
+  .validator((input: unknown) => z.object({ reference: z.string().min(6) }).parse(input))
   .handler(async ({ data, context }) => {
     const secret = process.env["PAYSTACK_SECRET_KEY"];
     if (!secret) throw new Error("Payments are not configured yet");

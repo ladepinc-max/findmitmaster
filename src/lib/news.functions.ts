@@ -62,7 +62,7 @@ function meta(html: string, prop: string): string | null {
 
 /** Fetches a news page and returns a clean, ad-free reader version. */
 export const readArticle = createServerFn({ method: "POST" })
-  .inputValidator((input: { url: string }) => {
+  .validator((input: { url: string }) => {
     const u = new URL(input.url);
     if (!/^https?:$/.test(u.protocol)) throw new Error("Invalid link");
     return { url: u.toString() };

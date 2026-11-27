@@ -115,7 +115,7 @@ async function assertAdmin(context: { supabase: unknown; userId: string; claims?
 /** Adds syllabus rows, BECE past questions or textbook notes to the vault. */
 export const addVaultEntries = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ entries: z.array(EntrySchema).min(1).max(500) }).parse(data))
+  .validator((data: unknown) => z.object({ entries: z.array(EntrySchema).min(1).max(500) }).parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -135,7 +135,7 @@ export const addVaultEntries = createServerFn({ method: "POST" })
 /** Publishes pending vault rows: embeds them so Ama can find and use them. */
 export const indexVault = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ limit: z.number().int().min(1).max(500).default(60) }).parse(data))
+  .validator((data: unknown) => z.object({ limit: z.number().int().min(1).max(500).default(60) }).parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -177,7 +177,7 @@ export const indexVault = createServerFn({ method: "POST" })
 /** Admin preview: what Ama would actually read for a given question. */
 export const previewVaultSearch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         question: z.string().min(2).max(500),

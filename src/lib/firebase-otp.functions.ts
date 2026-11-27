@@ -22,7 +22,7 @@ async function phoneFromFirebaseToken(idToken: string): Promise<string | null> {
 
 /** Checks whether a phone number or email already belongs to an account. */
 export const checkAccountExists = createServerFn({ method: "POST" })
-  .inputValidator((d: { phone?: string | undefined; email?: string | undefined }) => d)
+  .validator((d: { phone?: string | undefined; email?: string | undefined }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const phone = data.phone ? normalizeGhanaPhone(data.phone) : null;
@@ -49,7 +49,7 @@ export const checkAccountExists = createServerFn({ method: "POST" })
 
 /** Confirms the Firebase OTP result server-side and returns the verified phone. */
 export const confirmFirebasePhone = createServerFn({ method: "POST" })
-  .inputValidator((d: { idToken: string }) => d)
+  .validator((d: { idToken: string }) => d)
   .handler(async ({ data }) => {
     const phone = await phoneFromFirebaseToken(data.idToken);
     if (!phone) return { ok: false as const };
@@ -64,7 +64,7 @@ export const confirmFirebasePhone = createServerFn({ method: "POST" })
 /** For signed-in users without a verified phone (e.g. new Google users). */
 export const attachVerifiedPhone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { idToken: string }) => d)
+  .validator((d: { idToken: string }) => d)
   .handler(async ({ data, context }) => {
     const phone = await phoneFromFirebaseToken(data.idToken);
     if (!phone) return { ok: false as const, reason: "invalid" as const };

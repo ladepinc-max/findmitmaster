@@ -1,16 +1,4 @@
-import { useEffect, useState } from "react";
-import { newsMediaUrl } from "@/lib/community-news";
-
-export function useNewsMedia(path: string | null | undefined) {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let active = true;
-    if (!path) return;
-    void newsMediaUrl(path).then((u) => active && setUrl(u));
-    return () => { active = false; };
-  }, [path]);
-  return url;
-}
+import { useNewsMedia } from "@/hooks/use-news-media";
 
 export function NewsMedia({ path, type, controls, className }: { path: string; type: string; controls?: boolean; className?: string }) {
   const url = useNewsMedia(path);

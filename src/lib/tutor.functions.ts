@@ -111,7 +111,7 @@ const GRADE_NAMES: Record<string, string> = {
 /** Creates WASSCE-style practice questions when no past paper question exists for a topic. */
 export const generateQuestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         subject: z.string().min(2).max(80),
@@ -200,7 +200,7 @@ ${hasVault ? context : "(no matching vault material for this question — answer
 /** Ama explains a question, a topic, or answers a free-form student question. */
 export const askTutor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         prompt: z.string().max(4000).default(""),
@@ -410,7 +410,7 @@ function needsDeepThinking(question: string) {
 /** Full conversation with the tutor inside FindMit chat, with live web facts. */
 export const chatWithAma = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         question: z.string().min(1).max(2000),
@@ -495,7 +495,7 @@ How to answer:
 /** Turns a recorded voice note into text so Ama can answer it. */
 export const transcribeVoiceNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ audio: z.string().min(10).max(14_000_000), mime: z.string().max(100) }).parse(d),
   )
   .handler(async ({ data }) => {

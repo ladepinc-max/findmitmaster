@@ -45,8 +45,8 @@ import { useAppSections, useIsSuperAdmin, isVisibleTo, isLockedFor, type Section
 import { SectionToggles } from "@/components/admin/SectionToggles";
 import { sendPushToUser } from "@/lib/push.functions";
 import { useRole } from "@/lib/roles";
-import { StationsPage } from "./stations";
-import { AdminPartnerTvs } from "./admin.partner-tvs";
+import { StationsPage } from "@/components/tv/StationsPage";
+import { AdminPartnerTvs } from "@/components/tv/AdminPartnerTvs";
 
 import { LiveHost } from "@/components/live/LiveHost";
 import { LiveBroadcast } from "@/components/live/LiveBroadcast";

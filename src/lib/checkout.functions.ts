@@ -33,7 +33,7 @@ async function isFreePoster(userId: string, email: string | null | undefined) {
  */
 export const startPaystackCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z
       .object({
         kind: z.enum(["job", "expertise"]),
@@ -124,7 +124,7 @@ export const startPaystackCheckout = createServerFn({ method: "POST" })
  */
 export const completePaystackCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ reference: z.string().min(6) }).parse(data))
+  .validator((data: unknown) => z.object({ reference: z.string().min(6) }).parse(data))
   .handler(async ({ data, context }) => {
     const secret = process.env["PAYSTACK_SECRET_KEY"];
     if (!secret) throw new Error("Payments are not configured yet");

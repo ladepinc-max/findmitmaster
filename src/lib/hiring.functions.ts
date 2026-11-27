@@ -28,7 +28,7 @@ const jobSchema = z.object({
 /** Verifies the Paystack charge for a job listing and activates/extends it. */
 export const redeemJobPurchase = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => jobSchema.parse(data))
+  .validator((data: unknown) => jobSchema.parse(data))
   .handler(async ({ data, context }) => {
     const plan = JOB_PLAN_VALUES[data.plan]!;
     const secret = process.env["PAYSTACK_SECRET_KEY"];
@@ -97,7 +97,7 @@ export const redeemJobPurchase = createServerFn({ method: "POST" })
  */
 export const redeemContactPurchase = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => schema.parse(data))
+  .validator((data: unknown) => schema.parse(data))
   .handler(async ({ data, context }) => {
     const plan = PLAN_VALUES[data.plan]!;
     const secret = process.env["PAYSTACK_SECRET_KEY"];

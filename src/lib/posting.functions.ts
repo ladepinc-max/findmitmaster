@@ -110,7 +110,7 @@ export const getPostingPrivileges = createServerFn({ method: "GET" })
 /** Publishes a job after a verified job post payment (free for admins). */
 export const publishJobPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z.object({ jobId: z.string().uuid(), reference: z.string().min(6).optional() }).parse(data),
   )
   .handler(async ({ data, context }) => {
@@ -160,7 +160,7 @@ export const publishJobPost = createServerFn({ method: "POST" })
 /** Publishes an expertise listing after a verified GHS 25 payment (free for admins). */
 export const publishExpertisePost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
+  .validator((data: unknown) =>
     z.object({ talentProfileId: z.string().uuid(), reference: z.string().min(6).optional() }).parse(data),
   )
   .handler(async ({ data, context }) => {

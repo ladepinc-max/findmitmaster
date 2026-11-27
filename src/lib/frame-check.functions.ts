@@ -3,7 +3,7 @@ import { frameBlockedByHeaders } from "./frame-policy";
 
 /** Asks the site itself whether it allows being shown inside another app. */
 export const checkFrameable = createServerFn({ method: "POST" })
-  .inputValidator((d: { url: string }) => ({ url: String(d?.url ?? "").slice(0, 2000) }))
+  .validator((d: { url: string }) => ({ url: String(d?.url ?? "").slice(0, 2000) }))
   .handler(async ({ data }): Promise<{ blocked: boolean }> => {
     if (!/^https?:\/\//i.test(data.url)) return { blocked: false };
     try {

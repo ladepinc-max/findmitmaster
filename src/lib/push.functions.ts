@@ -93,7 +93,7 @@ async function deliverPush(input: DeliverInput): Promise<{ sent: number }> {
  */
 export const sendPushToUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) => sendPushInput.parse(data))
+  .validator((data) => sendPushInput.parse(data))
   .handler(async ({ data }) => deliverPush(data));
 
 const jobMatchInput = z.object({ jobId: z.string() });
@@ -104,7 +104,7 @@ const jobMatchInput = z.object({ jobId: z.string() });
  */
 export const sendJobMatchPushes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) => jobMatchInput.parse(data))
+  .validator((data) => jobMatchInput.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin

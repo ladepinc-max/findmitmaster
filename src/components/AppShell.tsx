@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { AmaClassEndListener } from "@/components/tutor/AmaClassEndListener";
 import { hasPendingNav } from "@/lib/share-location";
 import { useStoriesAccess } from "@/lib/stories-access";
+import { isPublicBrowsingPath } from "@/lib/public-browsing";
 
 const TABS = [
   { to: "/chat", label: "Chat", icon: MessageCircle },
@@ -30,7 +31,7 @@ const STORIES_TABS: { id: StoriesInnerTab; label: string; icon: typeof Home }[] 
 
 function BottomNavFrame({ children }: { children: ReactNode }) {
   return (
-    <nav aria-label="App navigation" className="fixed inset-x-2 bottom-2 z-40 mx-auto max-w-xl">
+    <nav aria-label="App navigation" className="fixed inset-x-2 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-xl">
       <div className="flex h-[4.5rem] items-center gap-1 rounded-[2rem] border border-nav-border bg-nav-surface px-2 shadow-nav-bar">
         {children}
       </div>
@@ -65,7 +66,7 @@ function StoriesBottomNav() {
 
 function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
   const { count: unreadChats } = useUnreadChatCount(profile?.id);
 
   useNotifications(profile?.id);
@@ -78,7 +79,7 @@ function BottomNav() {
           return (
             <li key={to} className="flex-1">
               <Link
-                to={to}
+                to={!session && (to === "/chat" || to === "/profile") ? "/auth" : to}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-1 py-2 text-[0.68rem] font-semibold transition-colors",
                   active ? "text-nav-active" : "text-nav-muted hover:text-nav-foreground",
@@ -137,7 +138,7 @@ export function AppShell({
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const stories = useStoriesAccess();
-  const publicContent = pathname.startsWith("/community-news/") || pathname.startsWith("/ad/") || pathname.startsWith("/job/") || pathname.startsWith("/supplier/") || pathname.startsWith("/@");
+  const publicContent = isPublicBrowsingPath(pathname);
 
   useEffect(() => {
     if (loading) return;
@@ -176,7 +177,7 @@ export function AppShell({
   const isStories = pathname === "/";
 
   return (
-    <div className={`min-h-screen bg-background ${hideNavigation ? "" : "pb-28"}`}>
+    <div className={`min-h-screen bg-background ${hideNavigation ? "" : "pb-[calc(7rem+env(safe-area-inset-bottom))]"}`}>
       {profile ? <AmaClassEndListener userId={profile.id} /> : null}
       <div className={cn("mx-auto", wide ? "max-w-6xl" : "max-w-lg")}>{children}</div>
       {hideNavigation ? null : isStories ? <StoriesBottomNav /> : <BottomNav />}

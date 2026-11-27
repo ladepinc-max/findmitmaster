@@ -61,7 +61,7 @@ async function activate(db: Admin, shopId: string) {
 /** Starts the yearly shop payment. Activates instantly when the admin has waived the fee. */
 export const startShopCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ shopId: z.string().uuid(), momoNumber: z.string().max(20).optional(), callbackUrl: z.string().url() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -101,7 +101,7 @@ export const startShopCheckout = createServerFn({ method: "POST" })
 /** Verifies the Paystack payment and unlocks the shop for one year. */
 export const completeShopCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ reference: z.string().min(6) }).parse(d))
+  .validator((d: unknown) => z.object({ reference: z.string().min(6) }).parse(d))
   .handler(async ({ data, context }) => {
     const secret = process.env["PAYSTACK_SECRET_KEY"];
     if (!secret) throw new Error("Payments are not configured yet");

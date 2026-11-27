@@ -17,7 +17,7 @@ async function hashOf(text: string) {
  */
 export const drawTutorPicture = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ description: z.string().min(3).max(600) }).parse(data))
+  .validator((data: unknown) => z.object({ description: z.string().min(3).max(600) }).parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const path = `${await hashOf(data.description)}.png`;

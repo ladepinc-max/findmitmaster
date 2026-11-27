@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
  * The username is resolved server-side so email addresses are never exposed to the browser.
  */
 export const loginWithIdentifier = createServerFn({ method: "POST" })
-  .inputValidator((data: { identifier: string; password: string }) => data)
+  .validator((data: { identifier: string; password: string }) => data)
   .handler(async ({ data }) => {
     const identifier = data.identifier.trim();
     if (!identifier || !data.password) return { ok: false as const, reason: "invalid" as const };

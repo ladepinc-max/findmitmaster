@@ -10,7 +10,7 @@ export function normalizeGhanaPhone(raw: string): string | null {
 }
 
 export const sendPhoneCode = createServerFn({ method: "POST" })
-  .inputValidator((data: { phone: string }) => data)
+  .validator((data: { phone: string }) => data)
   .handler(async ({ data }) => {
     const phone = normalizeGhanaPhone(data.phone);
     if (!phone) return { ok: false as const, reason: "invalid" as const };
@@ -50,7 +50,7 @@ export const sendPhoneCode = createServerFn({ method: "POST" })
   });
 
 export const verifyPhoneCode = createServerFn({ method: "POST" })
-  .inputValidator((data: { phone: string; code: string }) => data)
+  .validator((data: { phone: string; code: string }) => data)
   .handler(async ({ data }) => {
     const phone = normalizeGhanaPhone(data.phone);
     if (!phone) return { ok: false as const, reason: "invalid" as const };
