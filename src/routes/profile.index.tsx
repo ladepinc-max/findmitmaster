@@ -1,7 +1,8 @@
 import { useCachedState } from "@/lib/page-cache";
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BadgeCheck, Bell, Copy, FolderPlus, MapPin, Search, Settings } from "lucide-react";
+import { BadgeCheck, Bell, Copy, FolderPlus, GraduationCap, MapPin, Search, Settings, ShieldCheck, UserCog, Wallet } from "lucide-react";
+import { SettingsHub, type HubCategory } from "@/components/settings/SettingsHub";
 import { PricingSection } from "@/components/settings/PricingSection";
 import { copyFindmitId, findmitId } from "@/lib/user-id";
 import { toast } from "sonner";
@@ -242,6 +243,56 @@ function ProfilePage() {
         })
     : [];
 
+  const hubCategories: HubCategory[] = [
+    {
+      id: "account", label: "Account & Identity", icon: UserCog,
+      items: [
+        { id: "id", label: "Your FindMit ID", hint: "Copy your ID", render: () => (
+          <button type="button" onClick={() => void copyFindmitId(findmitId(profile.id))} className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left">
+            <span className="font-mono text-sm font-bold">{findmitId(profile.id)}</span>
+            <Copy className="size-4 text-muted-foreground" />
+          </button>
+        ) },
+        { id: "account", label: "Account, privacy & log out", render: () => (
+          <Button asChild className="w-full"><Link to="/settings"><Settings className="size-4" /> Open account settings</Link></Button>
+        ) },
+      ],
+    },
+    {
+      id: "sound", label: "Notifications & Sounds", icon: Bell,
+      items: [{ id: "sounds", label: "Assign sounds", render: () => (
+        <Button asChild className="w-full"><Link to="/assign-sounds"><Bell className="size-4" /> Assign Sounds</Link></Button>
+      ) }],
+    },
+    {
+      id: "learning", label: "Learning & TV", icon: GraduationCap,
+      items: [
+        { id: "tutor", label: "Ama — WASSCE Tutor", hint: "Past questions and marking", render: () => (
+          <Button asChild className="w-full"><Link to="/tutor">Open Ama Tutor</Link></Button>
+        ) },
+        { id: "channel", label: "Choose Channel", hint: "Class TV on your Home tab", render: () => <ChooseChannel /> },
+      ],
+    },
+    {
+      id: "wallet", label: "Wallet & Plans", icon: Wallet,
+      items: [
+        { id: "wallet", label: "Fund wallet", render: () => <WalletFund /> },
+        { id: "plans", label: "Pricing plans", render: () => <div className="-mx-4"><PricingSection /></div> },
+      ],
+    },
+    {
+      id: "admin", label: "Admin Desk", icon: ShieldCheck,
+      items: isAdmin ? [
+        { id: "news", label: "Review Community News", render: () => <CommunityNewsReviewCard /> },
+        { id: "packages", label: "Wallet packages", render: () => <WalletPackagesAdmin /> },
+        { id: "waivers", label: "Waivers & fees", render: () => <SectionWaivers /> },
+        { id: "cats", label: "Shop category pricing", render: () => <ShopCategoryPricing /> },
+        { id: "free", label: "Free access", render: () => <FreeAccessManager /> },
+        { id: "apps", label: "FindMit applications", render: () => <FindMitApplications /> },
+      ] : [],
+    },
+  ];
+
   const stats = [
     { label: "Posts", value: profile.posts_count },
     { label: "Followers", value: profile.followers_count },
@@ -272,9 +323,7 @@ function ProfilePage() {
               </span>
             ) : null}
           </button>
-          <Link to="/settings" aria-label="Settings" className="text-muted-foreground hover:text-foreground">
-            <Settings className="size-5" />
-          </Link>
+          <SettingsHub title="Settings" categories={hubCategories} />
         </div>
       </header>
 
@@ -327,44 +376,6 @@ function ProfilePage() {
           </Button>
         </div>
 
-        <Button asChild variant="secondary" className="mt-2 w-full">
-          <Link to="/assign-sounds">
-            <Bell className="size-4" /> Assign Sounds
-          </Link>
-        </Button>
-
-        <button
-          type="button"
-          onClick={() => void copyFindmitId(findmitId(profile.id))}
-          className="mt-3 flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left"
-        >
-          <span>
-            <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">
-              Your FindMit ID
-            </span>
-            <span className="block font-mono text-sm font-bold">{findmitId(profile.id)}</span>
-          </span>
-          <Copy className="size-4 text-muted-foreground" />
-        </button>
-
-        <Link
-          to="/tutor"
-          className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3"
-        >
-          <span>
-            <span className="block text-sm font-semibold">Ama — WASSCE Tutor</span>
-            <span className="block text-xs text-muted-foreground">
-              Past questions, instant marking and explanations
-            </span>
-          </span>
-          <span className="text-xs font-semibold text-primary">Open</span>
-        </Link>
-
-        <ChooseChannel />
-
-        <div className="-mx-4 mt-2">
-          <PricingSection />
-        </div>
       </section>
 
 
@@ -497,8 +508,6 @@ function ProfilePage() {
         </>
       )}
 
-      <div className="px-4"><WalletFund /></div>
-      {isAdmin ? <div className="px-4"><CommunityNewsReviewCard /><WalletPackagesAdmin /><SectionWaivers /><ShopCategoryPricing /><FreeAccessManager /><FindMitApplications /></div> : null}
 
       <FolderDialog
         open={dialogOpen}

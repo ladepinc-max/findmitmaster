@@ -6,7 +6,8 @@ import { useCachedState } from "@/lib/page-cache";
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Camera, Check, Copy, Eye, Package, MessageCircle, Loader2, Lock, MapPin, Plus, Store, Trash2, Wallet, X } from "lucide-react";
+import { SettingsHub, type HubCategory } from "@/components/settings/SettingsHub";
+import { ArrowLeft, Camera, Clock, Megaphone, Palette, Check, Copy, Eye, Package, MessageCircle, Loader2, Lock, MapPin, Plus, Store, Trash2, Wallet, X } from "lucide-react";
 import { ShopBackgroundEditor } from "@/components/shop/ShopBackgroundEditor";
 import { ShopInboxSheet } from "@/components/shop/ShopInboxSheet";
 import { ShopAdsManager } from "@/components/ads/ShopAdsManager";
@@ -483,51 +484,20 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
     }
   };
 
-  return (
-    <>
-      <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-lg border border-border bg-card p-3"><Eye className="mb-2 size-5 text-primary" /><p className="text-xl font-bold">{views}</p><p className="text-xs text-muted-foreground">Total Views</p></div>
-        <div className="rounded-lg border border-border bg-card p-3"><Package className="mb-2 size-5 text-wa-green" /><p className="text-xl font-bold">{activeProductCount(products)}</p><p className="text-xs text-muted-foreground">Active Products</p></div>
-        <Button variant="outline" className="h-auto min-w-0 flex-col items-start gap-0 rounded-lg bg-card p-3 text-left" onClick={() => setInboxOpen(true)}><MessageCircle className="mb-2 size-5 text-primary" /><span className="text-xl font-bold">{inbox.unread}</span><span className="whitespace-normal text-xs font-normal text-muted-foreground">New Messages</span></Button>
-      </div>
-      {!isPoliceShop(shop) ? <ShopAdsManager shopId={shop.id} userId={userId} products={products.map((p) => ({ id: p.id, name: p.name, photo_url: p.photo_url, thumbnail: thumbs[p.id] ?? null }))} /> : null}
-      <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
-        <div className="flex items-center gap-2">
-          {isPoliceShop(shop) ? (
-            <img src={policeCrest.url} alt="Ghana Police crest" className="size-10 object-contain" />
-          ) : (
-            <Store className="size-5 text-wa-green" />
-          )}
-          <p className="font-display font-bold">{shop.name}</p>
-          <Button size="icon" variant="ghost" aria-label="Shop messages" className="relative shrink-0" onClick={() => setInboxOpen(true)}><MessageCircle className="size-5" />{inbox.unread > 0 ? <span className="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">{inbox.unread}</span> : null}</Button>
-          <span className="ml-auto rounded-full bg-wa-green/15 px-2 py-0.5 text-xs font-medium text-wa-green">
-            Active · {left} days left
-          </span>
-        </div>
-        <Button className="w-full" onClick={() => void navigator.clipboard.writeText(link).then(() => toast.success("Link copied")).catch(() => toast.error("Could not copy link"))}><Copy className="size-4" />Copy Shop Link</Button>
+  const police = isPoliceShop(shop);
+  const hubCategories: HubCategory[] = [
+    { id: "ops", label: "Store Operations & Hours", icon: Clock, items: [
+      { id: "hours", label: "Open / closed & opening hours", render: () => (
+        <div className="space-y-3">
         <div className="flex items-center justify-between gap-3"><label htmlFor="shop-open" className={`text-sm font-semibold ${isOpen ? "text-wa-green" : "text-destructive"}`}>{isOpen ? "Open" : "Closed"}</label><Switch id="shop-open" checked={isOpen} disabled={updating} onCheckedChange={(next) => void updateDetails(next)} /></div>
         <label className="block space-y-1 text-sm"><span>Opening hours</span><Input value={hours} onChange={(e) => setHours(e.target.value)} placeholder="e.g. Mon–Sat, 8 am–6 pm; Sun closed" maxLength={500} /></label>
         <Button variant="outline" className="w-full" disabled={updating} onClick={() => void updateDetails(isOpen)}>{updating ? "Saving…" : "Save opening hours"}</Button>
-        <div className="flex gap-2">
-          <Button asChild variant="outline" className="flex-1">
-            <Link to="/$handle" params={{ handle: `@${shop.handle}` }}>View my shop</Link>
-          </Button>
-          <Button variant="outline" className="flex-1 rounded-full border-wa-green/50" onClick={() => setAccountsOpen(true)}><Wallet className="size-4" />Accounts</Button>
-          {left <= 30 ? <RenewButton shop={shop} /> : null}
         </div>
-      </section>
-      {stationKind(shop) ? <EmergencyReportsDesk shopId={shop.id} /> : null}
-      <ShopBackgroundEditor shop={shop} userId={userId} />
-
-      {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}
-      {accountsOpen ? <ShopAccountsSheet shopId={shop.id} shopName={shop.name} productCount={products.length} onClose={() => setAccountsOpen(false)} /> : null}
-      {isPoliceShop(shop) ? (
-        <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-sm">
-          Police stations don't list products. Customers see your station name, location and a Call Police button.
-        </p>
-      ) : (
-      <>
-      <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
+      ) },
+    ] },
+    { id: "catalog", label: police ? "Station" : "Products & Stock", icon: Package, items: police ? [] : [
+      { id: "add", label: isServiceCategory(shop.category) ? "Add a service" : "Add a product", render: () => (
+        <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
         <p className="font-display font-bold">{isServiceCategory(shop.category) ? "Add a service or offering" : "Add a product"}</p>
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={isServiceCategory(shop.category) ? "Service or offering name (e.g. Brake replacement, JHS Tutoring)" : "Name (e.g. Jollof with chicken)"} />
         <Input value={price} onChange={(e) => setPrice(e.target.value)} type="number" min={0} placeholder={isServiceCategory(shop.category) ? "Price in GH₵ (optional)" : "Price in GH₵"} />
@@ -540,7 +510,70 @@ function ManageShop({ shop, userId }: { shop: Shop; userId: string }) {
           <Plus className="size-4" /> {saving ? "Adding…" : "Add product"}
         </Button>
       </section>
+      ) },
+    ] },
+    { id: "brand", label: "Branding & Appearance", icon: Palette, items: [
+      { id: "bg", label: "Shop background", hint: "Photo, blur and opacity", render: () => (
+        <ShopBackgroundEditor shop={shop} userId={userId} />
+      ) },
+    ] },
+    { id: "marketing", label: "Ads & Marketing", icon: Megaphone, items: police ? [] : [
+      { id: "ads", label: "Shop adverts", render: () => (
+        <>
+      {true ? <ShopAdsManager shopId={shop.id} userId={userId} products={products.map((p) => ({ id: p.id, name: p.name, photo_url: p.photo_url, thumbnail: thumbs[p.id] ?? null }))} /> : null}
+        </>
+      ) },
+    ] },
+    { id: "billing", label: "Subscription", icon: Wallet, items: [
+      { id: "plan", label: "Subscription", hint: `${left} days left`, render: () => (
+        <div className="space-y-3 text-sm">
+          <p>Your shop is active for <b>{left}</b> more days.</p>
+          <div className="flex"><RenewButton shop={shop} /></div>
+        </div>
+      ) },
+    ] },
+  ];
 
+  return (
+    <>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-lg border border-border bg-card p-3"><Eye className="mb-2 size-5 text-primary" /><p className="text-xl font-bold">{views}</p><p className="text-xs text-muted-foreground">Total Views</p></div>
+        <div className="rounded-lg border border-border bg-card p-3"><Package className="mb-2 size-5 text-wa-green" /><p className="text-xl font-bold">{activeProductCount(products)}</p><p className="text-xs text-muted-foreground">Active Products</p></div>
+        <Button variant="outline" className="h-auto min-w-0 flex-col items-start gap-0 rounded-lg bg-card p-3 text-left" onClick={() => setInboxOpen(true)}><MessageCircle className="mb-2 size-5 text-primary" /><span className="text-xl font-bold">{inbox.unread}</span><span className="whitespace-normal text-xs font-normal text-muted-foreground">New Messages</span></Button>
+      </div>
+      <section className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
+        <div className="flex items-center gap-2">
+          {isPoliceShop(shop) ? (
+            <img src={policeCrest.url} alt="Ghana Police crest" className="size-10 object-contain" />
+          ) : (
+            <Store className="size-5 text-wa-green" />
+          )}
+          <p className="font-display font-bold">{shop.name}</p>
+          <Button size="icon" variant="ghost" aria-label="Shop messages" className="relative shrink-0" onClick={() => setInboxOpen(true)}><MessageCircle className="size-5" />{inbox.unread > 0 ? <span className="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">{inbox.unread}</span> : null}</Button>
+          <SettingsHub title="Shop Settings" categories={hubCategories} />
+          <span className="ml-auto rounded-full bg-wa-green/15 px-2 py-0.5 text-xs font-medium text-wa-green">
+            Active · {left} days left
+          </span>
+        </div>
+        <Button className="w-full" onClick={() => void navigator.clipboard.writeText(link).then(() => toast.success("Link copied")).catch(() => toast.error("Could not copy link"))}><Copy className="size-4" />Copy Shop Link</Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" className="flex-1">
+            <Link to="/$handle" params={{ handle: `@${shop.handle}` }}>View my shop</Link>
+          </Button>
+          <Button variant="outline" className="flex-1 rounded-full border-wa-green/50" onClick={() => setAccountsOpen(true)}><Wallet className="size-4" />Accounts</Button>
+        </div>
+      </section>
+      {stationKind(shop) ? <EmergencyReportsDesk shopId={shop.id} /> : null}
+
+      {inboxOpen ? <ShopInboxSheet shopId={shop.id} meId={userId} onClose={() => { setInboxOpen(false); void inbox.refresh(); }} /> : null}
+      {accountsOpen ? <ShopAccountsSheet shopId={shop.id} shopName={shop.name} productCount={products.length} onClose={() => setAccountsOpen(false)} /> : null}
+      {isPoliceShop(shop) ? (
+        <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-sm">
+          Police stations don't list products. Customers see your station name, location and a Call Police button.
+        </p>
+      ) : (
+      <>
+      <p className="px-1 font-display text-sm font-bold">Your {isServiceCategory(shop.category) ? "services" : "products"} · add more in ⚙ Shop Settings</p>
       <section className="space-y-2">
         {products.map((p) => (
           <div key={p.id} className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-sm">
