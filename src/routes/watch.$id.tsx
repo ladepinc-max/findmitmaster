@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Eye, Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { PartnerTv } from "./stations";
+import type { PartnerTv } from "@/lib/stations";
 
 export const Route = createFileRoute("/watch/$id")({
   head: () => ({

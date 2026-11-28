@@ -13,5 +13,5 @@ export function useNewsMedia(path: string | null | undefined) {
     });
     return () => { active = false; };
   }, [path]);
-  return resolved?.path === path ? resolved.url : null;
+  return resolved && resolved.path === path ? resolved.url : null;
 }
